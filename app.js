@@ -164,7 +164,7 @@ function showModal(title,bodyBuilder){
   const box=document.createElement('div');box.className='modalBox';
   const head=document.createElement('div');head.className='modalHead';
   const h=document.createElement('h2');h.textContent=title;
-  const close=document.createElement('button');close.textContent='סגור';close.onclick=()=>ov.remove();
+  const close=document.createElement('button');close.textContent=t('close');close.onclick=()=>ov.remove();
   head.appendChild(h);head.appendChild(close);box.appendChild(head);
   const body=document.createElement('div');box.appendChild(body);ov.appendChild(box);document.body.appendChild(ov);
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
@@ -177,7 +177,7 @@ function bookKeyFromEvent(e){
 }
 function bookTitleFromEvent(e){
   const d=e.data||{};
-  return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||'ספר';
+  return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||t('book');
 }
 function eventsForBook(key){
   return events.filter(e=>['book','ref'].includes(e.type)&&String(bookKeyFromEvent(e))===String(key)).sort((a,b)=>b.time-a.time);
@@ -194,9 +194,9 @@ function sessionSummary(s){
     if(e.type==='ref')refs++;
   }
   const mins=Math.max(1,Math.round((s.end-s.start)/60000));
-  const parts=[mins+' דקות',books.size+' ספרים'];
-  if(plugins.size)parts.push(plugins.size+' תוספים');
-  if(refs)parts.push(refs+' שינויי מקום');
+  const parts=[mins+' '+t('minutes'),books.size+' '+t('books')];
+  if(plugins.size)parts.push(plugins.size+' '+t('plugins'));
+  if(refs)parts.push(refs+' '+t('position_changes'));
   return parts.join(' · ');
 }
 function dominantType(s){
@@ -223,9 +223,9 @@ function recentPlaces(limit=12){
 
 function dayTitle(t){
   const k=dk(t),now=Date.now();
-  if(k===dk(now))return'היום';
-  if(k===dk(now-86400000))return'אתמול';
-  return new Intl.DateTimeFormat('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(t));
+  if(k===dk(now))return t('today');
+  if(k===dk(now-86400000))return t('yesterday');
+  return new Intl.DateTimeFormat(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(t));
 }
 function startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
 function startOfWeek(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getTime()}
@@ -237,8 +237,8 @@ function bucketKey(ts){
 }
 function bucketTitle(key,ts){
   if(viewMode==='day')return dayTitle(ts);
-  if(viewMode==='week'){const start=Number(key.slice(2));return 'שבוע '+fmtDate(start)+' – '+fmtDate(start+6*86400000)}
-  return new Intl.DateTimeFormat('he-IL',{month:'long',year:'numeric'}).format(new Date(ts));
+  if(viewMode==='week'){const start=Number(key.slice(2));return t('week')+' '+fmtDate(start)+' – '+fmtDate(start+6*86400000)}
+  return new Intl.DateTimeFormat(locale(),{month:'long',year:'numeric'}).format(new Date(ts));
 }
 function matchesPreset(e){
   if(selectedDayKey)return dk(e.time)===selectedDayKey;
@@ -337,29 +337,29 @@ function renderHeatmap(){
   for(let i=34;i>=0;i--){
     const t=Date.now()-i*86400000,k=dk(t),n=counts[k]||0,b=document.createElement('button');
     b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
-    b.title=k+' · '+n+' אירועים';
+    b.title=k+' · '+n+' '+t('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();render()};
     box.appendChild(b);
   }
 }
 function renderSearches(){
   const b=$('recentSearches');
-  b.innerHTML=searches.length?searches.slice(0,10).map(x=>'<button class="searchChip" data-q="'+esc(x.query)+'">'+esc(x.query)+'</button>').join(''):'<span class="muted">אין חיפושים אחרונים</span>';
+  b.innerHTML=searches.length?searches.slice(0,10).map(x=>'<button class="searchChip" data-q="'+esc(x.query)+'">'+esc(x.query)+'</button>').join(''):'<span class="muted">'+esc(t('no_recent_searches'))+'</span>';
   b.querySelectorAll('button').forEach(btn=>btn.onclick=async()=>{
     await call('reader.openSearchTab',{query:btn.dataset.q,autoSearch:true});
     await call('navigation.goTo',{target:'reading'});
   });
 }
 function renderSnapshots(){
-  $('snapshotCount').textContent=snaps.length?snaps.length+' שמורים':'';
+  $('snapshotCount').textContent=snaps.length?snaps.length+' '+t('saved'):'';
   const box=$('snapshotGallery');box.innerHTML='';
   const recent=snaps.slice(-12).reverse();
-  if(!recent.length){box.innerHTML='<span class="muted">עדיין אין Snapshots</span>';return}
+  if(!recent.length){box.innerHTML='<span class="muted">'+esc(t('no_snapshots'))+'</span>';return}
   for(const s of recent){
     const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId);
     const tools=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
     const el=document.createElement('button');el.className='snapshotCard';
-    el.innerHTML='<b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' ספרים · '+tools.length+' תוספים/כלים'+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small>';
+    el.innerHTML='<b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' '+esc(t('books'))+' · '+tools.length+' '+esc(t('plugins'))+'/'+esc(t('built_in_tool'))+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small>';
     el.onclick=()=>restoreSnapshot(s);box.appendChild(el);
   }
 }
