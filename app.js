@@ -612,15 +612,15 @@ function showDashboard(){
 
 function render(){
   const list=filtered(),ss=sessions(list);
-  renderStats(list,ss);renderHeatmap();renderSearches();renderSnapshots();renderPlugins();
+  renderStats(list,ss);renderHeatmap();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
-  if(!ss.length){cont.innerHTML='<div class="empty">אין פעילות שתואמת למסנן.</div>';updateContinue();return}
+  if(!ss.length){cont.innerHTML='<div class="empty">'+esc(t('no_activity'))+'</div>';updateContinue();return}
   const buckets=new Map();
   for(const s of ss){const key=bucketKey(s.start);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(s)}
   for(const[key,items]of buckets){
     const wrap=document.createElement('section');wrap.className='bucket';
     if(viewMode==='day'){
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="timelineRail"></div>';
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(t('sessions'))+'</span></div><div class="timelineRail"></div>';
       const rail=wrap.querySelector('.timelineRail');
       items.forEach((s,i)=>{
         const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');
@@ -632,11 +632,11 @@ function render(){
         const dot=document.createElement('div');dot.className='timelineDot';
         const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
         const marks=document.createElement('div');marks.className='snapshotMarks';
-        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title='Snapshot '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
+        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=t('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
         node.appendChild(cw);node.appendChild(dot);node.appendChild(stamp);node.appendChild(marks);rail.appendChild(node);
       });
     }else{
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="sessionGrid"></div>';
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(t('sessions'))+'</span></div><div class="sessionGrid"></div>';
       const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>grid.appendChild(createSessionCard(s)));
     }
     cont.appendChild(wrap);
@@ -645,14 +645,14 @@ function render(){
 }
 function updateContinue(){
   const latest=snaps[snaps.length-1];$('continueBtn').disabled=!latest;
-  $('continueInfo').textContent=latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length+' ספרים · '+fmtDate(latest.time)+' · '+fmt(latest.time)):'אין Snapshot זמין';
+  $('continueInfo').textContent=latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length+' '+t('books')+' · '+fmtDate(latest.time)+' · '+fmt(latest.time)):t('no_snapshots');
 }
 async function createSnapshot(renderAfter=true,showNotice=true){
   const[rs,ws]=await Promise.all([call('reader.getCurrentState'),call('workspace.getActive')]);
-  if(!rs.success||!rs.data){if(showNotice)await notify('לא ניתן ליצור Snapshot','error');return null}
+  if(!rs.success||!rs.data){if(showNotice)await notify(t('snapshot_create_failed'),'error');return null}
   const snap={id:'snap-'+Date.now().toString(36),time:Date.now(),workspace:ws.success?ws.data:null,active:{bookUid:rs.data.bookUid,bookId:rs.data.currentBookId,index:rs.data.currentIndex},tabs:rs.data.openTabs||[]};
   snaps.push(snap);if(snaps.length>300)snaps.splice(0,snaps.length-300);
-  await set(SNAPS,snaps);if(renderAfter)render();if(showNotice)await notify('Snapshot נשמר','success');await publishHomepageState();return snap;
+  await set(SNAPS,snaps);if(renderAfter)render();if(showNotice)await notify(t('snapshot_saved'),'success');await publishHomepageState();return snap;
 }
 async function performRestoreSnapshot(s,selectedBookKeys=null){
   const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
@@ -665,60 +665,59 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
   if(st.success&&st.data&&(!keys||keys.size)){
     const tabs=st.data.openTabs||[];
     for(let i=tabs.length-1;i>=0;i--){
-      const t=tabs[i],identity=String(t.bookUid||t.bookId||'');
-      if(!t.isSelf&&t.bookId&&!t.toolId&&(!keys||keys.has(identity)))await call('reader.closeTab',{index:i});
+      const tb=tabs[i],identity=String(tb.bookUid||tb.bookId||'');
+      if(!tb.isSelf&&tb.bookId&&!tb.toolId&&(!keys||keys.has(identity)))await call('reader.closeTab',{index:i});
     }
   }
-  for(const t of (s.tabs||[]).filter(t=>t.bookId&&!t.toolId)){
-    const identity=String(t.bookUid||t.bookId);
+  for(const tb of (s.tabs||[]).filter(t=>t.bookId&&!t.toolId)){
+    const identity=String(tb.bookUid||tb.bookId);
     if(keys&&!keys.has(identity))continue;
-    const p={};for(const k of ['bookUid','id','bookId','type','source'])if(t[k]!=null)p[k]=t[k];
-    if(t.index!=null)p.index=t.index;p.navigateToPositionIfReused=true;await call('reader.openBook',p);
+    const p={};for(const k of ['bookUid','id','bookId','type','source'])if(tb[k]!=null)p[k]=tb[k];
+    if(tb.index!=null)p.index=tb.index;p.navigateToPositionIfReused=true;await call('reader.openBook',p);
   }
   await call('navigation.goTo',{target:'reading'});
   settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;await set(SETTINGS,settings);
-  await notify('ה-Snapshot שוחזר בהצלחה','success');
+  await notify(t('snapshot_restored'),'success');
 }
 function restoreSnapshot(s){
   if(!s)return;
-  const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId);
-  const plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-  showModal('Preview לפני שחזור',body=>{
-    body.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">בחר אילו ספרים לשחזר. טאבי תוספים וכלים לא ייסגרו.</p>';
+  const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
+  showModal(t('restore_preview'),body=>{
+    body.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">'+esc(t('select_books_restore'))+'</p>';
     const grid=document.createElement('div');grid.className='modalGrid',checks=[];
-    for(const t of books){
-      const id=String(t.bookUid||t.bookId),card=document.createElement('label');card.className='miniCard';
-      card.innerHTML='<input type="checkbox" checked> <b>'+esc(t.book||t.bookId||id)+'</b><div class="muted">'+esc(t.currentRef||('מיקום '+(t.index??'')))+'</div>';
+    for(const tb of books){
+      const id=String(tb.bookUid||tb.bookId),card=document.createElement('label');card.className='miniCard';
+      card.innerHTML='<input type="checkbox" checked> <b>'+esc(tb.book||tb.bookId||id)+'</b><div class="muted">'+esc(tb.currentRef||String(tb.index??''))+'</div>';
       checks.push({id,input:card.querySelector('input')});grid.appendChild(card);
     }
     body.appendChild(grid);
-    if(plugins.length){const p=document.createElement('p');p.className='muted';p.textContent='ב-Snapshot היו גם '+plugins.length+' תוספים/כלים; הם מוצגים למידע בלבד.';body.appendChild(p)}
+    if(plugins.length){const p=document.createElement('p');p.className='muted';p.textContent=plugins.length+' '+t('plugins')+'/'+t('built_in_tool');body.appendChild(p)}
     const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='14px';
-    const all=document.createElement('button');all.textContent='בחר הכל';all.onclick=()=>checks.forEach(x=>x.input.checked=true);
-    const none=document.createElement('button');none.textContent='בטל הכל';none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='primary';go.textContent='שחזר נבחרים';go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
+    const all=document.createElement('button');all.textContent=t('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
+    const none=document.createElement('button');none.textContent=t('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
+    const go=document.createElement('button');go.className='primary';go.textContent=t('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
     actions.appendChild(all);actions.appendChild(none);actions.appendChild(go);body.appendChild(actions);
   });
 }
 function showSnapshotBrowser(){
-  showModal('כל ה-Snapshots',body=>{
-    if(!snaps.length){body.innerHTML='<div class="empty">אין Snapshots</div>';return}
+  showModal(t('all_restore_points'),body=>{
+    if(!snaps.length){body.innerHTML='<div class="empty">'+esc(t('no_snapshots'))+'</div>';return}
     const grid=document.createElement('div');grid.className='modalGrid';
     snaps.slice().reverse().forEach(s=>{
       const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
       const card=document.createElement('div');card.className='miniCard';
-      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' ספרים · '+plugins.length+' תוספים/כלים</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
-      const btn=document.createElement('button');btn.textContent='Preview / שחזור';btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
+      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' '+esc(t('books'))+' · '+plugins.length+' '+esc(t('plugins'))+'</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
+      const btn=document.createElement('button');btn.textContent=t('preview_restore');btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
     });body.appendChild(grid);
   });
 }
 function showExportDialog(){
-  showModal('ייצוא Timeline',body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent='בחר מה לייצא לקובץ JSON.';body.appendChild(p);
+  showModal(t('export_timeline'),body=>{
+    const p=document.createElement('p');p.className='muted';p.textContent=t('choose_export');body.appendChild(p);
     const actions=document.createElement('div');actions.className='actions';
-    const all=document.createElement('button');all.textContent='הכול';all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
-    const filteredBtn=document.createElement('button');filteredBtn.textContent='התצוגה המסוננת';filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
-    const day=document.createElement('button');day.textContent='היום';day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
+    const all=document.createElement('button');all.textContent=t('all');all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
+    const filteredBtn=document.createElement('button');filteredBtn.textContent=t('filtered_view');filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
+    const day=document.createElement('button');day.textContent=t('today');day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
     actions.appendChild(all);actions.appendChild(filteredBtn);actions.appendChild(day);body.appendChild(actions);
   });
 }
