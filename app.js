@@ -141,11 +141,27 @@ function render(){
     if(!buckets.has(key))buckets.set(key,[]);
     buckets.get(key).push(s);
   }
+
   for(const [key,items] of buckets){
     const wrap=document.createElement('section');wrap.className='bucket';
-    wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="sessionGrid"></div>';
-    const grid=wrap.querySelector('.sessionGrid');
-    items.forEach(s=>grid.appendChild(createSessionCard(s)));
+    if(viewMode==='day'){
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="timelineRail"></div>';
+      const rail=wrap.querySelector('.timelineRail');
+      items.slice().sort((a,b)=>b.start-a.start).forEach((s,i)=>{
+        const node=document.createElement('div');
+        node.className='timelineNode '+(i%2===0?'right':'left');
+        const cardWrap=document.createElement('div');cardWrap.className='timelineCard';
+        cardWrap.appendChild(createSessionCard(s));
+        const dot=document.createElement('div');dot.className='timelineDot';
+        const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
+        node.appendChild(cardWrap);node.appendChild(dot);node.appendChild(stamp);
+        rail.appendChild(node);
+      });
+    }else{
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="sessionGrid"></div>';
+      const grid=wrap.querySelector('.sessionGrid');
+      items.forEach(s=>grid.appendChild(createSessionCard(s)));
+    }
     cont.appendChild(wrap);
   }
   updateContinue();
