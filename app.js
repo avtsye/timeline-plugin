@@ -16,7 +16,7 @@ const HEALTH='timeline.health.v1';
 
 const $=id=>document.getElementById(id);
 let events=[],snaps=[],searches=[],installed=[];
-let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto'};
+let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto',focusMode:false,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,pauseUntil:0,pauseUntilRestart:false,summaryArchiveEnabled:true};
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
@@ -828,6 +828,46 @@ function showMigrationManager(){
       row.appendChild(title);row.appendChild(document.createElement('br'));row.appendChild(sel);row.appendChild(btn);body.appendChild(row);
     }
   });
+}
+function updatePrivacyStatus(){
+  const now=Date.now();
+  if(settings.pauseUntilRestart){$('privacyStatus').textContent=t('privacy_active_restart');return}
+  if(Number(settings.pauseUntil||0)>now){$('privacyStatus').textContent=t('privacy_active_until')+' '+fmt(settings.pauseUntil);return}
+  $('privacyStatus').textContent=t('privacy_inactive');
+}
+function setFocusMode(on){
+  settings.focusMode=!!on;
+  document.body.classList.toggle('focus-mode',settings.focusMode);
+  $('focusModeBtn').textContent=settings.focusMode?t('exit_focus'):t('focus_mode');
+  set(SETTINGS,settings);
+}
+function activateSettingsTab(name){
+  document.querySelectorAll('.settingsTabBtn').forEach(b=>b.classList.toggle('active',b.dataset.settingsTab===name));
+  document.querySelectorAll('.settingsPane').forEach(p=>p.classList.toggle('active',p.dataset.settingsPane===name));
+}
+async function sendFeedback(){
+  const details=$('feedbackText').value.trim();
+  if(!details){await notify(t('feedback_empty'),'error');return}
+  const reportType=$('feedbackType').value||'other';
+  const r=await call('feedback.report',{details,reportType});
+  if(!r.success){await notify(t('feedback_empty'),'error');return}
+  if(r.data==='sent'){await notify(t('feedback_sent'),'success');$('feedbackText').value=''}
+  else if(r.data==='queued'){await notify(t('feedback_queued'),'success');$('feedbackText').value=''}
+  else if(r.data==='cancelled'){await notify(t('feedback_cancelled'),'info')}
+}
+async function showSummaryArchive(){
+  const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
+  if(!r.success||!r.data||typeof r.data.content!=='string'){await notify(t('archive_empty'),'info');return}
+  try{
+    const data=JSON.parse(r.data.content);
+    showModal(t('archive_title'),body=>{
+      const totals=data.totals||{};
+      body.innerHTML='<div class="modalGrid"><div class="miniCard"><h3>'+esc(t('archive_events'))+'</h3><div>'+Number(totals.events||0)+'</div></div><div class="miniCard"><h3>'+esc(t('archive_days'))+'</h3><div>'+Number(totals.days||0)+'</div></div><div class="miniCard"><h3>'+esc(t('recent_snapshots'))+'</h3><div>'+Number(totals.snapshots||0)+'</div></div></div>';
+      const days=Object.entries(data.days||{}).sort((a,b)=>b[0].localeCompare(a[0]));
+      const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='14px';
+      days.slice(0,120).forEach(([date,x])=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(date)+'</h3><div>'+Number(x.events||0)+' '+esc(t('events'))+' · '+Number(x.sessions||0)+' '+esc(t('sessions'))+'</div>';grid.appendChild(card)});body.appendChild(grid);
+    });
+  }catch(_){await notify(t('archive_empty'),'error')}
 }
 function updateQuickButtons(){
   document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===datePreset&&!selectedDayKey));
