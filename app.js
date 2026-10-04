@@ -260,9 +260,12 @@ function renderPlugins(){
     const last=lastByPlugin.get(p.pluginId);
     const card=document.createElement('div');card.className='pluginCard';
     card.innerHTML='<div class="pluginHead"><span class="pluginIcon" title="'+esc(p.toolTabIconName||'puzzle_piece_24_regular')+'">'+pluginIconHtml(p.pluginId)+'</span><strong>'+esc(p.name||p.pluginId)+'</strong></div><small>גרסה '+esc(p.version||'')+' · '+(p.enabled?'פעיל':'מושבת')+'</small><small>'+(last?'שימוש אחרון: '+fmtDate(last.time)+' '+fmt(last.time):'טרם נרשם בציר')+'</small>';
+    const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='8px';
     if(p.enabled){
-      const btn=document.createElement('button');btn.textContent='פתח';btn.onclick=()=>openPlugin(p.pluginId);card.appendChild(btn);
+      const btn=document.createElement('button');btn.textContent='פתח';btn.onclick=()=>openPlugin(p.pluginId);actions.appendChild(btn);
     }
+    const hist=document.createElement('button');hist.textContent='Timeline';hist.onclick=()=>showPluginHistory(p.pluginId);actions.appendChild(hist);
+    card.appendChild(actions);
     grid.appendChild(card);
   }
 }
@@ -285,9 +288,11 @@ function previewForSession(s){
   return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||'ספר',ref:d.currentRef||d.ref||''};
 }
 async function openPlugin(id){
-  const p=pluginInfo(id);
-  if(p&&!p.enabled){await notify('התוסף מושבת','error');return}
-  const r=await call('plugin.openOther',{pluginId:id,param:{source:'timeline-plugin'}});
+  const target=resolvedPluginId(id);
+  const p=pluginInfo(target);
+  if(!p){await notify('התוסף אינו מותקן. ניתן למפות אותו ב-Diagnostics.','error');return}
+  if(!p.enabled){await notify('התוסף מושבת','error');return}
+  const r=await call('plugin.openOther',{pluginId:target,param:{source:'timeline-plugin'}});
   if(!r.success)await notify('לא ניתן לפתוח את התוסף','error');
 }
 async function openEvent(e){
