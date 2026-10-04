@@ -848,17 +848,25 @@ function updateQuickButtons(){
   document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===datePreset&&!selectedDayKey));
   $('favoritesOnly').classList.toggle('active',favoritesOnly);
 }
+async function updateTrackingStatus(){
+  const info=await call('app.getGrantedPermissions');
+  const perms=info.success&&info.data&&Array.isArray(info.data.permissions)?info.data.permissions:[];
+  const hasRun=perms.includes('app.run_on_startup'),hasKeep=perms.includes('app.background_keep_alive');
+  if(hasRun&&hasKeep){$('trackingStatus').textContent=t('active');$('trackingDetail').textContent=t('tracking_active')}
+  else if(hasRun){$('trackingStatus').textContent=t('partial');$('trackingDetail').textContent=t('tracking_partial')}
+  else{$('trackingStatus').textContent=t('limited');$('trackingDetail').textContent=t('tracking_limited')}
+}
 function sync(){
-  $('pauseBtn').textContent=settings.paused?'המשך תיעוד':'השהה תיעוד';
+  $('pauseBtn').textContent=settings.paused?t('resume_tracking'):t('pause_tracking');
   $('maxEvents').value=String(settings.maxEvents||5000);
   $('notificationsEnabled').checked=settings.inAppNotifications!==false;
   $('compactMode').checked=!!settings.compactMode;
   $('newTabIntegration').checked=!!settings.newTabIntegration;
   $('homepageIntegration').checked=settings.homepageIntegration!==false;
+  $('languageSelect').value=settings.language||'auto';
   $('zoomLabel').textContent=Math.round(Number(settings.timelineZoom||1)*100)+'%';
   document.body.classList.toggle('compact',!!settings.compactMode);
-  updateSavedFilterSelect();
-  updateQuickButtons();
+  updateSavedFilterSelect();updateQuickButtons();applyTranslations();
 }
 async function load(){
   events=await get(EVENTS,[]);
@@ -869,13 +877,27 @@ async function load(){
   ]);
   snaps=values[0];settings=Object.assign(settings,values[1]);pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
   savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
+  await resolveLanguage();
   const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
-  const pf=$('pluginFilter');pf.innerHTML='<option value="">כל התוספים</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
+  const pf=$('pluginFilter');
+  pf.innerHTML='<option value="">'+esc(t('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
   sync();render();await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
-function theme(t){
-  const c=t&&t.colorScheme||{},r=document.documentElement.style;r.setProperty('--bg',c.surfaceContainerLowest||c.surface||'#fffbfe');r.setProperty('--surface',c.surface||'#fff');r.setProperty('--soft',c.surfaceContainer||'#f7f2fa');r.setProperty('--top',c.surfaceContainerHigh||c.surfaceContainer||'#f3edf7');r.setProperty('--text',c.onSurface||'#1d1b20');r.setProperty('--muted',c.onSurfaceVariant||c.outline||'#666');r.setProperty('--primary',c.primary||'#6750a4');r.setProperty('--outline',c.outlineVariant||c.outline||'#cac4d0');
+function theme(payload){
+  const c=payload&&payload.colorScheme||{},y=payload&&payload.typography||{},r=document.documentElement.style;
+  r.setProperty('--bg',c.surfaceContainerLowest||c.surface||'#fffbfe');
+  r.setProperty('--surface',c.surface||'#fffbfe');
+  r.setProperty('--surface-low',c.surfaceContainerLow||c.surfaceContainer||'#f7f2fa');
+  r.setProperty('--surface-high',c.surfaceContainerHigh||c.surfaceContainerHighest||'#ece6f0');
+  r.setProperty('--text',c.onSurface||'#1d1b20');
+  r.setProperty('--muted',c.onSurfaceVariant||c.outline||'#49454f');
+  r.setProperty('--primary',c.primary||'#6750a4');
+  r.setProperty('--on-primary',c.onPrimary||'#fff');
+  r.setProperty('--outline',c.outline||'#79747e');
+  r.setProperty('--outline-variant',c.outlineVariant||c.outline||'#cac4d0');
+  r.setProperty('--error',c.error||'#b3261e');
+  if(y.uiFontFamily)r.setProperty('--ui',JSON.stringify(y.uiFontFamily)+',system-ui,sans-serif');
 }
 
 $('search').oninput=render;$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
@@ -890,20 +912,25 @@ $('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
 $('snapshotBrowserBtn').onclick=showSnapshotBrowser;
 $('dashboardBtn').onclick=showDashboard;
 $('diagnosticsBtn').onclick=showDiagnostics;
-$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?'תיעוד ציר הזמן הושהה':'תיעוד ציר הזמן חודש',settings.paused?'info':'success')};
+$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?t('tracking_paused'):t('tracking_resumed'),settings.paused?'info':'success')};
 $('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
 $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
-$('clearBtn').onclick=async()=>{if(confirm('למחוק את כל ציר הזמן וה-Snapshots?')){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify('ציר הזמן נוקה','success')}};
-$('settingsBtn').onclick=()=>$('dialog').classList.add('open');$('closeSettings').onclick=()=>$('dialog').classList.remove('open');
+$('clearBtn').onclick=async()=>{if(confirm(t('clear_all_confirm'))){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(t('timeline_cleared'),'success')}};
+$('settingsFab').onclick=()=>$('dialog').classList.add('open');
+$('closeSettings').onclick=()=>$('dialog').classList.remove('open');
 $('saveSettings').onclick=async()=>{
   settings.maxEvents=+$('maxEvents').value||5000;
   settings.inAppNotifications=$('notificationsEnabled').checked;
   settings.compactMode=$('compactMode').checked;
   settings.newTabIntegration=$('newTabIntegration').checked;
   settings.homepageIntegration=$('homepageIntegration').checked;
-  await set(SETTINGS,settings);$('dialog').classList.remove('open');sync();await applyNewTabIntegration();await publishHomepageState();render();await notify('הגדרות ציר הזמן נשמרו','success');
+  settings.language=$('languageSelect').value||'auto';
+  await set(SETTINGS,settings);
+  await resolveLanguage();applyTranslations();sync();
+  $('dialog').classList.remove('open');
+  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(t('settings_saved'),'success');
 };
 
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await load()});
