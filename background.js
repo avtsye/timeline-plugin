@@ -13,7 +13,7 @@ const SNAP_GAP=15*60*1000;
 const TOOL_POLL_MS=5000;
 const BACKUP_GAP=30*60*1000;
 const STALE_SNAPSHOT=35*60*1000;
-let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0;
+let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0,bootPrivacyCleared=false;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -65,13 +65,15 @@ async function notify(message,type='info'){const s=await get(SETTINGS,{});if(s.i
 async function currentState(){const rs=await call('reader.getCurrentState');return rs.success&&rs.data?rs.data:null}
 
 async function detectToolTabs(){
+  const settings=Object.assign({trackPlugins:true,trackTools:true},await get(SETTINGS,{}));
   const state=await currentState();if(!state)return;
   const tabs=(state.openTabs||[]).filter(t=>t&&t.toolId&&!t.isSelf);
   const current=new Set();
   for(const t of tabs){
     const key=t.toolId+'|'+(t.book||t.bookId||'');
     current.add(key);
-    if(toolBaselineReady&&!knownToolTabs.has(key))record(toolKind(t.toolId),{toolId:t.toolId,title:t.book||t.bookId||t.toolId});
+    const kind=toolKind(t.toolId);
+    if(toolBaselineReady&&!knownToolTabs.has(key)&&((kind==='plugin'&&settings.trackPlugins!==false)||(kind==='tool'&&settings.trackTools!==false)))record(kind,{toolId:t.toolId,title:t.book||t.bookId||t.toolId});
   }
   knownToolTabs=current;toolBaselineReady=true;
   await set(TOOL_STATE,{open:[...current],updatedAt:Date.now()});
@@ -92,6 +94,33 @@ async function snapshot(force=false){
   return snap;
 }
 
+function summarizeArchive(events,snaps){
+  const days={};
+  for(const e of Array.isArray(events)?events:[]){
+    const d=new Date(e.time||0);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(!days[key])days[key]={events:0,sessions:{},types:{},books:{},plugins:{}};
+    const x=days[key];x.events++;if(e.sessionId)x.sessions[e.sessionId]=1;x.types[e.type]=(x.types[e.type]||0)+1;
+    const data=e.data||{},book=data.currentBook||data.book||data.currentBookId||data.bookId,plugin=data.toolId;
+    if(book&&(e.type==='book'||e.type==='ref'))x.books[book]=(x.books[book]||0)+1;
+    if(plugin&&e.type==='plugin')x.plugins[plugin]=(x.plugins[plugin]||0)+1;
+  }
+  return {
+    schemaVersion:1,updatedAt:new Date().toISOString(),
+    totals:{events:Array.isArray(events)?events.length:0,snapshots:Array.isArray(snaps)?snaps.length:0,days:Object.keys(days).length},
+    days:Object.fromEntries(Object.entries(days).map(([k,v])=>[k,{
+      events:v.events,sessions:Object.keys(v.sessions).length,types:v.types,
+      topBooks:Object.entries(v.books).sort((a,b)=>b[1]-a[1]).slice(0,10),
+      topPlugins:Object.entries(v.plugins).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    }]))
+  };
+}
+async function writeSummaryArchive(events,snaps,settings){
+  if(settings.summaryArchiveEnabled===false)return;
+  const summary=summarizeArchive(events,snaps);
+  await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(summary)});
+}
+
 async function rotateBackups(force=false){
   const now=Date.now(),last=await get(LAST_BACKUP,0);
   if(!force&&now-Number(last||0)<BACKUP_GAP)return;
@@ -99,6 +128,7 @@ async function rotateBackups(force=false){
   const payload=JSON.stringify({schemaVersion:1,createdAt:new Date(now).toISOString(),events,snaps,settings});
   const name='backups/backup-'+now+'.json';
   const wr=await call('fs.writeFile',{path:name,content:payload});
+  await writeSummaryArchive(events,snaps,settings);
   if(!wr.success)return;
   const list=await call('fs.listDir',{path:'backups'});
   if(list.success&&list.data&&Array.isArray(list.data.entries)){
@@ -131,8 +161,15 @@ async function checkHealth(force=false){
 
 function record(type,p){
   q=q.then(async()=>{
-    const settings=Object.assign({paused:false,maxEvents:5000},await get(SETTINGS,{}));if(settings.paused)return;
-    const now=Date.now(),d=clean(p),raw=await get(EVENTS,[]),list=Array.isArray(raw)?raw:[];
+    const settings=Object.assign({
+      paused:false,maxEvents:5000,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,
+      pauseUntil:0,pauseUntilRestart:false
+    },await get(SETTINGS,{}));
+    const now=Date.now();
+    if(settings.paused||settings.pauseUntilRestart||Number(settings.pauseUntil||0)>now)return;
+    const enabled={book:settings.trackBooks!==false,ref:settings.trackRefs!==false,plugin:settings.trackPlugins!==false,tool:settings.trackTools!==false,workspace:settings.trackWorkspaces!==false,navigation:settings.trackNavigation!==false};
+    if(enabled[type]===false)return;
+    const d=clean(p),raw=await get(EVENTS,[]),list=Array.isArray(raw)?raw:[];
     const prev=list[list.length-1];
     const same=prev&&prev.type===type&&bookKey(prev.data||{})===bookKey(d)&&now-(prev.endTime||prev.time)<MERGE_GAP;
     if(same&&['book','ref','navigation'].includes(type)){
@@ -171,6 +208,11 @@ function wire(){
   });
 }
 Otzaria.on('plugin.boot',async()=>{
+  if(!bootPrivacyCleared){
+    bootPrivacyCleared=true;
+    const s=Object.assign({},await get(SETTINGS,{}));
+    if(s.pauseUntilRestart){s.pauseUntilRestart=false;await set(SETTINGS,s)}
+  }
   wire();
   await registerLocalizedShortcuts();
   await snapshot(false);
