@@ -608,6 +608,60 @@ async function updateTrackingStatus(){
   else if(hasRun){$('trackingStatus').textContent='חלקי';$('trackingDetail').textContent='הרשאת keep-alive לא אושרה; מעקב התוספים עלול להיפסק לאחר חוסר פעילות'}
   else{$('trackingStatus').textContent='מוגבל';$('trackingDetail').textContent='הרשאת run-on-startup לא אושרה; מעקב רקע אינו מלא'}
 }
+function updateSavedFilterSelect(){
+  const el=$('savedFilterSelect');
+  el.innerHTML='<option value="">מסננים שמורים</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
+}
+async function saveCurrentFilter(){
+  const name=prompt('שם למסנן השמור');if(!name||!name.trim())return;
+  savedFilters.push({name:name.trim(),search:$('search').value,type:$('type').value,plugin:$('pluginFilter').value,range:$('range').value,sort:$('sort').value,datePreset,selectedDayKey,favoritesOnly});
+  if(savedFilters.length>30)savedFilters.shift();
+  await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify('המסנן נשמר','success');
+}
+function applySavedFilter(i){
+  const x=savedFilters[Number(i)];if(!x)return;
+  $('search').value=x.search||'';$('type').value=x.type||'';$('pluginFilter').value=x.plugin||'';$('range').value=x.range??'30';$('sort').value=x.sort||'newest';
+  datePreset=x.datePreset||'all';selectedDayKey=x.selectedDayKey||'';favoritesOnly=!!x.favoritesOnly;updateQuickButtons();render();
+}
+function setTimelineZoom(v){
+  settings.timelineZoom=Math.max(.4,Math.min(3,Math.round(v*10)/10));
+  $('zoomLabel').textContent=Math.round(settings.timelineZoom*100)+'%';
+  set(SETTINGS,settings);render();
+}
+async function applyNewTabIntegration(){
+  const r=await call('plugin.setNewTabPage',{enabled:!!settings.newTabIntegration});
+  if(!r.success&&settings.newTabIntegration)await notify('לא ניתן להפעיל אינטגרציה עם +','error');
+}
+async function publishHomepageState(){
+  if(!settings.homepageIntegration){
+    await call('publishedData.remove',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue'});
+    return;
+  }
+  const latest=snaps[snaps.length-1];
+  const recent=events.slice(-1)[0];
+  await call('publishedData.upsert',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue',payload:{
+    title:'המשך עבודה',count:latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length):0,
+    label:latest?'Timeline · '+fmtDate(latest.time)+' '+fmt(latest.time):'Timeline',
+    source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
+  }});
+}
+function missingPluginIds(){
+  const ids=new Set(events.filter(e=>e.type==='plugin'&&(e.data||{}).toolId).map(e=>(e.data||{}).toolId));
+  return [...ids].filter(id=>!pluginMap.has(resolvedPluginId(id)));
+}
+function showMigrationManager(){
+  const missing=missingPluginIds();
+  showModal('מיפוי תוספים חסרים',body=>{
+    if(!missing.length){body.innerHTML='<div class="empty">אין תוספים חסרים</div>';return}
+    for(const oldId of missing){
+      const row=document.createElement('div');row.className='miniCard';row.style.margin='8px 0';
+      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">בחר תוסף חלופי…</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const title=document.createElement('b');title.textContent=oldId;
+      const btn=document.createElement('button');btn.textContent='שמור מיפוי';btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify('מיפוי התוסף נשמר','success')};
+      row.appendChild(title);row.appendChild(document.createElement('br'));row.appendChild(sel);row.appendChild(btn);body.appendChild(row);
+    }
+  });
+}
 function updateQuickButtons(){
   document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===datePreset&&!selectedDayKey));
   $('favoritesOnly').classList.toggle('active',favoritesOnly);
