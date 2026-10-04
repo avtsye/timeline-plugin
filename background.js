@@ -1,19 +1,58 @@
 (() => {
 'use strict';
 const EVENTS='timeline.events.v2', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1';
-const SESSION_GAP=30*60*1000, MERGE_GAP=2*60*1000, SNAP_GAP=15*60*1000;
-let q=Promise.resolve(), wired=false;
+const SESSION_GAP=30*60*1000, MERGE_GAP=2*60*1000, SNAP_GAP=15*60*1000, TOOL_POLL_MS=5000;
+let q=Promise.resolve(), wired=false, pollTimer=null, knownToolTabs=new Set();
+
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
 const set=(k,v)=>call('storage.set',{key:k,value:v});
-const clean=o=>{const x={}; for(const k of ['book','bookId','bookUid','id','type','source','index','currentBook','currentBookId','currentIndex','currentRef','screen','workspaceId']) if(o&&o[k]!=null)x[k]=o[k]; return x};
-const bookKey=d=>d.bookUid||d.currentBookId||d.bookId||d.currentBook||d.book||'';
+const clean=o=>{
+  const x={};
+  for(const k of ['book','bookId','bookUid','id','type','source','index','currentBook','currentBookId','currentIndex','currentRef','screen','workspaceId','toolId','title'])
+    if(o&&o[k]!=null)x[k]=o[k];
+  return x;
+};
+const bookKey=d=>d.bookUid||d.currentBookId||d.bookId||d.currentBook||d.book||d.toolId||'';
+
+function toolKind(toolId){
+  if(!toolId)return'tool';
+  if(toolId.startsWith('builtin.'))return'tool';
+  return'plugin';
+}
+function toolLabel(toolId){
+  if(!toolId)return'כלי';
+  if(toolId.startsWith('builtin.'))return'כלי: '+toolId.slice(8);
+  return'תוסף: '+toolId;
+}
 function label(type,d){
   if(type==='book'||type==='ref') return d.currentBook||d.book||d.currentBookId||d.bookId||'ספר';
   if(type==='workspace') return 'שולחן עבודה';
   if(type==='navigation') return 'מעבר '+(d.screen||'');
+  if(type==='plugin'||type==='tool') return toolLabel(d.toolId);
   return 'פעילות';
 }
+
+async function currentState(){
+  const rs=await call('reader.getCurrentState');
+  return rs.success&&rs.data?rs.data:null;
+}
+
+async function detectToolTabs(){
+  const state=await currentState();
+  if(!state)return;
+  const tabs=(state.openTabs||[]).filter(t=>t&&t.toolId&&!t.isSelf);
+  const current=new Set();
+  for(const t of tabs){
+    const key=t.toolId+'|'+(t.book||t.bookId||'');
+    current.add(key);
+    if(!knownToolTabs.has(key)){
+      record(toolKind(t.toolId),{toolId:t.toolId,title:t.book||t.bookId||t.toolId});
+    }
+  }
+  knownToolTabs=current;
+}
+
 async function snapshot(force=false){
   const now=Date.now(), snaps=await get(SNAPS,[]);
   const list=Array.isArray(snaps)?snaps:[];
@@ -33,6 +72,7 @@ async function snapshot(force=false){
   if(list.length>300) list.splice(0,list.length-300);
   await set(SNAPS,list);
 }
+
 function record(type,p){
   q=q.then(async()=>{
     const settings=Object.assign({paused:false,maxEvents:5000},await get(SETTINGS,{}));
@@ -41,6 +81,7 @@ function record(type,p){
     const list=Array.isArray(arr)?arr:[];
     const prev=list[list.length-1];
     const same=prev&&prev.type===type&&bookKey(prev.data||{})===bookKey(d)&&now-(prev.endTime||prev.time)<MERGE_GAP;
+
     if(same && (type==='book'||type==='ref'||type==='navigation')){
       prev.endTime=now;
       prev.count=(prev.count||1)+1;
@@ -53,12 +94,24 @@ function record(type,p){
         time:now,endTime:now,type,label:label(type,d),sessionId:sid,count:1,data:d
       });
     }
+
     const max=Math.max(500,Math.min(20000,Number(settings.maxEvents)||5000));
     if(list.length>max) list.splice(0,list.length-max);
     await set(EVENTS,list);
     await snapshot(type==='workspace');
   });
   return q;
+}
+
+function startPolling(){
+  if(pollTimer)return;
+  detectToolTabs();
+  pollTimer=setInterval(detectToolTabs,TOOL_POLL_MS);
+}
+function stopPolling(){
+  if(!pollTimer)return;
+  clearInterval(pollTimer);
+  pollTimer=null;
 }
 function wire(){
   if(wired) return;
@@ -67,6 +120,13 @@ function wire(){
   Otzaria.on('reader.current_book_changed',p=>record('book',p));
   Otzaria.on('reader.current_ref_changed',p=>record('ref',p));
   Otzaria.on('workspace.changed',p=>record('workspace',p));
+  Otzaria.on('plugin.suspended',stopPolling);
+  Otzaria.on('plugin.resumed',startPolling);
 }
-Otzaria.on('plugin.boot',async()=>{wire();await snapshot(false)});
+
+Otzaria.on('plugin.boot',async payload=>{
+  wire();
+  await snapshot(false);
+  if(payload&&payload.app&&payload.app.runMode==='background') startPolling();
+});
 })();
