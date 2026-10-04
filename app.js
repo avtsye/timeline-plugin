@@ -363,25 +363,6 @@ function renderSnapshots(){
     el.onclick=()=>restoreSnapshot(s);box.appendChild(el);
   }
 }
-function renderPlugins(){
-  const grid=$('pluginGrid');grid.innerHTML='';
-  $('installedCount').textContent=installed.length+' מותקנים';
-  const lastByPlugin=new Map();
-  events.filter(e=>e.type==='plugin'&&(e.data||{}).toolId).sort((a,b)=>b.time-a.time).forEach(e=>{const id=resolvedPluginId(e.data.toolId);if(!lastByPlugin.has(id))lastByPlugin.set(id,e)});
-  for(const p of installed){
-    if(p.pluginId==='timeline-plugin')continue;
-    const last=lastByPlugin.get(p.pluginId);
-    const card=document.createElement('div');card.className='pluginCard';
-    card.innerHTML='<div class="pluginHead"><span class="pluginIcon" title="'+esc(p.toolTabIconName||'puzzle_piece_24_regular')+'">'+pluginIconHtml(p.pluginId)+'</span><strong>'+esc(p.name||p.pluginId)+'</strong></div><small>גרסה '+esc(p.version||'')+' · '+(p.enabled?'פעיל':'מושבת')+'</small><small>'+(last?'שימוש אחרון: '+fmtDate(last.time)+' '+fmt(last.time):'טרם נרשם בציר')+'</small>';
-    const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='8px';
-    if(p.enabled){
-      const btn=document.createElement('button');btn.textContent='פתח';btn.onclick=()=>openPlugin(p.pluginId);actions.appendChild(btn);
-    }
-    const hist=document.createElement('button');hist.textContent='Timeline';hist.onclick=()=>showPluginHistory(p.pluginId);actions.appendChild(hist);
-    card.appendChild(actions);
-    grid.appendChild(card);
-  }
-}
 function smartTitle(s){
   if(names[s.id])return names[s.id];
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
@@ -524,7 +505,7 @@ function renderStats(list,ss){
   $('count').textContent=list.length;$('sessionCount').textContent=ss.length;
   $('bookCount').textContent=new Set(list.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBookId||(e.data||{}).bookId||(e.data||{}).book).filter(Boolean)).size;
   $('pluginCount').textContent=new Set(list.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean)).size;
-  $('bookTime').textContent=times.books+'ד׳';$('toolTime').textContent=times.tools+'ד׳';
+  $('bookTime').textContent=times.books+' '+(currentLang==='he'?'דק׳':'min');$('toolTime').textContent=times.tools+' '+(currentLang==='he'?'דק׳':'min');
 }
 function showBookHistory(bookKey){
   const visits=eventsForBook(bookKey);
