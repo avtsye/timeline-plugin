@@ -437,19 +437,50 @@ function topPlugins(limit=10){
   for(const e of events){if(e.type!=='plugin'||!(e.data||{}).toolId)continue;const original=e.data.toolId,k=resolvedPluginId(original);const x=m.get(k)||{key:k,title:pluginName(k),count:0,last:0,missing:!pluginMap.has(k)};x.count++;x.last=Math.max(x.last,e.time);m.set(k,x)}
   return [...m.values()].sort((a,b)=>b.count-a.count).slice(0,limit);
 }
+function buildBarChart(data,labelFn){
+  const chart=document.createElement('div');chart.className='chart';
+  const max=Math.max(1,...data.map(x=>x.count));
+  data.forEach((x,i)=>{
+    const bar=document.createElement('div');bar.className='bar';
+    bar.style.height=Math.max(2,Math.round(x.count/max*100))+'%';
+    bar.title=(labelFn?labelFn(x,i):x.label||x.key)+' · '+x.count;
+    if(i%Math.max(1,Math.floor(data.length/8))===0){const l=document.createElement('span');l.textContent=labelFn?labelFn(x,i):x.label||'';bar.appendChild(l)}
+    chart.appendChild(bar);
+  });
+  return chart;
+}
+function aggregateWeeks(count=12){
+  const out=[];const now=Date.now(),current=startOfWeek(now);
+  for(let i=count-1;i>=0;i--){const start=current-i*7*86400000,end=start+7*86400000;out.push({time:start,label:fmtDate(start),count:events.filter(e=>e.time>=start&&e.time<end).length})}
+  return out;
+}
+function aggregateMonths(count=12){
+  const out=[],now=new Date();
+  for(let i=count-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1),next=new Date(d.getFullYear(),d.getMonth()+1,1);out.push({time:d.getTime(),label:new Intl.DateTimeFormat('he-IL',{month:'short'}).format(d),count:events.filter(e=>e.time>=d.getTime()&&e.time<next.getTime()).length})}
+  return out;
+}
 function showDashboard(){
   showModal('Dashboard פעילות',body=>{
-    const daily=aggregateDaily(30),max=Math.max(1,...daily.map(x=>x.count));
-    const chart=document.createElement('div');chart.className='chart';
-    daily.forEach((x,i)=>{const bar=document.createElement('div');bar.className='bar';bar.style.height=Math.max(2,Math.round(x.count/max*100))+'%';bar.title=x.key+' · '+x.count; if(i%5===0){const l=document.createElement('span');l.textContent=new Date(x.time).getDate();bar.appendChild(l)}chart.appendChild(bar)});
-    body.innerHTML='<h3>30 ימים אחרונים</h3>';body.appendChild(chart);
+    const daily=aggregateDaily(30);
+    body.innerHTML='<h3>30 ימים אחרונים</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
+    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent='12 שבועות אחרונים';body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat('he-IL',{day:'numeric',month:'numeric'}).format(new Date(x.time))));
+    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent='12 חודשים אחרונים';body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
+
     const yearTitle=document.createElement('h3');yearTitle.textContent='Heatmap שנתי';body.appendChild(yearTitle);
     const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
-    for(let i=364;i>=0;i--){const t=Date.now()-i*86400000,n=counts[dk(t)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(t)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(t);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}body.appendChild(year);
+    for(let i=364;i>=0;i--){const t=Date.now()-i*86400000,n=counts[dk(t)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(t)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(t);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}
+    body.appendChild(year);
+
     const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='18px';
-    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>Top Books</h3>';topBooks().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')';b.onclick=()=>showBookHistory(x.key);bcard.appendChild(b)});grid.appendChild(bcard);
-    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>Top Plugins</h3>';topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — חסר':'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
-    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>מקומות אחרונים</h3>';recentPlaces().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+(x.ref?' — '+x.ref:'');b.onclick=()=>openEvent(x.event);rcard.appendChild(b)});grid.appendChild(rcard);
+    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>Top Books</h3>';
+    topBooks().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')';b.onclick=()=>showBookHistory(x.key);bcard.appendChild(b)});grid.appendChild(bcard);
+
+    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>Top Plugins</h3>';
+    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — חסר':'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
+
+    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>מקומות אחרונים</h3>';
+    recentPlaces().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+(x.ref?' — '+x.ref:'');b.onclick=()=>openEvent(x.event);rcard.appendChild(b)});grid.appendChild(rcard);
+
     body.appendChild(grid);
   });
 }
