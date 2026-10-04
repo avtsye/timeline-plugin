@@ -473,24 +473,30 @@ function createSessionCard(s){
   const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const preview=previewForSession(s),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id),dom=dominantType(s);
-  const card=document.createElement('section');card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
-  const chooser=ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(t('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+' · '+((x.tabs||[]).filter(t=>t.bookId&&!t.toolId).length)+' '+esc(t('books'))+'</option>').join('')+'</select>':'';
   const note=sessionNotes[s.id]||'';
-  const nearestInfo=nearest?' · '+t('recent_snapshots')+' '+fmt(nearest.time):'';
+  const card=document.createElement('section');
+  card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
   card.innerHTML=
-    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(t('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+nearestInfo+'</div></div>'+
-    '<div class="sessionTools"><button class="renameBtn">'+esc(t('name'))+'</button><button class="noteBtn">'+esc(t('note'))+'</button><button class="pinBtn">'+esc(isPinned?t('unpin'):t('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?t('expand'):t('collapse'))+'</button><button class="workspaceBtn">'+esc(t('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(t('export'))+'</button>'+chooser+(nearest?'<button class="restoreNearest">'+esc(t('restore'))+'</button>':'')+'<button class="deleteBtn danger">'+esc(t('delete'))+'</button></div></div>'+
+    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(t('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+(nearest?' · '+esc(t('recent_snapshots'))+' '+fmt(nearest.time):'')+'</div></div>'+
+    '<div class="sessionTools">'+(nearest?'<button class="restoreNearest">'+esc(t('restore'))+'</button>':'')+
+    '<details class="sessionMenu"><summary title="'+esc(t('session_actions'))+'">⋯</summary><div class="sessionMenuPanel">'+
+    '<button class="renameBtn">'+esc(t('name'))+'</button><button class="noteBtn">'+esc(t('note'))+'</button>'+
+    '<button class="pinBtn">'+esc(isPinned?t('unpin'):t('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?t('expand'):t('collapse'))+'</button>'+
+    '<button class="workspaceBtn">'+esc(t('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(t('export'))+'</button>'+
+    (ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(t('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+'</option>').join('')+'</select>':'')+
+    '<button class="deleteBtn danger">'+esc(t('delete'))+'</button></div></details></div></div>'+
     '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' '+esc(t('books'))+' · '+plugins.length+' '+esc(t('plugins'))+' · '+tools.length+' '+esc(t('built_in_tool'))+(note?' · '+esc(t('note')):'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
     '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">'+pluginIconHtml(x)+' '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
 
   const eb=card.querySelector('.events');
-  for(const e of s.events.slice().reverse()){
-    const d=e.data||{},row=document.createElement('div');row.className='event';
-    const main=document.createElement('div');main.style.flex='1';main.innerHTML='<b>'+esc(e.type==='plugin'?pluginName(d.toolId):e.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(e.count>1?' · '+e.count:'')+'</small>';
-    main.onclick=()=>openEvent(e);
-    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(e.id)?'★':'☆';fav.title=t('favorites');
-    fav.onclick=async ev=>{ev.stopPropagation();favorites.has(e.id)?favorites.delete(e.id):favorites.add(e.id);await set(FAVORITES,[...favorites]);render()};
-    const time=document.createElement('time');time.textContent=fmt(e.time);
+  for(const ev of s.events.slice().reverse()){
+    const d=ev.data||{},row=document.createElement('div');row.className='event';
+    const main=document.createElement('div');main.style.flex='1';
+    main.innerHTML='<b>'+esc(ev.type==='plugin'?pluginName(d.toolId):ev.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'')+'</small>';
+    main.onclick=()=>openEvent(ev);
+    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(ev.id)?'★':'☆';fav.title=t('favorites');
+    fav.onclick=async e=>{e.stopPropagation();favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()};
+    const time=document.createElement('time');time.textContent=fmt(ev.time);
     row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
   }
   card.querySelector('.renameBtn').onclick=()=>renameSession(s);
@@ -500,7 +506,7 @@ function createSessionCard(s){
   card.querySelector('.workspaceBtn').onclick=()=>saveSessionAsWorkspace(s);
   card.querySelector('.exportSessionBtn').onclick=()=>exportSession(s);
   card.querySelector('.deleteBtn').onclick=()=>deleteSession(s);
-  const select=card.querySelector('.snapshotSelect');if(select)select.onchange=()=>{const i=Number(select.value);if(Number.isInteger(i)&&ssnaps[i])restoreSnapshot(ssnaps[i]);select.value=''};
+  const sel=card.querySelector('.snapshotSelect');if(sel)sel.onchange=()=>{const i=Number(sel.value);if(Number.isInteger(i)&&ssnaps[i])restoreSnapshot(ssnaps[i]);sel.value=''};
   const restore=card.querySelector('.restoreNearest');if(restore)restore.onclick=()=>restoreSnapshot(nearest);
   return card;
 }
