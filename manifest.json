@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "ציר זמן מתקדם לאוצריא עם הפעלות, נקודות שחזור, תוספים, ניתוח פעילות, גיבויים ושחזור.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
@@ -30,7 +30,9 @@
     "events.subscribe:navigation.changed",
     "events.subscribe:reader.current_book_changed",
     "events.subscribe:reader.current_ref_changed",
-    "events.subscribe:workspace.changed"
+    "events.subscribe:workspace.changed",
+    "events.subscribe:theme.changed",
+    "ui.feedback"
   ],
   "network": {
     "enabled": false,
