@@ -672,16 +672,30 @@ function updateQuickButtons(){
   $('favoritesOnly').classList.toggle('active',favoritesOnly);
 }
 function sync(){
-  $('pauseBtn').textContent=settings.paused?'המשך תיעוד':'השהה תיעוד';$('maxEvents').value=String(settings.maxEvents||5000);
-  $('notificationsEnabled').checked=settings.inAppNotifications!==false;$('compactMode').checked=!!settings.compactMode;document.body.classList.toggle('compact',!!settings.compactMode);
+  $('pauseBtn').textContent=settings.paused?'המשך תיעוד':'השהה תיעוד';
+  $('maxEvents').value=String(settings.maxEvents||5000);
+  $('notificationsEnabled').checked=settings.inAppNotifications!==false;
+  $('compactMode').checked=!!settings.compactMode;
+  $('newTabIntegration').checked=!!settings.newTabIntegration;
+  $('homepageIntegration').checked=settings.homepageIntegration!==false;
+  $('zoomLabel').textContent=Math.round(Number(settings.timelineZoom||1)*100)+'%';
+  document.body.classList.toggle('compact',!!settings.compactMode);
+  updateSavedFilterSelect();
   updateQuickButtons();
 }
 async function load(){
-  events=await get(EVENTS,[]);if(!events.length){const old=await get(LEGACY,[]);if(Array.isArray(old)&&old.length)events=old}
-  snaps=await get(SNAPS,[]);settings=Object.assign(settings,await get(SETTINGS,{}));pinned=new Set(await get(PINS,[]));collapsed=new Set(await get(COLLAPSED,[]));favorites=new Set(await get(FAVORITES,[]));names=await get(NAMES,{});
-  const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
+  events=await get(EVENTS,[]);
+  if(!events.length){const old=await get(LEGACY,[]);if(Array.isArray(old)&&old.length)events=old}
+  const values=await Promise.all([
+    get(SNAPS,[]),get(SETTINGS,{}),get(PINS,[]),get(COLLAPSED,[]),get(FAVORITES,[]),get(NAMES,{}),
+    get(SAVED_FILTERS,[]),get(MIGRATIONS,{}),get(NOTES,{}),get(HEALTH,{})
+  ]);
+  snaps=values[0];settings=Object.assign(settings,values[1]);pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
+  savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
+  const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);
+  searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
   const pf=$('pluginFilter');pf.innerHTML='<option value="">כל התוספים</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
-  sync();render();await updateTrackingStatus();
+  sync();render();await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
 function theme(t){
   const c=t&&t.colorScheme||{},r=document.documentElement.style;r.setProperty('--bg',c.surfaceContainerLowest||c.surface||'#fffbfe');r.setProperty('--surface',c.surface||'#fff');r.setProperty('--soft',c.surfaceContainer||'#f7f2fa');r.setProperty('--top',c.surfaceContainerHigh||c.surfaceContainer||'#f3edf7');r.setProperty('--text',c.onSurface||'#1d1b20');r.setProperty('--muted',c.onSurfaceVariant||c.outline||'#666');r.setProperty('--primary',c.primary||'#6750a4');r.setProperty('--outline',c.outlineVariant||c.outline||'#cac4d0');
