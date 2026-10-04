@@ -1,12 +1,15 @@
 (() => {
 'use strict';
-const EVENTS='timeline.events.v2', LEGACY='timeline.events.v1', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1';
+const EVENTS='timeline.events.v2', LEGACY='timeline.events.v1', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1', PINS='timeline.pins.v1', COLLAPSED='timeline.collapsed.v1';
 const $=id=>document.getElementById(id);
-let events=[],snaps=[],settings={paused:false,maxEvents:5000},searches=[],viewMode='day';
+let events=[],snaps=[],settings={paused:false,maxEvents:5000,inAppNotifications:true},searches=[],viewMode='day',pinned=new Set(),collapsed=new Set();
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
 const set=(k,v)=>call('storage.set',{key:k,value:v});
+async function notify(message,type='info'){if(settings.inAppNotifications===false)return;await call('notifications.showInApp',{message,type});}
+async function savePins(){await set(PINS,[...pinned]);}
+async function saveCollapsed(){await set(COLLAPSED,[...collapsed]);}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>new Date(t).toISOString().slice(0,10);
 const fmt=t=>new Intl.DateTimeFormat('he-IL',{hour:'2-digit',minute:'2-digit'}).format(new Date(t));
@@ -86,17 +89,31 @@ function renderSnapshots(){
     box.appendChild(el);
   }
 }
+function smartTitle(s){
+  const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
+  const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
+  const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
+  if(books.length===1&&plugins.length===0&&tools.length===0)return 'קריאה ב'+books[0];
+  if(plugins.length===1&&books.length===0)return 'עבודה עם '+plugins[0];
+  if(plugins.length||tools.length)return (books.length?books.length+' ספרים · ':'')+(plugins.length?plugins.length+' תוספים · ':'')+(tools.length?tools.length+' כלים':'').replace(/ · $/,'');
+  if(books.length>1)return books.length+' ספרים';
+  return 'פעילות באוצריא';
+}
 function previewForSession(s){
-  const last=s.events.slice().reverse().find(e=>['book','ref'].includes(e.type));
-  if(!last)return{title:'פעילות באוצריא',ref:'ללא ספר פעיל בסוף הסשן'};
+  const last=s.events.slice().reverse().find(e=>['book','ref','plugin','tool'].includes(e.type));
+  if(!last)return{title:'פעילות באוצריא',ref:'ללא פעילות מזוהה בסוף הסשן'};
   const d=last.data||{};
+  if(last.type==='plugin')return{title:'תוסף: '+(d.toolId||last.label),ref:'נפתח במהלך הסשן'};
+  if(last.type==='tool')return{title:'כלי: '+(d.toolId||last.label),ref:'נפתח במהלך הסשן'};
   return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||'ספר',ref:d.currentRef||d.ref||''};
 }
 function createSessionCard(s){
   const ssnaps=snapshotsForSession(s),nearest=nearestSnap(s.end);
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
-  const preview=previewForSession(s),mins=Math.max(1,Math.round((s.end-s.start)/60000));
-  const card=document.createElement('section');card.className='session';
+  const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
+  const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
+  const preview=previewForSession(s),mins=Math.max(1,Math.round((s.end-s.start)/60000)),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id);
+  const card=document.createElement('section');card.className='session'+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
 
   let chooser='';
   if(ssnaps.length){
@@ -104,19 +121,29 @@ function createSessionCard(s){
   }
 
   card.innerHTML=
-    '<div class="sessionHead"><div><h3>'+fmt(s.start)+'–'+fmt(s.end)+'</h3><div class="muted">'+mins+' דקות · '+s.events.length+' פעילויות · '+books.length+' ספרים</div></div>'+
-    '<div class="sessionTools">'+chooser+(nearest?'<button class="restoreNearest">שחזר קרוב</button>':'')+'</div></div>'+
+    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">מוצמד</span>':'')+'</div><div class="muted">'+fmt(s.start)+'–'+fmt(s.end)+' · '+mins+' דקות · '+s.events.length+' פעילויות · '+books.length+' ספרים'+(plugins.length?' · '+plugins.length+' תוספים':'')+'</div></div>'+
+    '<div class="sessionTools"><button class="pinBtn">'+(isPinned?'בטל הצמדה':'הצמד')+'</button><button class="collapseBtn">'+(isCollapsed?'פתח':'קפל')+'</button>'+chooser+(nearest?'<button class="restoreNearest">שחזר קרוב</button>':'')+'</div></div>'+
     '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div></div>'+
-    '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+
+    '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span>תוסף: '+esc(x)+'</span>').join('')+tools.slice(0,5).map(x=>'<span>כלי: '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div>'+
     '<div class="events"></div>';
 
   const eb=card.querySelector('.events');
   for(const e of s.events.slice().reverse()){
     const d=e.data||{},x=document.createElement('div');x.className='event';
-    x.innerHTML='<div><b>'+esc(e.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||'')+(e.count>1?' · '+e.count+' עדכונים':'')+'</small></div><time>'+fmt(e.time)+'</time>';
+    const detail=d.currentRef||d.ref||d.screen||d.toolId||'';
+    x.innerHTML='<div><b>'+esc(e.label)+'</b><small>'+esc(detail)+(e.count>1?' · '+e.count+' עדכונים':'')+'</small></div><time>'+fmt(e.time)+'</time>';
     if(['book','ref'].includes(e.type))x.onclick=()=>openEvent(e);
     eb.appendChild(x);
   }
+
+  card.querySelector('.pinBtn').onclick=async()=>{
+    if(pinned.has(s.id))pinned.delete(s.id);else pinned.add(s.id);
+    await savePins();render();
+  };
+  card.querySelector('.collapseBtn').onclick=async()=>{
+    if(collapsed.has(s.id))collapsed.delete(s.id);else collapsed.add(s.id);
+    await saveCollapsed();render();
+  };
   const select=card.querySelector('.snapshotSelect');
   if(select)select.onchange=()=>{const i=Number(select.value);if(Number.isInteger(i)&&ssnaps[i])restoreSnapshot(ssnaps[i]);select.value=''};
   const restore=card.querySelector('.restoreNearest');
@@ -147,7 +174,7 @@ function render(){
     if(viewMode==='day'){
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="timelineRail"></div>';
       const rail=wrap.querySelector('.timelineRail');
-      items.slice().sort((a,b)=>b.start-a.start).forEach((s,i)=>{
+      items.slice().sort((a,b)=>(pinned.has(b.id)-pinned.has(a.id))||(b.start-a.start)).forEach((s,i)=>{
         const node=document.createElement('div');
         node.className='timelineNode '+(i%2===0?'right':'left');
         const cardWrap=document.createElement('div');cardWrap.className='timelineCard';
@@ -155,12 +182,13 @@ function render(){
         const dot=document.createElement('div');dot.className='timelineDot';
         const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
         node.appendChild(cardWrap);node.appendChild(dot);node.appendChild(stamp);
+        const marks=document.createElement('div');marks.className='snapshotMarks';snapshotsForSession(s).slice(0,6).forEach(()=>{const m=document.createElement('span');m.className='snapshotMark';marks.appendChild(m)});node.appendChild(marks);
         rail.appendChild(node);
       });
     }else{
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="sessionGrid"></div>';
       const grid=wrap.querySelector('.sessionGrid');
-      items.forEach(s=>grid.appendChild(createSessionCard(s)));
+      items.slice().sort((a,b)=>(pinned.has(b.id)-pinned.has(a.id))||(b.start-a.start)).forEach(s=>grid.appendChild(createSessionCard(s)));
     }
     cont.appendChild(wrap);
   }
@@ -178,6 +206,7 @@ async function openEvent(e){
   p.navigateToPositionIfReused=true;
   await call('reader.openBook',p);
   await call('navigation.goTo',{target:'reading'});
+  await notify('ה-Snapshot שוחזר בהצלחה','success');
 }
 async function restoreSnapshot(s){
   if(!s||!confirm('לשחזר את מצב הספרים מה-Snapshot הזה? טאבי ספרים קיימים ייסגרו; טאבי כלים ותוספים יישארו.'))return;
@@ -213,6 +242,7 @@ async function createSnapshot(){
   });
   if(snaps.length>300)snaps.splice(0,snaps.length-300);
   await set(SNAPS,snaps);render();
+  await notify('Snapshot נשמר','success');
 }
 async function load(){
   events=await get(EVENTS,[]);
@@ -222,6 +252,8 @@ async function load(){
   }
   snaps=await get(SNAPS,[]);
   settings=Object.assign(settings,await get(SETTINGS,{}));
+  pinned=new Set(await get(PINS,[]));
+  collapsed=new Set(await get(COLLAPSED,[]));
   const sr=await call('history.listSearches',{limit:20});
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];
   sync();render();
@@ -229,6 +261,7 @@ async function load(){
 function sync(){
   $('pauseBtn').textContent=settings.paused?'המשך תיעוד':'השהה תיעוד';
   $('maxEvents').value=String(settings.maxEvents||5000);
+  $('notificationsEnabled').checked=settings.inAppNotifications!==false;
 }
 function theme(t){
   const c=t&&t.colorScheme||{},r=document.documentElement.style;
@@ -250,17 +283,17 @@ document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===btn));
   render();
 });
-$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync()};
+$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?'תיעוד ציר הזמן הושהה':'תיעוד ציר הזמן חודש',settings.paused?'info':'success')};
 $('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
 $('snapshotBtn').onclick=createSnapshot;
 $('clearBtn').onclick=async()=>{
   if(confirm('למחוק את כל ציר הזמן וה-Snapshots?')){
-    events=[];snaps=[];await set(EVENTS,[]);await set(SNAPS,[]);render();
+    events=[];snaps=[];pinned.clear();collapsed.clear();await set(EVENTS,[]);await set(SNAPS,[]);await set(PINS,[]);await set(COLLAPSED,[]);render();await notify('ציר הזמן נוקה','success');
   }
 };
 $('settingsBtn').onclick=()=>$('dialog').classList.add('open');
 $('closeSettings').onclick=()=>$('dialog').classList.remove('open');
-$('saveSettings').onclick=async()=>{settings.maxEvents=+$('maxEvents').value||5000;await set(SETTINGS,settings);$('dialog').classList.remove('open')};
+$('saveSettings').onclick=async()=>{settings.maxEvents=+$('maxEvents').value||5000;settings.inAppNotifications=$('notificationsEnabled').checked;await set(SETTINGS,settings);$('dialog').classList.remove('open');await notify('הגדרות ציר הזמן נשמרו','success')};
 
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await load()});
 Otzaria.on('theme.changed',theme);
