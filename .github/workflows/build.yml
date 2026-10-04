@@ -1,0 +1,20 @@
+name: Build Otzaria Timeline
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifest JSON
+        run: python -m json.tool manifest.json >/dev/null
+      - name: Build package
+        run: |
+          mkdir -p dist
+          zip -r dist/timeline-plugin.otzplugin manifest.json index.html app.js background.html background.js README.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: timeline-plugin
+          path: dist/timeline-plugin.otzplugin
