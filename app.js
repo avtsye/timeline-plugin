@@ -387,31 +387,34 @@ function smartTitle(s){
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
   const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
-  if(books.length===1&&!plugins.length&&!tools.length)return'קריאה ב'+books[0];
-  if(plugins.length===1&&!books.length)return'עבודה עם '+pluginName(plugins[0]);
-  const parts=[];if(books.length)parts.push(books.length+' ספרים');if(plugins.length)parts.push(plugins.length+' תוספים');if(tools.length)parts.push(tools.length+' כלים');
-  return parts.join(' · ')||'פעילות באוצריא';
+  if(books.length===1&&!plugins.length&&!tools.length)return t('reading_in')+' '+books[0];
+  if(plugins.length===1&&!books.length)return t('work_with')+' '+pluginName(plugins[0]);
+  const parts=[];
+  if(books.length)parts.push(books.length+' '+t('books'));
+  if(plugins.length)parts.push(plugins.length+' '+t('plugins'));
+  if(tools.length)parts.push(tools.length+' '+t('built_in_tool'));
+  return parts.join(' · ')||t('activity_in_otzaria');
 }
 function previewForSession(s){
   const last=s.events.slice().reverse().find(e=>['book','ref','plugin','tool'].includes(e.type));
-  if(!last)return{title:'פעילות באוצריא',ref:'ללא פעילות מזוהה בסוף הסשן'};
+  if(!last)return{title:t('activity_in_otzaria'),ref:t('no_identified_activity')};
   const d=last.data||{};
-  if(last.type==='plugin')return{title:'תוסף: '+pluginName(d.toolId||''),ref:'נפתח במהלך הסשן'};
-  if(last.type==='tool')return{title:'כלי: '+String(d.toolId||last.label).replace(/^builtin\./,''),ref:'נפתח במהלך הסשן'};
-  return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||'ספר',ref:d.currentRef||d.ref||''};
+  if(last.type==='plugin')return{title:t('plugin')+': '+pluginName(d.toolId||''),ref:t('opened_during_session')};
+  if(last.type==='tool')return{title:t('tool')+': '+String(d.toolId||last.label).replace(/^builtin\./,''),ref:t('opened_during_session')};
+  return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||t('book'),ref:d.currentRef||d.ref||''};
 }
 async function openPlugin(id){
   const target=resolvedPluginId(id);
   const p=pluginInfo(target);
-  if(!p){await notify('התוסף אינו מותקן. ניתן למפות אותו ב-Diagnostics.','error');return}
-  if(!p.enabled){await notify('התוסף מושבת','error');return}
+  if(!p){await notify(t('plugin_missing'),'error');return}
+  if(!p.enabled){await notify(t('plugin_disabled'),'error');return}
   const r=await call('plugin.openOther',{pluginId:target,param:{source:'timeline-plugin'}});
-  if(!r.success)await notify('לא ניתן לפתוח את התוסף','error');
+  if(!r.success)await notify(t('plugin_open_failed'),'error');
 }
 async function openEvent(e){
   const d=e.data||{};
   if(e.type==='plugin'&&d.toolId){await openPlugin(d.toolId);return}
-  if(e.type==='tool'){await notify('אין API כללי לפתיחה מחדש של כלי מובנה ב-Otzaria 0.9.97','info');return}
+  if(e.type==='tool'){await notify(t('builtin_open_unavailable'),'info');return}
   if(!['book','ref'].includes(e.type))return;
   const p={};const map={bookUid:d.bookUid,id:d.id,bookId:d.currentBookId||d.bookId||d.currentBook||d.book,type:d.type,source:d.source,index:d.currentIndex??d.index};
   for(const[k,v]of Object.entries(map))if(v!=null&&v!=='')p[k]=v;
@@ -420,25 +423,24 @@ async function openEvent(e){
   if(r.success)await call('navigation.goTo',{target:'reading'});
 }
 async function renameSession(s){
-  const next=prompt('שם ל-Session',names[s.id]||smartTitle(s));
+  const next=prompt(t('session_name'),names[s.id]||smartTitle(s));
   if(next===null)return;
   if(next.trim())names[s.id]=next.trim();else delete names[s.id];
   await set(NAMES,names);render();
 }
 async function deleteSession(s){
-  if(!confirm('למחוק את ה-Session הזה מציר הזמן?'))return;
-  const ids=new Set(s.events.map(e=>e.id));
+  if(!confirm(t('delete_session_confirm')))return;
   events=events.filter(e=>e.sessionId!==s.id);
   s.events.forEach(e=>favorites.delete(e.id));
-  pinned.delete(s.id);collapsed.delete(s.id);delete names[s.id];
-  await Promise.all([set(EVENTS,events),persistMeta()]);
-  render();await notify('ה-Session נמחק','success');
+  pinned.delete(s.id);collapsed.delete(s.id);delete names[s.id];delete sessionNotes[s.id];
+  await Promise.all([set(EVENTS,events),set(NOTES,sessionNotes),persistMeta()]);
+  render();await notify(t('session_deleted'),'success');
 }
 async function saveSessionAsWorkspace(s){
-  const name=prompt('שם ה-Workspace',names[s.id]||smartTitle(s));
+  const name=prompt(t('workspace_name'),names[s.id]||smartTitle(s));
   if(!name||!name.trim())return;
   const cr=await call('workspace.create',{name:name.trim(),switchTo:true,reuseExisting:false});
-  if(!cr.success){await notify('יצירת Workspace נכשלה','error');return}
+  if(!cr.success){await notify(t('workspace_create_failed'),'error');return}
   const seen=new Set();
   for(const e of s.events){
     if(['book','ref'].includes(e.type)){
@@ -452,7 +454,7 @@ async function saveSessionAsWorkspace(s){
     }
   }
   await call('navigation.goTo',{target:'reading'});
-  await notify('ה-Session נשמר כ-Workspace','success');
+  await notify(t('session_saved_workspace'),'success');
 }
 function editSessionNote(s){
   showModal('הערה ל-Session',body=>{
