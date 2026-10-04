@@ -40,6 +40,7 @@ async function persistMeta(){
 function pluginInfo(id){return pluginMap.get(id)||null}
 function pluginName(id){const p=pluginInfo(id);return p&&p.name?p.name:id}
 function pluginIconName(id){const p=pluginInfo(id);return p&&p.toolTabIconName?p.toolTabIconName:'puzzle_piece_24_regular'}
+function pluginIconHtml(id){const name=pluginIconName(id);const map=window.OFFICIAL_FLUENT_ICONS||{};return map[name]||map.puzzle_piece_24_regular||'🧩'}
 
 function dayTitle(t){
   const k=dk(t),now=Date.now();
@@ -169,7 +170,7 @@ function renderPlugins(){
     if(p.pluginId==='timeline-plugin')continue;
     const last=lastByPlugin.get(p.pluginId);
     const card=document.createElement('div');card.className='pluginCard';
-    card.innerHTML='<strong title="'+esc(p.toolTabIconName||'puzzle_piece_24_regular')+'">🧩 '+esc(p.name||p.pluginId)+'</strong><small>גרסה '+esc(p.version||'')+' · '+(p.enabled?'פעיל':'מושבת')+'</small><small>'+(last?'שימוש אחרון: '+fmtDate(last.time)+' '+fmt(last.time):'טרם נרשם בציר')+'</small>';
+    card.innerHTML='<div class="pluginHead"><span class="pluginIcon" title="'+esc(p.toolTabIconName||'puzzle_piece_24_regular')+'">'+pluginIconHtml(p.pluginId)+'</span><strong>'+esc(p.name||p.pluginId)+'</strong></div><small>גרסה '+esc(p.version||'')+' · '+(p.enabled?'פעיל':'מושבת')+'</small><small>'+(last?'שימוש אחרון: '+fmtDate(last.time)+' '+fmt(last.time):'טרם נרשם בציר')+'</small>';
     if(p.enabled){
       const btn=document.createElement('button');btn.textContent='פתח';btn.onclick=()=>openPlugin(p.pluginId);card.appendChild(btn);
     }
@@ -254,7 +255,7 @@ function createSessionCard(s){
   const preview=previewForSession(s),mins=Math.max(1,Math.round((s.end-s.start)/60000)),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id);
   const card=document.createElement('section');card.className='session'+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
   const chooser=ssnaps.length?'<select class="snapshotSelect"><option value="">Snapshot ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+' · '+((x.tabs||[]).filter(t=>t.bookId&&!t.toolId).length)+' ספרים</option>').join('')+'</select>':'';
-  card.innerHTML='<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">מוצמד</span>':'')+'</div><div class="muted">'+fmt(s.start)+'–'+fmt(s.end)+' · '+mins+' דקות · '+books.length+' ספרים · '+plugins.length+' תוספים</div></div><div class="sessionTools"><button class="renameBtn">שם</button><button class="pinBtn">'+(isPinned?'בטל הצמדה':'הצמד')+'</button><button class="collapseBtn">'+(isCollapsed?'פתח':'קפל')+'</button><button class="workspaceBtn">ל-Workspace</button>'+chooser+(nearest?'<button class="restoreNearest">שחזר</button>':'')+'<button class="deleteBtn danger">מחק</button></div></div><div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div></div><div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">🧩 '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
+  card.innerHTML='<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">מוצמד</span>':'')+'</div><div class="muted">'+fmt(s.start)+'–'+fmt(s.end)+' · '+mins+' דקות · '+books.length+' ספרים · '+plugins.length+' תוספים</div></div><div class="sessionTools"><button class="renameBtn">שם</button><button class="pinBtn">'+(isPinned?'בטל הצמדה':'הצמד')+'</button><button class="collapseBtn">'+(isCollapsed?'פתח':'קפל')+'</button><button class="workspaceBtn">ל-Workspace</button>'+chooser+(nearest?'<button class="restoreNearest">שחזר</button>':'')+'<button class="deleteBtn danger">מחק</button></div></div><div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div></div><div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">'+pluginIconHtml(x)+' '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
 
   const eb=card.querySelector('.events');
   for(const e of s.events.slice().reverse()){
