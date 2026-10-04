@@ -1,8 +1,119 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ציר זמן</title><style>
-:root{--bg:#fffbfe;--surface:#fff;--soft:#f7f2fa;--text:#1d1b20;--muted:#666;--primary:#6750a4;--outline:#cac4d0}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:auto;background:var(--bg);color:var(--text);font-family:system-ui,"Segoe UI",sans-serif}button,input,select{font:inherit;color:inherit}.app{max-width:1180px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.top h1{margin:0;font-size:30px}.muted{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}button{border:1px solid var(--outline);background:var(--surface);padding:9px 13px;border-radius:12px;cursor:pointer}.primary{background:var(--primary);color:#fff;border-color:var(--primary)}button:disabled{opacity:.45;cursor:not-allowed}.continue{margin:18px 0;background:linear-gradient(135deg,var(--surface),var(--soft));border:1px solid var(--outline);border-radius:20px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:14px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:var(--surface);border:1px solid var(--outline);border-radius:16px;padding:14px}.stat b{font-size:23px;display:block}.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin:14px 0}.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--outline);border-radius:12px;padding:10px}.panel{background:var(--surface);border:1px solid var(--outline);border-radius:18px;padding:14px;margin:14px 0}.heatmap{display:grid;grid-template-columns:repeat(35,1fr);gap:4px}.heat{aspect-ratio:1;border-radius:4px;background:var(--soft);border:1px solid var(--outline)}.h1{background:color-mix(in srgb,var(--primary) 25%,var(--soft))}.h2{background:color-mix(in srgb,var(--primary) 45%,var(--soft))}.h3{background:color-mix(in srgb,var(--primary) 70%,var(--soft))}.h4{background:var(--primary)}.searches{display:flex;gap:6px;flex-wrap:wrap}.searchChip{border-radius:999px;padding:6px 10px}.session{background:var(--surface);border:1px solid var(--outline);border-radius:20px;padding:16px;margin:14px 0}.sessionHead{display:flex;justify-content:space-between;gap:12px;align-items:start}.session h2{font-size:17px;margin:0 0 4px}.books{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.books span{background:var(--soft);padding:5px 9px;border-radius:999px;font-size:13px}.events{border-top:1px solid var(--outline)}.event{display:flex;justify-content:space-between;gap:10px;padding:10px 4px;border-bottom:1px solid color-mix(in srgb,var(--outline) 65%,transparent);cursor:pointer}.event small{display:block;color:var(--muted);margin-top:3px}.event time{color:var(--muted);white-space:nowrap}.empty{text-align:center;padding:50px;color:var(--muted)}.dialog{display:none;position:fixed;inset:0;background:#0006;align-items:center;justify-content:center;padding:20px}.dialog.open{display:flex}.dialogBox{background:var(--surface);border-radius:20px;padding:20px;width:min(480px,100%)}.dialogBox select{width:100%;padding:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface)}@media(max-width:720px){.app{padding:12px}.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(7,1fr)}.sessionHead,.continue{align-items:stretch;flex-direction:column}}
-</style></head><body><div class="app"><div class="top"><div><h1>ציר זמן</h1><div class="muted">היסטוריית העבודה שלך באוצריא — מקומית בלבד</div></div><div class="actions"><button id="snapshotBtn">שמור Snapshot עכשיו</button><button id="pauseBtn"></button><button id="settingsBtn">הגדרות</button><button id="clearBtn">נקה</button></div></div>
-<div class="continue"><div><b>המשך מהמקום שבו הפסקת</b><div id="continueInfo" class="muted"></div></div><button id="continueBtn" class="primary">המשך עבודה</button></div>
-<div class="stats"><div class="stat"><b id="count">0</b><span>אירועים</span></div><div class="stat"><b id="sessionCount">0</b><span>סשנים</span></div><div class="stat"><b id="bookCount">0</b><span>ספרים</span></div><div class="stat"><b id="dayCount">0</b><span>ימים פעילים</span></div></div>
-<div class="panel"><b>35 הימים האחרונים</b><div id="heatmap" class="heatmap" style="margin-top:10px"></div></div><div class="panel"><b>חיפושים אחרונים</b><div id="recentSearches" class="searches" style="margin-top:10px"></div></div>
-<div class="toolbar"><input id="search" placeholder="חיפוש בציר הזמן…"><select id="type"><option value="">כל הפעילויות</option><option value="book">פתיחת ספר</option><option value="ref">קריאה/מיקום</option><option value="workspace">שולחן עבודה</option><option value="navigation">ניווט</option></select><select id="range"><option value="7">7 ימים</option><option value="30" selected>30 ימים</option><option value="90">90 ימים</option><option value="0">הכול</option></select></div><main id="content"></main></div>
-<div id="dialog" class="dialog"><div class="dialogBox"><h2>הגדרות</h2><label>מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select><div class="actions" style="margin-top:16px"><button id="saveSettings" class="primary">שמור</button><button id="closeSettings">ביטול</button></div></div></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ציר זמן</title>
+<style>
+:root{--bg:#fffbfe;--surface:#fff;--soft:#f7f2fa;--text:#1d1b20;--muted:#666;--primary:#6750a4;--outline:#cac4d0;--top:#f3edf7}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:auto;background:var(--bg);color:var(--text);font-family:system-ui,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+.app{max-width:1220px;margin:auto;padding:22px}
+.topbar{position:sticky;top:0;z-index:5;margin:-22px -22px 18px;padding:15px 22px;background:var(--top);border-bottom:1px solid var(--outline);backdrop-filter:blur(14px)}
+.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+.top h1{margin:0;font-size:29px}.muted{color:var(--muted)}
+.actions,.viewSwitch,.searches,.snapshotList,.books{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid var(--outline);background:var(--surface);padding:9px 13px;border-radius:12px;cursor:pointer}
+button:hover{background:var(--soft)}button.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+button:disabled{opacity:.45;cursor:not-allowed}.viewSwitch button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.continue{margin:18px 0;background:linear-gradient(135deg,var(--surface),var(--soft));border:1px solid var(--outline);border-radius:22px;padding:19px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.continueTitle{font-size:18px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:var(--surface);border:1px solid var(--outline);border-radius:16px;padding:14px}.stat b{font-size:23px;display:block}
+.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin:14px 0}.toolbar input,.toolbar select,.snapshotSelect{background:var(--surface);border:1px solid var(--outline);border-radius:12px;padding:10px}
+.panel{background:var(--surface);border:1px solid var(--outline);border-radius:18px;padding:14px;margin:14px 0}.panelTitle{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.heatmap{display:grid;grid-template-columns:repeat(35,1fr);gap:4px}.heat{aspect-ratio:1;border-radius:4px;background:var(--soft);border:1px solid var(--outline)}
+.h1{background:color-mix(in srgb,var(--primary) 25%,var(--soft))}.h2{background:color-mix(in srgb,var(--primary) 45%,var(--soft))}.h3{background:color-mix(in srgb,var(--primary) 70%,var(--soft))}.h4{background:var(--primary)}
+.searchChip,.snapshotChip,.books span{border-radius:999px;padding:6px 10px}.searchChip,.snapshotChip{border:1px solid var(--outline);background:var(--surface);cursor:pointer}.books span{background:var(--soft);font-size:13px}
+.bucket{margin:24px 0}.bucketTitle{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0 2px 10px}.bucketTitle h2{font-size:20px;margin:0}
+.sessionGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px}
+.session{background:var(--surface);border:1px solid var(--outline);border-radius:22px;padding:16px;min-width:0;box-shadow:0 1px 2px #0000000d}
+.sessionHead{display:flex;justify-content:space-between;gap:12px;align-items:start}.session h3{font-size:17px;margin:0 0 4px}.sessionTools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.preview{margin:12px 0;padding:12px;border-radius:16px;background:var(--soft);min-height:72px}.preview strong{display:block;margin-bottom:5px}.preview .ref{font-size:13px;color:var(--muted)}
+.events{border-top:1px solid var(--outline);max-height:280px;overflow:auto}.event{display:flex;justify-content:space-between;gap:10px;padding:10px 4px;border-bottom:1px solid color-mix(in srgb,var(--outline) 65%,transparent);cursor:pointer}.event:hover{background:var(--soft)}.event small{display:block;color:var(--muted);margin-top:3px}.event time{color:var(--muted);white-space:nowrap}
+.snapshotCard{min-width:190px;max-width:250px;flex:1;background:var(--soft);border:1px solid var(--outline);border-radius:16px;padding:12px;cursor:pointer}.snapshotCard:hover{outline:2px solid color-mix(in srgb,var(--primary) 35%,transparent)}.snapshotCard b,.snapshotCard small{display:block}.snapshotCard small{color:var(--muted);margin-top:5px}
+.empty{text-align:center;padding:50px;color:var(--muted)}
+.dialog{display:none;position:fixed;inset:0;background:#0006;align-items:center;justify-content:center;padding:20px;z-index:20}.dialog.open{display:flex}.dialogBox{background:var(--surface);border-radius:20px;padding:20px;width:min(500px,100%)}.dialogBox select{width:100%;padding:10px;border:1px solid var(--outline);border-radius:10px;background:var(--surface)}
+@media(max-width:760px){.app{padding:12px}.topbar{margin:-12px -12px 14px;padding:12px}.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(7,1fr)}.sessionGrid{grid-template-columns:1fr}.sessionHead,.continue{align-items:stretch;flex-direction:column}.sessionTools{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="top">
+      <div><h1>ציר זמן</h1><div class="muted">Windows Timeline לאוצריא — מקומי בלבד</div></div>
+      <div class="actions">
+        <button id="snapshotBtn">שמור Snapshot עכשיו</button>
+        <button id="pauseBtn"></button>
+        <button id="settingsBtn">הגדרות</button>
+        <button id="clearBtn">נקה</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="continue">
+    <div><div class="continueTitle">המשך מהמקום שבו הפסקת</div><div id="continueInfo" class="muted"></div></div>
+    <button id="continueBtn" class="primary">המשך עבודה</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="count">0</b><span>אירועים</span></div>
+    <div class="stat"><b id="sessionCount">0</b><span>סשנים</span></div>
+    <div class="stat"><b id="bookCount">0</b><span>ספרים</span></div>
+    <div class="stat"><b id="dayCount">0</b><span>ימים פעילים</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle"><b>35 הימים האחרונים</b><span class="muted">עוצמת פעילות</span></div>
+    <div id="heatmap" class="heatmap"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle"><b>Snapshots אחרונים</b><span id="snapshotCount" class="muted"></span></div>
+    <div id="snapshotGallery" class="snapshotList"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle"><b>חיפושים אחרונים</b></div>
+    <div id="recentSearches" class="searches"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelTitle">
+      <b>תצוגת ציר הזמן</b>
+      <div class="viewSwitch">
+        <button data-view="day" class="active">יום</button>
+        <button data-view="week">שבוע</button>
+        <button data-view="month">חודש</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input id="search" placeholder="חיפוש בציר הזמן…">
+      <select id="type">
+        <option value="">כל הפעילויות</option>
+        <option value="book">פתיחת ספר</option>
+        <option value="ref">קריאה/מיקום</option>
+        <option value="workspace">שולחן עבודה</option>
+        <option value="navigation">ניווט</option>
+      </select>
+      <select id="range">
+        <option value="7">7 ימים</option>
+        <option value="30" selected>30 ימים</option>
+        <option value="90">90 ימים</option>
+        <option value="0">הכול</option>
+      </select>
+    </div>
+  </div>
+
+  <main id="content"></main>
+</div>
+
+<div id="dialog" class="dialog"><div class="dialogBox">
+  <h2>הגדרות</h2>
+  <label>מספר אירועים מרבי</label>
+  <select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select>
+  <div class="actions" style="margin-top:16px"><button id="saveSettings" class="primary">שמור</button><button id="closeSettings">ביטול</button></div>
+</div></div>
+
+<script src="app.js"></script>
+</body></html>
