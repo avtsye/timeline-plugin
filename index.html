@@ -1,193 +1,276 @@
 <!doctype html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ציר זמן</title>
 <style>
+*,*::before,*::after{box-sizing:border-box}
 :root{
-  --bg:#fffbfe;--surface:#fffbfe;--surface-low:#f7f2fa;--surface-container:#f3edf7;--surface-high:#ece6f0;--surface-highest:#e6e0e9;
-  --text:#1d1b20;--muted:#49454f;--primary:#6750a4;--on-primary:#fff;--primary-container:#eaddff;--on-primary-container:#21005d;
-  --secondary:#625b71;--on-secondary:#fff;--secondary-container:#e8def8;--on-secondary-container:#1d192b;
-  --tertiary:#7d5260;--on-tertiary:#fff;--tertiary-container:#ffd8e4;--on-tertiary-container:#31111d;
-  --outline:#79747e;--outline-variant:#cac4d0;--error:#b3261e;--on-error:#fff;--error-container:#f9dedc;--on-error-container:#410e0b;
-  --inverse-surface:#322f35;--on-inverse-surface:#f5eff7;--inverse-primary:#d0bcff;--scrim:#000;--shadow:#000;--surface-tint:#6750a4;
-  --ui:system-ui,"Segoe UI",sans-serif;--reading:'David',serif;--base-font-size:18px;--line-height:1.5
+  --color-primary:#6750A4;--color-on-primary:#FFFFFF;
+  --color-primary-container:#EADDFF;--color-on-primary-container:#21005D;
+  --color-secondary:#625B71;--color-on-secondary:#FFFFFF;
+  --color-secondary-container:#E8DEF8;--color-on-secondary-container:#1D192B;
+  --color-tertiary:#7D5260;--color-on-tertiary:#FFFFFF;
+  --color-tertiary-container:#FFD8E4;--color-on-tertiary-container:#31111D;
+  --color-surface:#FFFBFE;--color-on-surface:#1C1B1F;--color-on-surface-variant:#49454F;
+  --color-surface-container-lowest:#FFFFFF;--color-surface-container-low:#F7F2FA;
+  --color-surface-container:#F3EDF7;--color-surface-container-high:#ECE6F0;--color-surface-container-highest:#E6E0E9;
+  --color-error:#B3261E;--color-on-error:#FFFFFF;--color-error-container:#F9DEDC;--color-on-error-container:#410E0B;
+  --color-outline:#79747E;--color-outline-variant:#CAC4D0;
+  --color-inverse-surface:#322F35;--color-on-inverse-surface:#F5EFF7;--color-inverse-primary:#D0BCFF;
+  --color-shadow:#000000;--color-scrim:#000000;--color-surface-tint:#6750A4;
+  --font-ui:'Rubik',system-ui,sans-serif;--font-main:'FrankRuhlCLM','David',serif;
+  --font-size-base:18px;--line-height:1.5;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-pill:999px;
 }
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--ui)}
+html,body{height:100%;margin:0}
+body{overflow:hidden;background:var(--color-surface);color:var(--color-on-surface);font-family:var(--font-ui);font-size:var(--font-size-base);line-height:var(--line-height)}
 button,input,select,textarea{font:inherit;color:inherit}
-button{border:1px solid var(--outline-variant);background:var(--surface);padding:8px 12px;border-radius:10px;cursor:pointer}
-button:hover{background:var(--surface-low)}
-button.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
-button.danger{color:var(--error)}
-button:disabled{opacity:.45;cursor:not-allowed}
-button.active,.viewSwitch button.active,.quickRanges button.active,.settingsTabBtn.active{background:var(--primary)!important;color:var(--on-primary)!important;border-color:var(--primary)!important}
-.app{max-width:1180px;margin:auto;padding:18px 20px 80px}
-.muted{color:var(--muted)}
-.actions,.viewSwitch,.searches,.snapshotList,.books,.quickRanges,.sessionTools{display:flex;gap:8px;flex-wrap:wrap}
-.panel,.continue,.session{background:var(--surface);border:1px solid var(--outline-variant);border-radius:14px}
-.panel{padding:14px;margin:12px 0}
-.panelTitle{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
-.continue{margin:12px 0;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surface-low)}
-.continueTitle{font-size:17px;font-weight:650}
-.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
-.stat{background:var(--surface);border:1px solid var(--outline-variant);border-radius:12px;padding:12px}
-.stat b{font-size:20px;display:block}
-.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) repeat(4,auto);gap:8px;margin:10px 0}
-.toolbar input,.toolbar select,.snapshotSelect,.dialogBox select{background:var(--surface);border:1px solid var(--outline-variant);border-radius:9px;padding:9px}
+button{cursor:pointer}
+.app-shell{height:100%;display:flex;flex-direction:column}
+.topbar{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:var(--color-surface-container-high);color:var(--color-on-surface)}
+.topbar h1{margin:0;font-size:16px;font-weight:600;white-space:nowrap}
+.topbar .screen-title{font-size:12px;color:var(--color-on-surface-variant);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-spacer{flex:1}
+.shell-body{flex:1;min-height:0;display:flex;background:var(--color-surface)}
+.side-nav{width:216px;flex:0 0 216px;padding:12px 8px;background:var(--color-surface-container-low);border-inline-end:1px solid var(--color-outline-variant);overflow-y:auto}
+.nav-group{display:flex;flex-direction:column;gap:4px}
+.nav-item{width:100%;display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border:0;border-radius:var(--radius-pill);background:transparent;color:var(--color-on-surface-variant);text-align:start;font-weight:500}
+.nav-item:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.nav-item.active{background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-weight:600}
+.nav-icon{width:24px;height:24px;display:grid;place-items:center;font-size:.95em;flex:0 0 24px}
+.content-host{flex:1;min-width:0;min-height:0;position:relative}
+.screen{display:none;height:100%;overflow-y:auto;padding:16px}
+.screen.active{display:block}
+.screen.timeline-screen{padding:0}
+.timeline-layout{height:100%;display:flex;flex-direction:column}
+.timeline-controls{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:var(--color-surface);border-bottom:1px solid var(--color-outline-variant)}
+.timeline-controls input,.timeline-controls select,.settings-pane input,.settings-pane select,.settings-pane textarea{background:var(--color-surface);color:var(--color-on-surface);border:1px solid var(--color-outline);border-radius:var(--radius-sm);padding:8px 10px;outline:none}
+.timeline-controls input:focus,.timeline-controls select:focus,.settings-pane input:focus,.settings-pane select:focus,.settings-pane textarea:focus{border-color:var(--color-primary)}
+.timeline-search{min-width:220px;flex:1}
+.timeline-scroll{flex:1;min-height:0;overflow-y:auto;padding:16px}
+.btn{border:1px solid var(--color-outline);background:var(--color-surface);color:var(--color-on-surface);border-radius:var(--radius-sm);padding:8px 14px}
+.btn:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.btn-filled{border-color:var(--color-primary);background:var(--color-primary);color:var(--color-on-primary);font-weight:600}
+.btn-tonal{border-color:transparent;background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-weight:600}
+.btn-error{color:var(--color-error);border-color:var(--color-outline-variant)}
+.icon-btn{width:36px;height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--color-on-surface-variant)}
+.icon-btn:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.segmented{display:flex;border:1px solid var(--color-outline);border-radius:var(--radius-pill);overflow:hidden}
+.segmented button{border:0;border-inline-end:1px solid var(--color-outline);background:transparent;padding:7px 12px}
+.segmented button:last-child{border-inline-end:0}
+.segmented button.active{background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-weight:600}
+.zoomCtl{display:flex;align-items:center;gap:4px}
+.zoomCtl .btn{padding:4px 10px}
+.card{background:var(--color-surface);border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:16px}
+.card+.card{margin-top:12px}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.page-head h2{margin:0;font-size:1.1em;font-weight:700}
+.page-subtitle{color:var(--color-on-surface-variant);font-size:.88em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--color-surface-container-low);border-radius:var(--radius-md);padding:14px}
+.stat b{display:block;font-size:1.15em}
+.muted{color:var(--color-on-surface-variant)}
+.continue-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-primary-container);color:var(--color-on-primary-container)}
 .heatmap{display:grid;grid-template-columns:repeat(35,1fr);gap:4px}
-.heat{padding:0;aspect-ratio:1;border-radius:3px;background:var(--surface-low);border:1px solid var(--outline-variant)}
-.h1{background:color-mix(in srgb,var(--primary) 25%,var(--surface-low))}
-.h2{background:color-mix(in srgb,var(--primary) 45%,var(--surface-low))}
-.h3{background:color-mix(in srgb,var(--primary) 70%,var(--surface-low))}
-.h4{background:var(--primary)}
-.snapshotCard{min-width:180px;max-width:250px;flex:1;background:var(--surface-low);border:1px solid var(--outline-variant);border-radius:12px;padding:11px;text-align:start}
-.snapshotCard b,.snapshotCard small{display:block}.snapshotCard small{color:var(--muted);margin-top:4px}
-.bucket{margin:24px 0}.bucketTitle{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0 2px 12px}.bucketTitle h2{font-size:19px;margin:0}
-.sessionGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
-.session{padding:14px;min-width:0}.sessionHead{display:flex;justify-content:space-between;gap:12px;align-items:start}.session h3{font-size:16px;margin:0}
-.sessionTitleLine{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.pinBadge{font-size:12px;color:var(--primary);font-weight:700}
-.preview{margin:10px 0;padding:11px;border-radius:11px;background:var(--surface-low);min-height:64px}.preview strong{display:block}.preview .ref{font-size:13px;color:var(--muted);margin-top:4px}
-.books{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.books span{background:var(--surface-low);border-radius:999px;padding:4px 8px;font-size:13px}.books svg{width:16px;height:16px;vertical-align:middle}
-.events{border-top:1px solid var(--outline-variant);max-height:290px;overflow:auto}.event{display:flex;justify-content:space-between;gap:8px;padding:8px 4px;border-bottom:1px solid var(--outline-variant);cursor:pointer}.event:hover{background:var(--surface-low)}
-.event small{display:block;color:var(--muted);margin-top:3px}.event time{white-space:nowrap;color:var(--muted)}.eventFav{padding:2px 7px;border-radius:8px}
-.session.pinned{outline:2px solid color-mix(in srgb,var(--primary) 50%,transparent)}
-.session.type-book{border-inline-start:4px solid #4f7cff}.session.type-plugin{border-inline-start:4px solid #8a5cf6}.session.type-tool{border-inline-start:4px solid #d8872b}.session.type-workspace{border-inline-start:4px solid #3b9b72}.session.type-navigation{border-inline-start:4px solid var(--outline)}.session.type-mixed{border-inline-start:4px solid var(--primary)}
-.session.collapsed .preview,.session.collapsed .books,.session.collapsed .events{display:none}
-.timelineRail{position:relative;padding:8px 0 4px}.timelineRail:before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--outline-variant);transform:translateX(50%)}
-.timelineNode{position:relative;display:grid;grid-template-columns:1fr 90px 1fr;gap:18px;align-items:start;margin:18px 0}
-.timelineDot{grid-column:2;justify-self:center;margin-top:24px;width:14px;height:14px;border-radius:50%;background:var(--primary);border:4px solid var(--bg);box-shadow:0 0 0 1px var(--outline-variant);z-index:2}
-.timelineStamp{grid-column:2;justify-self:center;margin-top:44px;color:var(--muted);font-size:12px;background:var(--bg);padding:2px 5px;border-radius:999px;z-index:2}
+.heat{padding:0;aspect-ratio:1;border-radius:4px;border:1px solid var(--color-outline-variant);background:var(--color-surface-container-low)}
+.h1{background:color-mix(in srgb,var(--color-primary) 24%,var(--color-surface))}
+.h2{background:color-mix(in srgb,var(--color-primary) 44%,var(--color-surface))}
+.h3{background:color-mix(in srgb,var(--color-primary) 68%,var(--color-surface))}
+.h4{background:var(--color-primary)}
+.snapshotList,.searches,.actions,.sessionTools,.books{display:flex;gap:8px;flex-wrap:wrap}
+.snapshotCard{min-width:180px;max-width:260px;flex:1;text-align:start;background:var(--color-surface-container-low);color:var(--color-on-surface);border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:12px}
+.snapshotCard b,.snapshotCard small{display:block}.snapshotCard small{color:var(--color-on-surface-variant);margin-top:4px}
+.settings-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.settingsTabBtn{border:1px solid var(--color-outline);background:var(--color-surface);padding:8px 14px;border-radius:var(--radius-pill)}
+.settingsTabBtn.active{background:var(--color-secondary-container);color:var(--color-on-secondary-container);border-color:transparent;font-weight:600}
+.settingsPane{display:none}.settingsPane.active{display:block}
+.settingsSection{padding:14px 0;border-bottom:1px solid var(--color-outline-variant)}.settingsSection:last-child{border-bottom:0}.settingsSection h3{margin:0 0 10px;font-size:1em}
+.checkRow{display:flex;align-items:center;gap:9px;margin:10px 0}.checkRow input{width:18px;height:18px}
+.settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.feedbackBox{width:100%;min-height:120px;resize:vertical}
+.timelineRail{position:relative;padding:8px 0}
+.timelineRail::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--color-outline-variant);transform:translateX(50%)}
+.timelineNode{position:relative;display:grid;grid-template-columns:1fr 88px 1fr;gap:16px;align-items:start;margin:16px 0}
+.timelineDot{grid-column:2;justify-self:center;margin-top:24px;width:14px;height:14px;border-radius:50%;background:var(--color-primary);border:4px solid var(--color-surface);box-shadow:0 0 0 1px var(--color-outline-variant);z-index:2}
+.timelineStamp{grid-column:2;justify-self:center;margin-top:44px;color:var(--color-on-surface-variant);font-size:.72em;background:var(--color-surface);padding:2px 5px;border-radius:var(--radius-pill);z-index:2}
 .timelineNode.left .timelineCard{grid-column:1}.timelineNode.right .timelineCard{grid-column:3}.timelineCard{position:relative}
-.timelineCard:after{content:"";position:absolute;top:28px;width:18px;height:2px;background:var(--outline-variant)}
-.timelineNode.left .timelineCard:after{inset-inline-end:-18px}.timelineNode.right .timelineCard:after{inset-inline-start:-18px}
-.snapshotMarks{grid-column:2;justify-self:center;display:flex;gap:3px;margin-top:68px;z-index:3}.snapshotMark{width:8px;height:8px;padding:0;border-radius:50%;background:var(--primary);border:2px solid var(--bg)}
-.checkRow{display:flex;gap:9px;align-items:center;margin:12px 0}.checkRow input{width:18px;height:18px}.empty{text-align:center;padding:40px;color:var(--muted)}
-body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}body.compact .preview{min-height:0;padding:8px;margin:7px 0}body.compact .event{padding:6px 3px}body.compact .stats{gap:6px;margin:8px 0}body.compact .stat{padding:9px}
-.settingsFab{position:fixed;z-index:30;inset-inline-end:18px;bottom:18px;width:48px;height:48px;border-radius:50%;padding:0;background:var(--primary);color:var(--on-primary);border:none;font-size:22px;display:grid;place-items:center}
-.dialog{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:18px;z-index:40}.dialog.open{display:flex}
-.dialogBox{background:var(--surface);border-radius:16px;padding:18px;width:min(680px,96vw);max-height:90vh;overflow:auto;border:1px solid var(--outline-variant)}
-.settingsTabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.settingsTabBtn{border-radius:999px}.settingsPane{display:none}.settingsPane.active{display:block;background:transparent;color:inherit;border:0}.settingsSection{padding:14px 0;border-bottom:1px solid var(--outline-variant)}.settingsSection:last-child{border-bottom:0}.settingsSection h3{margin:0 0 10px;font-size:16px}.settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.panelDisclosure>summary{cursor:pointer;font-weight:650;list-style:none}.panelDisclosure>summary::-webkit-details-marker{display:none}.panelDisclosure>summary:after{content:'⌄';float:inline-end;color:var(--muted)}.panelDisclosure[open]>summary:after{content:'⌃'}.focusToggle{margin-inline-start:auto}.sessionMenu{position:relative}.sessionMenu>summary{list-style:none;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--outline-variant);border-radius:10px;background:var(--surface)}.sessionMenu>summary::-webkit-details-marker{display:none}.sessionMenuPanel{position:absolute;z-index:9;inset-inline-end:0;top:40px;min-width:190px;background:var(--surface-highest);border:1px solid var(--outline-variant);border-radius:12px;padding:7px;box-shadow:0 10px 28px color-mix(in srgb,var(--shadow) 18%,transparent)}.sessionMenuPanel button{width:100%;text-align:start;margin:2px 0}.timelineTooltip{display:none;position:absolute;z-index:8;inset-inline-start:50%;transform:translateX(-50%);top:-8px;min-width:220px;max-width:320px;background:var(--inverse-surface);color:var(--on-inverse-surface);padding:9px 10px;border-radius:10px;font-size:12px;box-shadow:0 8px 24px color-mix(in srgb,var(--shadow) 18%,transparent);pointer-events:none}.timelineNode:hover .timelineTooltip{display:block}.feedbackBox{width:100%;min-height:120px;padding:10px;border:1px solid var(--outline-variant);border-radius:9px;background:var(--surface)}body.focus-mode .secondaryPanel,body.focus-mode .stats{display:none}body.focus-mode .continue{display:none}body.focus-mode .app{max-width:1000px}
-.modalOverlay{position:fixed;inset:0;background:#0008;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}.modalBox{background:var(--surface);border-radius:16px;width:min(980px,96vw);max-height:90vh;overflow:auto;padding:18px;border:1px solid var(--outline-variant)}
-.modalHead{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-18px;background:var(--surface);padding:8px 0;z-index:2}.modalHead h2{margin:0}
-.modalGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.miniCard{border:1px solid var(--outline-variant);border-radius:12px;padding:11px;background:var(--surface-low)}
-.miniCard h3{margin:0 0 6px}.chart{display:flex;align-items:end;gap:6px;height:180px;border-bottom:1px solid var(--outline-variant);padding:10px 0}.bar{min-width:14px;flex:1;background:var(--primary);border-radius:5px 5px 0 0;position:relative}.bar span{position:absolute;bottom:100%;font-size:10px;white-space:nowrap;transform:translateX(50%);right:50%;color:var(--muted)}
-.yearHeat{display:grid;grid-template-columns:repeat(53,1fr);gap:3px}.yearHeat .heat{min-width:5px}.zoomCtl{display:flex;align-items:center;gap:4px}.zoomCtl button{width:34px;height:34px;padding:0;font-size:20px}
-.diagGood{color:#237a57}.diagWarn{color:#a85f00}.diagBad{color:var(--error)}.noteBox{width:100%;min-height:90px;padding:10px;border:1px solid var(--outline-variant);border-radius:9px;background:var(--surface)}
-@media(max-width:900px){.timelineRail:before{inset-inline-start:20px;transform:none}.timelineNode{grid-template-columns:42px 1fr;gap:12px}.timelineDot,.timelineStamp,.snapshotMarks{grid-column:1}.timelineDot{grid-row:1}.timelineStamp{grid-row:1;margin-top:44px}.snapshotMarks{grid-row:1;margin-top:68px}.timelineNode.left .timelineCard,.timelineNode.right .timelineCard{grid-column:2}.timelineNode.left .timelineCard:after,.timelineNode.right .timelineCard:after{inset-inline-start:-12px;inset-inline-end:auto;width:12px}.stats{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:760px){.app{padding:12px 12px 76px}.toolbar{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.heatmap{grid-template-columns:repeat(7,1fr)}.sessionGrid{grid-template-columns:1fr}.sessionHead,.continue{align-items:stretch;flex-direction:column}}
-</style></head>
+.snapshotMarks{grid-column:2;justify-self:center;display:flex;gap:3px;margin-top:68px;z-index:3}.snapshotMark{width:8px;height:8px;padding:0;border-radius:50%;border:2px solid var(--color-surface);background:var(--color-tertiary)}
+.bucket{margin:20px 0}.bucketTitle{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:12px}.bucketTitle h2{margin:0;font-size:1.05em}
+.sessionGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.session{background:var(--color-surface);border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:14px;min-width:0}
+.session.type-book{border-inline-start:4px solid var(--color-primary)}
+.session.type-plugin{border-inline-start:4px solid var(--color-secondary)}
+.session.type-tool{border-inline-start:4px solid var(--color-tertiary)}
+.session.type-workspace{border-inline-start:4px solid var(--color-primary-container)}
+.session.type-navigation{border-inline-start:4px solid var(--color-outline)}
+.session.type-mixed{border-inline-start:4px solid var(--color-secondary-container)}
+.session.pinned{outline:2px solid var(--color-primary)}
+.session.collapsed .preview,.session.collapsed .books,.session.collapsed .events{display:none}
+.sessionHead{display:flex;justify-content:space-between;align-items:start;gap:10px}.session h3{margin:0;font-size:1em}
+.sessionTitleLine{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.pinBadge{font-size:.72em;color:var(--color-primary);font-weight:700}
+.preview{margin:10px 0;padding:11px;border-radius:var(--radius-sm);background:var(--color-surface-container-low)}.preview strong{display:block}.preview .ref{font-size:.82em;color:var(--color-on-surface-variant);margin-top:3px}
+.books span{background:var(--color-surface-container-low);border-radius:var(--radius-pill);padding:4px 8px;font-size:.78em}
+.events{border-top:1px solid var(--color-outline-variant);max-height:280px;overflow:auto}.event{display:flex;align-items:start;justify-content:space-between;gap:8px;padding:8px 4px;border-bottom:1px solid var(--color-outline-variant);cursor:pointer}.event:hover{background:color-mix(in srgb,var(--color-on-surface) 5%,transparent)}.event small{display:block;color:var(--color-on-surface-variant)}.event time{white-space:nowrap;color:var(--color-on-surface-variant)}
+.eventFav{border:0;background:transparent;color:var(--color-primary)}
+.sessionMenu{position:relative}.sessionMenu>summary{list-style:none;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:transparent}.sessionMenu>summary:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}.sessionMenu>summary::-webkit-details-marker{display:none}
+.sessionMenuPanel{position:absolute;z-index:20;inset-inline-end:0;top:38px;min-width:200px;background:var(--color-surface-container-highest);border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:8px;box-shadow:0 4px 20px color-mix(in srgb,var(--color-shadow) 15%,transparent)}
+.sessionMenuPanel button,.sessionMenuPanel select{width:100%;text-align:start;margin:2px 0;padding:8px;border:0;border-radius:var(--radius-sm);background:transparent}.sessionMenuPanel button:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.timelineTooltip{display:none;position:absolute;z-index:18;inset-inline-start:50%;transform:translateX(-50%);top:-8px;min-width:220px;max-width:320px;background:var(--color-inverse-surface);color:var(--color-on-inverse-surface);padding:9px 10px;border-radius:var(--radius-sm);font-size:.75em;box-shadow:0 4px 16px color-mix(in srgb,var(--color-shadow) 18%,transparent);pointer-events:none}
+.timelineNode:hover .timelineTooltip{display:block}
+.empty{text-align:center;padding:40px;color:var(--color-on-surface-variant)}
+.modalOverlay{position:fixed;inset:0;background:color-mix(in srgb,var(--color-scrim) 32%,transparent);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modalBox{background:var(--color-surface-container-highest);color:var(--color-on-surface);border-radius:var(--radius-lg);width:min(980px,96vw);max-height:90vh;overflow:auto;padding:18px;border:1px solid var(--color-outline-variant)}
+.modalHead{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-18px;background:var(--color-surface-container-highest);padding:8px 0;z-index:2}.modalHead h2{margin:0;font-size:1.1em}
+.modalGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.miniCard{border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:11px;background:var(--color-surface)}
+.chart{display:flex;align-items:end;gap:6px;height:180px;border-bottom:1px solid var(--color-outline-variant);padding:10px 0}.bar{min-width:14px;flex:1;background:var(--color-primary);border-radius:6px 6px 0 0;position:relative}.bar span{position:absolute;bottom:100%;font-size:.68em;white-space:nowrap;right:50%;transform:translateX(50%);color:var(--color-on-surface-variant)}
+.yearHeat{display:grid;grid-template-columns:repeat(53,1fr);gap:3px}.yearHeat .heat{min-width:5px}
+.diagGood{color:var(--color-primary)}.diagWarn{color:var(--color-tertiary)}.diagBad{color:var(--color-error)}
+body.compact .screen{padding:10px}body.compact .timeline-scroll{padding:10px}body.compact .session{padding:10px}
+body.focus-mode .topbar,body.focus-mode .side-nav{display:none}body.focus-mode .timeline-controls{display:none}
+body.focus-mode .shell-body{height:100%}
+@media(max-width:800px){
+  .side-nav{width:72px;flex-basis:72px;padding:8px 6px}.nav-item{justify-content:center;padding:0}.nav-label{display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.heatmap{grid-template-columns:repeat(7,1fr)}
+  .timelineRail::before{inset-inline-start:20px;transform:none}.timelineNode{grid-template-columns:42px 1fr;gap:12px}
+  .timelineDot,.timelineStamp,.snapshotMarks{grid-column:1}.timelineNode.left .timelineCard,.timelineNode.right .timelineCard{grid-column:2}
+}
+@media(max-width:600px){.topbar{height:44px;flex-basis:44px}.screen{padding:10px}.timeline-controls{padding:8px}.timeline-search{min-width:100%}}
+</style>
+</head>
 <body>
-<div class="app">
-  <div class="panel"><div class="panelTitle"><b data-i18n="tracking_status">מצב מעקב</b><span id="trackingStatus" class="muted"></span></div><div id="trackingDetail" class="muted"></div></div>
+<div class="app-shell">
+  <header class="topbar">
+    <h1 data-i18n="app_title">ציר זמן</h1>
+    <span id="currentScreenTitle" class="screen-title" data-i18n="screen_timeline">ציר הזמן</span>
+    <span class="topbar-spacer"></span>
+  </header>
 
-  <div class="continue"><div><div class="continueTitle" data-i18n="continue_title">המשך מהמקום שבו הפסקת</div><div id="continueInfo" class="muted"></div></div><button id="continueBtn" class="primary" data-i18n="continue_work">המשך עבודה</button></div>
+  <div class="shell-body">
+    <aside class="side-nav" aria-label="ניווט">
+      <nav class="nav-group">
+        <button class="nav-item active" data-screen="timeline"><span class="nav-icon">◷</span><span class="nav-label" data-i18n="screen_timeline">ציר הזמן</span></button>
+        <button class="nav-item" data-screen="overview"><span class="nav-icon">▦</span><span class="nav-label" data-i18n="screen_overview">סקירה</span></button>
+        <button class="nav-item" data-screen="restore"><span class="nav-icon">↶</span><span class="nav-label" data-i18n="screen_restore">שחזור</span></button>
+        <button class="nav-item" data-screen="analytics"><span class="nav-icon">▥</span><span class="nav-label" data-i18n="screen_analytics">פעילות</span></button>
+        <button class="nav-item" data-screen="diagnostics"><span class="nav-icon">✓</span><span class="nav-label" data-i18n="screen_diagnostics">אבחון</span></button>
+        <button class="nav-item" data-screen="settings"><span class="nav-icon">⚙</span><span class="nav-label" data-i18n="settings">הגדרות</span></button>
+      </nav>
+    </aside>
 
-  <details class="panel secondaryPanel panelDisclosure"><summary data-i18n="statistics">סטטיסטיקות</summary>
-  <div class="stats">
-    <div class="stat"><b id="count">0</b><span data-i18n="events">אירועים</span></div>
-    <div class="stat"><b id="sessionCount">0</b><span data-i18n="sessions">הפעלות</span></div>
-    <div class="stat"><b id="bookCount">0</b><span data-i18n="books">ספרים</span></div>
-    <div class="stat"><b id="pluginCount">0</b><span data-i18n="plugins">תוספים</span></div>
-    <div class="stat"><b id="bookTime">0 דק׳</b><span data-i18n="estimated_book_time">זמן ספרים משוער</span></div>
-    <div class="stat"><b id="toolTime">0 דק׳</b><span data-i18n="estimated_plugin_time">זמן תוספים/כלים משוער</span></div>
-  </div></details>
+    <main class="content-host">
+      <section class="screen timeline-screen active" data-screen-panel="timeline">
+        <div class="timeline-layout">
+          <div class="timeline-controls">
+            <input id="search" class="timeline-search" autofocus data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…">
+            <select id="type"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select>
+            <select id="pluginFilter"><option value="" data-i18n="all_plugins">כל התוספים</option></select>
+            <select id="range"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select>
+            <select id="sort"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select>
+            <div class="zoomCtl"><button id="zoomOut" class="btn" title="−">−</button><span id="zoomLabel">100%</span><button id="zoomIn" class="btn" title="+">+</button></div>
+            <div class="segmented"><button data-view="day" class="active" data-i18n="day">יום</button><button data-view="week" data-i18n="week">שבוע</button><button data-view="month" data-i18n="month">חודש</button></div>
+            <button id="focusModeBtn" class="btn" data-i18n="focus_mode">מצב פוקוס</button>
+          </div>
+          <div class="timeline-scroll"><div id="content"></div></div>
+        </div>
+      </section>
 
-  <div class="panel"><div class="panelTitle"><b data-i18n="quick_navigation">ניווט מהיר</b><div class="quickRanges">
-    <button id="saveFilterBtn" data-i18n="save_filter">שמור מסנן</button>
-    <select id="savedFilterSelect"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
-    <button data-preset="today" data-i18n="today">היום</button><button data-preset="yesterday" data-i18n="yesterday">אתמול</button><button data-preset="week" data-i18n="this_week">השבוע</button><button data-preset="all" data-i18n="all">הכול</button><button id="favoritesOnly" data-i18n="favorites">מועדפים</button>
-  </div></div></div>
+      <section class="screen" data-screen-panel="overview">
+        <div class="page-head"><div><h2 data-i18n="screen_overview">סקירה</h2><div class="page-subtitle" data-i18n="overview_subtitle">סיכום הפעילות האחרונה</div></div></div>
+        <div class="card continue-card"><div><b data-i18n="continue_title">המשך מהמקום שבו הפסקת</b><div id="continueInfo"></div></div><button id="continueBtn" class="btn btn-filled" data-i18n="continue_work">המשך עבודה</button></div>
+        <div class="card">
+          <div class="stats">
+            <div class="stat"><b id="count">0</b><span data-i18n="events">אירועים</span></div>
+            <div class="stat"><b id="sessionCount">0</b><span data-i18n="sessions">הפעלות</span></div>
+            <div class="stat"><b id="bookCount">0</b><span data-i18n="books">ספרים</span></div>
+            <div class="stat"><b id="pluginCount">0</b><span data-i18n="plugins">תוספים</span></div>
+            <div class="stat"><b id="bookTime">0</b><span data-i18n="estimated_book_time">זמן ספרים משוער</span></div>
+            <div class="stat"><b id="toolTime">0</b><span data-i18n="estimated_plugin_time">זמן תוספים/כלים משוער</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="page-head"><h2 data-i18n="last_35_days">35 הימים האחרונים</h2><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div><div id="heatmap" class="heatmap"></div></div>
+        <div class="card"><div class="page-head"><h2 data-i18n="recent_searches">חיפושים אחרונים</h2></div><div id="recentSearches" class="searches"></div></div>
+        <div class="card">
+          <div class="page-head"><h2 data-i18n="quick_navigation">ניווט מהיר</h2></div>
+          <div class="actions">
+            <button id="saveFilterBtn" class="btn" data-i18n="save_filter">שמור מסנן</button>
+            <select id="savedFilterSelect"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
+            <button class="btn" data-preset="today" data-i18n="today">היום</button><button class="btn" data-preset="yesterday" data-i18n="yesterday">אתמול</button><button class="btn" data-preset="week" data-i18n="this_week">השבוע</button><button class="btn" data-preset="all" data-i18n="all">הכול</button><button id="favoritesOnly" class="btn" data-i18n="favorites">מועדפים</button>
+          </div>
+        </div>
+      </section>
 
-  <details class="panel secondaryPanel panelDisclosure" open><summary data-i18n="last_35_days">35 הימים האחרונים</summary><div style="margin-top:10px"><div class="muted" data-i18n="activity_intensity">עוצמת פעילות</div><div id="heatmap" class="heatmap" style="margin-top:8px"></div></div></details>
-  <details class="panel secondaryPanel panelDisclosure" open><summary><span data-i18n="recent_snapshots">נקודות שחזור אחרונות</span> <span id="snapshotCount" class="muted"></span></summary><div id="snapshotGallery" class="snapshotList" style="margin-top:10px"></div></details>
-  <details class="panel secondaryPanel panelDisclosure" open><summary data-i18n="recent_searches">חיפושים אחרונים</summary><div id="recentSearches" class="searches" style="margin-top:10px"></div></details>
+      <section class="screen" data-screen-panel="restore">
+        <div class="page-head"><div><h2 data-i18n="screen_restore">שחזור</h2><div class="page-subtitle" data-i18n="restore_subtitle">נקודות שחזור וגיבויים</div></div><div class="actions"><button id="snapshotBtn" class="btn btn-filled" data-i18n="save_snapshot">שמור נקודת שחזור</button><button id="snapshotBrowserBtn" class="btn" data-i18n="all_snapshots">כל נקודות השחזור</button></div></div>
+        <div class="card"><div class="page-head"><h2 data-i18n="recent_snapshots">נקודות שחזור אחרונות</h2><span id="snapshotCount" class="muted"></span></div><div id="snapshotGallery" class="snapshotList"></div></div>
+        <div class="card"><div class="page-head"><h2 data-i18n="backup_restore_actions">גיבוי ושחזור</h2></div><div class="actions"><button id="exportBtn" class="btn" data-i18n="export">ייצוא</button><button id="importBtn" class="btn" data-i18n="import">ייבוא</button><button id="openArchiveBtn" class="btn" data-i18n="open_archive">פתח ארכיון מתומצת</button></div></div>
+      </section>
 
-  <div class="panel">
-    <div class="panelTitle"><b data-i18n="timeline_view">תצוגת ציר הזמן</b><div class="actions"><button id="focusModeBtn" class="focusToggle" data-i18n="focus_mode">מצב פוקוס</button><div class="zoomCtl"><button id="zoomOut" title="הקטן">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="הגדל">+</button></div><div class="viewSwitch"><button data-view="day" class="active" data-i18n="day">יום</button><button data-view="week" data-i18n="week">שבוע</button><button data-view="month" data-i18n="month">חודש</button></div></div></div>
-    <div class="toolbar">
-      <input id="search" data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…">
-      <select id="type"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select>
-      <select id="pluginFilter"><option value="" data-i18n="all_plugins">כל התוספים</option></select>
-      <select id="range"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select>
-      <select id="sort"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select>
-    </div>
+      <section class="screen" data-screen-panel="analytics">
+        <div class="page-head"><div><h2 data-i18n="screen_analytics">פעילות</h2><div class="page-subtitle" data-i18n="analytics_subtitle">גרפים, מפות פעילות וסיכומים</div></div></div>
+        <div class="card"><button id="dashboardBtn" class="btn btn-tonal" data-i18n="activity_dashboard">פתח לוח פעילות</button></div>
+      </section>
+
+      <section class="screen" data-screen-panel="diagnostics">
+        <div class="page-head"><div><h2 data-i18n="screen_diagnostics">אבחון</h2><div class="page-subtitle" data-i18n="diagnostics_subtitle">מצב מעקב, הרשאות ובריאות הנתונים</div></div></div>
+        <div class="card"><div class="page-head"><h2 data-i18n="tracking_status">מצב מעקב</h2><span id="trackingStatus" class="muted"></span></div><div id="trackingDetail" class="muted"></div></div>
+        <div class="card"><button id="diagnosticsBtn" class="btn btn-tonal" data-i18n="diagnostics">פתח אבחון מפורט</button></div>
+      </section>
+
+      <section id="dialog" class="screen settings-pane" data-screen-panel="settings">
+        <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">התאמת ציר הזמן, מעקב ואינטגרציות</div></div></div>
+        <div class="settings-tabs">
+          <button class="settingsTabBtn active" data-settings-tab="general" data-i18n="settings_general">כללי</button>
+          <button class="settingsTabBtn" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
+          <button class="settingsTabBtn" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
+          <button class="settingsTabBtn" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
+          <button class="settingsTabBtn" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
+        </div>
+
+        <div class="settingsPane active" data-settings-pane="general">
+          <div class="card settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
+            <label data-i18n="language">שפה</label>
+            <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
+            <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
+          </div>
+          <div class="card settingsSection"><h3 data-i18n="timeline_actions">פעולות ציר הזמן</h3><div class="settingsActions"><button id="pauseBtn" class="btn"></button></div></div>
+        </div>
+
+        <div class="settingsPane" data-settings-pane="tracking">
+          <div class="card settingsSection"><h3 data-i18n="tracking_types">מה לתעד</h3>
+            <label class="checkRow"><input id="trackBooks" type="checkbox"><span data-i18n="track_books">פתיחת ספרים</span></label>
+            <label class="checkRow"><input id="trackRefs" type="checkbox"><span data-i18n="track_positions">מיקומי קריאה</span></label>
+            <label class="checkRow"><input id="trackPlugins" type="checkbox"><span data-i18n="track_plugins">תוספים</span></label>
+            <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
+            <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
+            <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
+          </div>
+          <div class="card settingsSection"><h3 data-i18n="privacy_mode">מצב פרטיות</h3><div class="settingsActions"><button id="privacyHourBtn" class="btn" data-i18n="pause_one_hour">השהה לשעה</button><button id="privacySessionBtn" class="btn" data-i18n="pause_until_restart">השהה עד הפעלה מחדש</button><button id="privacyResumeBtn" class="btn" data-i18n="resume_now">חדש עכשיו</button></div><div id="privacyStatus" class="muted" style="margin-top:8px"></div></div>
+          <div class="card settingsSection"><label data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select><label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label></div>
+        </div>
+
+        <div class="settingsPane" data-settings-pane="backup">
+          <div class="card settingsSection"><label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label></div>
+        </div>
+
+        <div class="settingsPane" data-settings-pane="integrations">
+          <div class="card settingsSection"><h3 data-i18n="integrations">אינטגרציות</h3><label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label><label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label></div>
+        </div>
+
+        <div class="settingsPane" data-settings-pane="maintenance">
+          <div class="card settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3><select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select><textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea><div class="actions" style="margin-top:8px"><button id="sendFeedbackBtn" class="btn btn-filled" data-i18n="send_feedback">שלח משוב</button></div></div>
+          <div class="card settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><button id="clearBtn" class="btn btn-error" data-i18n="clear_all">נקה את כל ציר הזמן</button></div>
+        </div>
+
+        <div class="actions" style="margin-top:14px"><button id="saveSettings" class="btn btn-filled" data-i18n="save">שמור</button></div>
+        <button id="closeSettings" hidden></button>
+      </section>
+    </main>
   </div>
-  <main id="content"></main>
 </div>
-
-<button id="settingsFab" class="settingsFab" title="הגדרות" aria-label="הגדרות">⚙</button>
-
-<div id="dialog" class="dialog"><div class="dialogBox">
-  <div class="panelTitle"><h2 data-i18n="settings">הגדרות</h2><button id="closeSettings" data-i18n="close">סגור</button></div>
-  <div class="settingsTabs">
-    <button class="settingsTabBtn active" data-settings-tab="general" data-i18n="settings_general">כללי</button>
-    <button class="settingsTabBtn" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
-    <button class="settingsTabBtn" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
-    <button class="settingsTabBtn" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
-    <button class="settingsTabBtn" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
-  </div>
-
-  <div class="settingsPane active" data-settings-pane="general">
-    <div class="settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
-      <label data-i18n="language">שפה</label>
-      <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
-      <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
-    </div>
-    <div class="settingsSection"><h3 data-i18n="timeline_actions">פעולות ציר הזמן</h3><div class="settingsActions">
-      <button id="snapshotBtn" data-i18n="save_snapshot">שמור נקודת שחזור</button>
-      <button id="snapshotBrowserBtn" data-i18n="all_snapshots">כל נקודות השחזור</button>
-      <button id="dashboardBtn" data-i18n="activity_dashboard">לוח פעילות</button>
-      <button id="diagnosticsBtn" data-i18n="diagnostics">אבחון</button>
-      <button id="pauseBtn"></button>
-    </div></div>
-  </div>
-
-  <div class="settingsPane" data-settings-pane="tracking">
-    <div class="settingsSection"><h3 data-i18n="tracking_types">מה לתעד</h3>
-      <label class="checkRow"><input id="trackBooks" type="checkbox"><span data-i18n="track_books">פתיחת ספרים</span></label>
-      <label class="checkRow"><input id="trackRefs" type="checkbox"><span data-i18n="track_positions">מיקומי קריאה</span></label>
-      <label class="checkRow"><input id="trackPlugins" type="checkbox"><span data-i18n="track_plugins">תוספים</span></label>
-      <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
-      <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
-      <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
-    </div>
-    <div class="settingsSection"><h3 data-i18n="privacy_mode">מצב פרטיות</h3><div class="settingsActions">
-      <button id="privacyHourBtn" data-i18n="pause_one_hour">השהה לשעה</button>
-      <button id="privacySessionBtn" data-i18n="pause_until_restart">השהה עד הפעלה מחדש</button>
-      <button id="privacyResumeBtn" data-i18n="resume_now">חדש עכשיו</button>
-    </div><div id="privacyStatus" class="muted" style="margin-top:8px"></div></div>
-    <div class="settingsSection"><label data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select>
-      <label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label>
-    </div>
-  </div>
-
-  <div class="settingsPane" data-settings-pane="backup">
-    <div class="settingsSection"><h3 data-i18n="backup_restore_actions">גיבוי ושחזור</h3><div class="settingsActions">
-      <button id="exportBtn" data-i18n="export">ייצוא</button><button id="importBtn" data-i18n="import">ייבוא</button>
-      <button id="openArchiveBtn" data-i18n="open_archive">פתח ארכיון מתומצת</button>
-    </div></div>
-    <div class="settingsSection"><label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label></div>
-  </div>
-
-  <div class="settingsPane" data-settings-pane="integrations">
-    <div class="settingsSection"><h3 data-i18n="integrations">אינטגרציות</h3>
-      <label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label>
-      <label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label>
-    </div>
-  </div>
-
-  <div class="settingsPane" data-settings-pane="maintenance">
-    <div class="settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3>
-      <select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select>
-      <textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב..."></textarea>
-      <div class="actions" style="margin-top:8px"><button id="sendFeedbackBtn" class="primary" data-i18n="send_feedback">שלח משוב</button></div>
-    </div>
-    <div class="settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="actions"><button id="clearBtn" class="danger" data-i18n="clear_all">נקה את כל ציר הזמן</button></div></div>
-  </div>
-
-  <div class="actions" style="margin-top:14px"><button id="saveSettings" class="primary" data-i18n="save">שמור</button></div>
-</div></div>
-
+<button id="settingsFab" hidden></button>
 <script src="official-fluent-icons.js"></script><script src="app.js"></script>
-</body></html>
+</body>
+</html>
