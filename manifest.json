@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.7.0",
-  "description": "ציר זמן מתקדם לאוצריא: Sessions, Snapshots, תוספים, ניתוח פעילות, גיבויים ושחזור.",
+  "version": "0.8.0",
+  "description": "ציר זמן מתקדם לאוצריא עם הפעלות, נקודות שחזור, תוספים, ניתוח פעילות, גיבויים ושחזור.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
   "entrypoint": "index.html",
@@ -32,17 +32,29 @@
     "events.subscribe:reader.current_ref_changed",
     "events.subscribe:workspace.changed"
   ],
-  "network": {"enabled": false, "allowlist": []},
+  "network": {
+    "enabled": false,
+    "allowlist": []
+  },
   "contributes": {
-    "toolTab": {"title":"ציר זמן","iconName":"history_24_regular","order":80,"defaultPinned":true},
-    "background": {"entrypoint":"background.html"},
+    "toolTab": {
+      "title": "ציר זמן",
+      "iconName": "history_24_regular",
+      "order": 80,
+      "defaultPinned": true
+    },
+    "background": {
+      "entrypoint": "background.html"
+    },
     "startup": {
-      "activationEvents":["app.startup","navigation.changed","reader.current_book_changed","reader.current_ref_changed","workspace.changed"],
-      "keepAlive": true,
-      "shortcuts": [
-        {"id":"open-timeline","label":"פתח ציר זמן","key":"ctrl+alt+t","command":"openTimeline"},
-        {"id":"save-timeline-snapshot","label":"שמור Snapshot בציר הזמן","key":"ctrl+alt+s","command":"saveTimelineSnapshot"}
-      ]
+      "activationEvents": [
+        "app.startup",
+        "navigation.changed",
+        "reader.current_book_changed",
+        "reader.current_ref_changed",
+        "workspace.changed"
+      ],
+      "keepAlive": true
     }
   },
   "stability": "experimental"
