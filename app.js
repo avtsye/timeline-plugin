@@ -925,7 +925,7 @@ async function load(){
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
   const pf=$('pluginFilter');
   pf.innerHTML='<option value="">'+esc(tr('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
-  sync();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
+  applyShellIcons();sync();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
 function theme(payload){
   if(!payload||!payload.colorScheme)return;
@@ -952,6 +952,13 @@ function theme(payload){
   if(tg.fontSize)r.setProperty('--font-size-base',String(tg.fontSize)+'px');
   if(tg.lineHeight)r.setProperty('--line-height',String(tg.lineHeight));
   document.body.classList.toggle('dark-mode',payload.mode==='dark');
+}
+function applyShellIcons(){
+  const map=window.OFFICIAL_FLUENT_ICONS||{};
+  document.querySelectorAll('[data-icon]').forEach(el=>{
+    const svg=map[el.dataset.icon];
+    if(svg)el.innerHTML=svg;
+  });
 }
 function switchScreen(name){
   const valid=['timeline','overview','restore','analytics','diagnostics','settings'];
