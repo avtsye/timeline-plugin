@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.6.0",
-  "description": "ציר זמן מקומי לאוצריא עם Sessions, תוספים, Snapshots, ייצוא/ייבוא, Workspaces והתראות.",
+  "version": "0.7.0",
+  "description": "ציר זמן מתקדם לאוצריא: Sessions, Snapshots, תוספים, ניתוח פעילות, גיבויים ושחזור.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
   "entrypoint": "index.html",
@@ -11,6 +11,7 @@
   "sdkVersion": "1.x",
   "permissions": [
     "app.info.read",
+    "app.shortcuts",
     "app.run_on_startup",
     "app.background_keep_alive",
     "app.startup_contributions",
@@ -23,6 +24,7 @@
     "notifications.send",
     "fs.user_files.read",
     "fs.user_files.write",
+    "published_data.write",
     "plugin.storage.read",
     "plugin.storage.write",
     "events.subscribe:navigation.changed",
@@ -36,7 +38,11 @@
     "background": {"entrypoint":"background.html"},
     "startup": {
       "activationEvents":["app.startup","navigation.changed","reader.current_book_changed","reader.current_ref_changed","workspace.changed"],
-      "keepAlive": true
+      "keepAlive": true,
+      "shortcuts": [
+        {"id":"open-timeline","label":"פתח ציר זמן","key":"ctrl+alt+t","command":"openTimeline"},
+        {"id":"save-timeline-snapshot","label":"שמור Snapshot בציר הזמן","key":"ctrl+alt+s","command":"saveTimelineSnapshot"}
+      ]
     }
   },
   "stability": "experimental"
