@@ -20,8 +20,8 @@
   --color-outline:#79747E;--color-outline-variant:#CAC4D0;
   --color-inverse-surface:#322F35;--color-on-inverse-surface:#F5EFF7;--color-inverse-primary:#D0BCFF;
   --color-shadow:#000000;--color-scrim:#000000;--color-surface-tint:#6750A4;
-  --font-ui:'Rubik',system-ui,sans-serif;--font-main:'FrankRuhlCLM','David',serif;
-  --font-size-base:18px;--line-height:1.5;
+  --font-ui:'Rubik',system-ui,sans-serif;--font-main:'FrankRuhlCLM','David',serif;--font-commentators:'NotoRashiHebrew','David',serif;
+  --font-size-base:18px;--font-size-commentators:16px;--line-height:1.5;
   --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-pill:999px;
 }
 html,body{height:100%;margin:0}
@@ -130,7 +130,7 @@ button{cursor:pointer}
 .diagGood{color:var(--color-primary)}.diagWarn{color:var(--color-tertiary)}.diagBad{color:var(--color-error)}
 body.compact .screen{padding:10px}body.compact .timeline-scroll{padding:10px}body.compact .session{padding:10px}
 body.focus-mode .topbar,body.focus-mode .side-nav{display:none}body.focus-mode .timeline-controls{display:none}
-body.focus-mode .shell-body{height:100%}
+body.focus-mode .shell-body{height:100%}.focus-exit{display:none;position:fixed;z-index:120;inset-inline-end:16px;top:16px;border:0;border-radius:var(--radius-pill);background:var(--color-secondary-container);color:var(--color-on-secondary-container);padding:9px 14px;font-family:var(--font-ui);font-weight:600;box-shadow:0 4px 18px color-mix(in srgb,var(--color-shadow) 18%,transparent)}body.focus-mode .focus-exit{display:block}
 @media(max-width:800px){
   .side-nav{width:72px;flex-basis:72px;padding:8px 6px}.nav-item{justify-content:center;padding:0}.nav-label{display:none}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.heatmap{grid-template-columns:repeat(7,1fr)}
@@ -271,6 +271,7 @@ body.focus-mode .shell-body{height:100%}
   </div>
 </div>
 <button id="settingsFab" hidden></button>
+<button id="focusExitBtn" class="focus-exit" data-i18n="exit_focus">צא ממצב פוקוס</button>
 <script src="official-fluent-icons.js"></script><script src="app.js"></script>
 </body>
 </html>
