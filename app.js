@@ -9,13 +9,17 @@ const PINS='timeline.pins.v1';
 const COLLAPSED='timeline.collapsed.v1';
 const NAMES='timeline.names.v1';
 const FAVORITES='timeline.favorites.v1';
+const SAVED_FILTERS='timeline.saved_filters.v1';
+const MIGRATIONS='timeline.plugin_migrations.v1';
+const NOTES='timeline.session_notes.v1';
+const HEALTH='timeline.health.v1';
 
 const $=id=>document.getElementById(id);
 let events=[],snaps=[],searches=[],installed=[];
-let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false};
-let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={};
+let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true};
+let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
-let pluginMap=new Map();
+let pluginMap=new Map(),health={};
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -37,8 +41,9 @@ async function persistMeta(){
     set(FAVORITES,[...favorites])
   ]);
 }
-function pluginInfo(id){return pluginMap.get(id)||null}
-function pluginName(id){const p=pluginInfo(id);return p&&p.name?p.name:id}
+function resolvedPluginId(id){return pluginMigrations[id]||id}
+function pluginInfo(id){return pluginMap.get(resolvedPluginId(id))||null}
+function pluginName(id){const p=pluginInfo(id);return p&&p.name?p.name:(pluginMigrations[id]?pluginMigrations[id]:id)}
 function pluginIconName(id){const p=pluginInfo(id);return p&&p.toolTabIconName?p.toolTabIconName:'puzzle_piece_24_regular'}
 function pluginIconHtml(id){const name=pluginIconName(id);const map=window.OFFICIAL_FLUENT_ICONS||{};return map[name]||map.puzzle_piece_24_regular||'🧩'}
 
