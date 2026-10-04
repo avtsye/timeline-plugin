@@ -457,23 +457,27 @@ async function saveSessionAsWorkspace(s){
   await notify(t('session_saved_workspace'),'success');
 }
 function editSessionNote(s){
-  showModal('הערה ל-Session',body=>{
+  showModal(t('session_note'),body=>{
     const ta=document.createElement('textarea');ta.className='noteBox';ta.value=sessionNotes[s.id]||'';body.appendChild(ta);
     const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='12px';
-    const save=document.createElement('button');save.className='primary';save.textContent='שמור';save.onclick=async()=>{if(ta.value.trim())sessionNotes[s.id]=ta.value.trim();else delete sessionNotes[s.id];await set(NOTES,sessionNotes);document.querySelector('.modalOverlay')?.remove();render();await notify('הערת Session נשמרה','success')};
+    const save=document.createElement('button');save.className='primary';save.textContent=t('save');
+    save.onclick=async()=>{
+      if(ta.value.trim())sessionNotes[s.id]=ta.value.trim();else delete sessionNotes[s.id];
+      await set(NOTES,sessionNotes);document.querySelector('.modalOverlay')?.remove();render();await notify(t('note_saved'),'success');
+    };
     actions.appendChild(save);body.appendChild(actions);
   });
 }
 async function exportPayload(payload,suggested){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const begin=await call('fs.beginBinaryWrite',{purpose:'user-file',expectedSize:blob.size});
-  if(!begin.success){await notify('לא ניתן להתחיל ייצוא','error');return}
+  if(!begin.success){await notify(t('export_failed'),'error');return}
   try{
     const res=await fetch(begin.data.uploadUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body:blob});
     if(!res.ok)throw new Error('upload');
-    const save=await call('fs.commitUserFileWrite',{writeToken:begin.data.writeToken,suggestedName:suggested,extension:'json',title:'ייצוא Timeline'});
-    if(save.success&&!save.data.cancelled)await notify('הייצוא נשמר','success');
-  }catch(_){await call('fs.abortBinaryWrite',{writeToken:begin.data.writeToken});await notify('הייצוא נכשל','error')}
+    const save=await call('fs.commitUserFileWrite',{writeToken:begin.data.writeToken,suggestedName:suggested,extension:'json',title:t('export_timeline')});
+    if(save.success&&!save.data.cancelled)await notify(t('export_saved'),'success');
+  }catch(_){await call('fs.abortBinaryWrite',{writeToken:begin.data.writeToken});await notify(t('export_failed'),'error')}
 }
 function exportSession(s){
   exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'session',exportedAt:new Date().toISOString(),events:s.events,snapshots:snapshotsForSession(s),name:names[s.id]||null,note:sessionNotes[s.id]||null},'timeline-session-'+dk(s.start));
@@ -485,21 +489,22 @@ function createSessionCard(s){
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const preview=previewForSession(s),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id),dom=dominantType(s);
   const card=document.createElement('section');card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
-  const chooser=ssnaps.length?'<select class="snapshotSelect"><option value="">Snapshot ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+' · '+((x.tabs||[]).filter(t=>t.bookId&&!t.toolId).length)+' ספרים</option>').join('')+'</select>':'';
+  const chooser=ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(t('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+' · '+((x.tabs||[]).filter(t=>t.bookId&&!t.toolId).length)+' '+esc(t('books'))+'</option>').join('')+'</select>':'';
   const note=sessionNotes[s.id]||'';
-  const nearestInfo=nearest?' · Snapshot '+fmt(nearest.time):'';
+  const nearestInfo=nearest?' · '+t('recent_snapshots')+' '+fmt(nearest.time):'';
   card.innerHTML=
-    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">מוצמד</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+nearestInfo+'</div></div>'+
-    '<div class="sessionTools"><button class="renameBtn">שם</button><button class="noteBtn">הערה</button><button class="pinBtn">'+(isPinned?'בטל הצמדה':'הצמד')+'</button><button class="collapseBtn">'+(isCollapsed?'פתח':'קפל')+'</button><button class="workspaceBtn">ל-Workspace</button><button class="exportSessionBtn">ייצוא</button>'+chooser+(nearest?'<button class="restoreNearest">שחזר</button>':'')+'<button class="deleteBtn danger">מחק</button></div></div>'+
-    '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' ספרים · '+plugins.length+' תוספים · '+tools.length+' כלים'+(note?' · יש הערה':'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
+    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(t('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+nearestInfo+'</div></div>'+
+    '<div class="sessionTools"><button class="renameBtn">'+esc(t('name'))+'</button><button class="noteBtn">'+esc(t('note'))+'</button><button class="pinBtn">'+esc(isPinned?t('unpin'):t('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?t('expand'):t('collapse'))+'</button><button class="workspaceBtn">'+esc(t('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(t('export'))+'</button>'+chooser+(nearest?'<button class="restoreNearest">'+esc(t('restore'))+'</button>':'')+'<button class="deleteBtn danger">'+esc(t('delete'))+'</button></div></div>'+
+    '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' '+esc(t('books'))+' · '+plugins.length+' '+esc(t('plugins'))+' · '+tools.length+' '+esc(t('built_in_tool'))+(note?' · '+esc(t('note')):'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
     '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">'+pluginIconHtml(x)+' '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
 
   const eb=card.querySelector('.events');
   for(const e of s.events.slice().reverse()){
     const d=e.data||{},row=document.createElement('div');row.className='event';
-    const main=document.createElement('div');main.style.flex='1';main.innerHTML='<b>'+esc(e.type==='plugin'?pluginName(d.toolId):e.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(e.count>1?' · '+e.count+' עדכונים':'')+'</small>';
+    const main=document.createElement('div');main.style.flex='1';main.innerHTML='<b>'+esc(e.type==='plugin'?pluginName(d.toolId):e.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(e.count>1?' · '+e.count:'')+'</small>';
     main.onclick=()=>openEvent(e);
-    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(e.id)?'★':'☆';fav.title='מועדף';fav.onclick=async ev=>{ev.stopPropagation();favorites.has(e.id)?favorites.delete(e.id):favorites.add(e.id);await set(FAVORITES,[...favorites]);render()};
+    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(e.id)?'★':'☆';fav.title=t('favorites');
+    fav.onclick=async ev=>{ev.stopPropagation();favorites.has(e.id)?favorites.delete(e.id):favorites.add(e.id);await set(FAVORITES,[...favorites]);render()};
     const time=document.createElement('time');time.textContent=fmt(e.time);
     row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
   }
