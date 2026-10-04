@@ -5,10 +5,13 @@
 <title>ציר זמן</title>
 <style>
 :root{
-  --bg:#fffbfe;--surface:#fffbfe;--surface-low:#f7f2fa;--surface-high:#ece6f0;
-  --text:#1d1b20;--muted:#49454f;--primary:#6750a4;--on-primary:#fff;
-  --outline:#79747e;--outline-variant:#cac4d0;--error:#b3261e;
-  --ui:system-ui,"Segoe UI",sans-serif
+  --bg:#fffbfe;--surface:#fffbfe;--surface-low:#f7f2fa;--surface-container:#f3edf7;--surface-high:#ece6f0;--surface-highest:#e6e0e9;
+  --text:#1d1b20;--muted:#49454f;--primary:#6750a4;--on-primary:#fff;--primary-container:#eaddff;--on-primary-container:#21005d;
+  --secondary:#625b71;--on-secondary:#fff;--secondary-container:#e8def8;--on-secondary-container:#1d192b;
+  --tertiary:#7d5260;--on-tertiary:#fff;--tertiary-container:#ffd8e4;--on-tertiary-container:#31111d;
+  --outline:#79747e;--outline-variant:#cac4d0;--error:#b3261e;--on-error:#fff;--error-container:#f9dedc;--on-error-container:#410e0b;
+  --inverse-surface:#322f35;--on-inverse-surface:#f5eff7;--inverse-primary:#d0bcff;--scrim:#000;--shadow:#000;--surface-tint:#6750a4;
+  --ui:system-ui,"Segoe UI",sans-serif;--reading:'David',serif;--base-font-size:18px;--line-height:1.5
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--ui)}
@@ -64,7 +67,7 @@ body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}
 .settingsFab{position:fixed;z-index:30;inset-inline-end:18px;bottom:18px;width:48px;height:48px;border-radius:50%;padding:0;background:var(--primary);color:var(--on-primary);border:none;font-size:22px;display:grid;place-items:center}
 .dialog{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:18px;z-index:40}.dialog.open{display:flex}
 .dialogBox{background:var(--surface);border-radius:16px;padding:18px;width:min(680px,96vw);max-height:90vh;overflow:auto;border:1px solid var(--outline-variant)}
-.settingsSection{padding:14px 0;border-bottom:1px solid var(--outline-variant)}.settingsSection:last-child{border-bottom:0}.settingsSection h3{margin:0 0 10px;font-size:16px}.settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.settingsTabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.settingsTabBtn{border-radius:999px}.settingsPane{display:none}.settingsPane.active{display:block}.settingsSection{padding:14px 0;border-bottom:1px solid var(--outline-variant)}.settingsSection:last-child{border-bottom:0}.settingsSection h3{margin:0 0 10px;font-size:16px}.settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.panelDisclosure>summary{cursor:pointer;font-weight:650;list-style:none}.panelDisclosure>summary::-webkit-details-marker{display:none}.panelDisclosure>summary:after{content:'⌄';float:inline-end;color:var(--muted)}.panelDisclosure[open]>summary:after{content:'⌃'}.focusToggle{margin-inline-start:auto}.sessionMenu{position:relative}.sessionMenu>summary{list-style:none;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--outline-variant);border-radius:10px;background:var(--surface)}.sessionMenu>summary::-webkit-details-marker{display:none}.sessionMenuPanel{position:absolute;z-index:9;inset-inline-end:0;top:40px;min-width:190px;background:var(--surface-highest);border:1px solid var(--outline-variant);border-radius:12px;padding:7px;box-shadow:0 10px 28px color-mix(in srgb,var(--shadow) 18%,transparent)}.sessionMenuPanel button{width:100%;text-align:start;margin:2px 0}.timelineTooltip{display:none;position:absolute;z-index:8;inset-inline-start:50%;transform:translateX(-50%);top:-8px;min-width:220px;max-width:320px;background:var(--inverse-surface);color:var(--on-inverse-surface);padding:9px 10px;border-radius:10px;font-size:12px;box-shadow:0 8px 24px color-mix(in srgb,var(--shadow) 18%,transparent);pointer-events:none}.timelineNode:hover .timelineTooltip{display:block}.feedbackBox{width:100%;min-height:120px;padding:10px;border:1px solid var(--outline-variant);border-radius:9px;background:var(--surface)}body.focus-mode .secondaryPanel,body.focus-mode .stats{display:none}body.focus-mode .continue{display:none}body.focus-mode .app{max-width:1000px}
 .modalOverlay{position:fixed;inset:0;background:#0008;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}.modalBox{background:var(--surface);border-radius:16px;width:min(980px,96vw);max-height:90vh;overflow:auto;padding:18px;border:1px solid var(--outline-variant)}
 .modalHead{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-18px;background:var(--surface);padding:8px 0;z-index:2}.modalHead h2{margin:0}
 .modalGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.miniCard{border:1px solid var(--outline-variant);border-radius:12px;padding:11px;background:var(--surface-low)}
@@ -80,6 +83,7 @@ body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}
 
   <div class="continue"><div><div class="continueTitle" data-i18n="continue_title">המשך מהמקום שבו הפסקת</div><div id="continueInfo" class="muted"></div></div><button id="continueBtn" class="primary" data-i18n="continue_work">המשך עבודה</button></div>
 
+  <details class="panel secondaryPanel panelDisclosure"><summary data-i18n="statistics">סטטיסטיקות</summary>
   <div class="stats">
     <div class="stat"><b id="count">0</b><span data-i18n="events">אירועים</span></div>
     <div class="stat"><b id="sessionCount">0</b><span data-i18n="sessions">הפעלות</span></div>
@@ -87,7 +91,7 @@ body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}
     <div class="stat"><b id="pluginCount">0</b><span data-i18n="plugins">תוספים</span></div>
     <div class="stat"><b id="bookTime">0 דק׳</b><span data-i18n="estimated_book_time">זמן ספרים משוער</span></div>
     <div class="stat"><b id="toolTime">0 דק׳</b><span data-i18n="estimated_plugin_time">זמן תוספים/כלים משוער</span></div>
-  </div>
+  </div></details>
 
   <div class="panel"><div class="panelTitle"><b data-i18n="quick_navigation">ניווט מהיר</b><div class="quickRanges">
     <button id="saveFilterBtn" data-i18n="save_filter">שמור מסנן</button>
@@ -95,12 +99,12 @@ body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}
     <button data-preset="today" data-i18n="today">היום</button><button data-preset="yesterday" data-i18n="yesterday">אתמול</button><button data-preset="week" data-i18n="this_week">השבוע</button><button data-preset="all" data-i18n="all">הכול</button><button id="favoritesOnly" data-i18n="favorites">מועדפים</button>
   </div></div></div>
 
-  <div class="panel"><div class="panelTitle"><b data-i18n="last_35_days">35 הימים האחרונים</b><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div><div id="heatmap" class="heatmap"></div></div>
-  <div class="panel"><div class="panelTitle"><b data-i18n="recent_snapshots">נקודות שחזור אחרונות</b><span id="snapshotCount" class="muted"></span></div><div id="snapshotGallery" class="snapshotList"></div></div>
-  <div class="panel"><div class="panelTitle"><b data-i18n="recent_searches">חיפושים אחרונים</b></div><div id="recentSearches" class="searches"></div></div>
+  <details class="panel secondaryPanel panelDisclosure"><summary data-i18n="last_35_days">35 הימים האחרונים</summary><div style="margin-top:10px"><div class="muted" data-i18n="activity_intensity">עוצמת פעילות</div><div id="heatmap" class="heatmap" style="margin-top:8px"></div></div></details>
+  <details class="panel secondaryPanel panelDisclosure"><summary><span data-i18n="recent_snapshots">נקודות שחזור אחרונות</span> <span id="snapshotCount" class="muted"></span></summary><div id="snapshotGallery" class="snapshotList" style="margin-top:10px"></div></details>
+  <details class="panel secondaryPanel panelDisclosure"><summary data-i18n="recent_searches">חיפושים אחרונים</summary><div id="recentSearches" class="searches" style="margin-top:10px"></div></details>
 
   <div class="panel">
-    <div class="panelTitle"><b data-i18n="timeline_view">תצוגת ציר הזמן</b><div class="actions"><div class="zoomCtl"><button id="zoomOut" title="הקטן">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="הגדל">+</button></div><div class="viewSwitch"><button data-view="day" class="active" data-i18n="day">יום</button><button data-view="week" data-i18n="week">שבוע</button><button data-view="month" data-i18n="month">חודש</button></div></div></div>
+    <div class="panelTitle"><b data-i18n="timeline_view">תצוגת ציר הזמן</b><div class="actions"><button id="focusModeBtn" class="focusToggle" data-i18n="focus_mode">מצב פוקוס</button><div class="zoomCtl"><button id="zoomOut" title="הקטן">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="הגדל">+</button></div><div class="viewSwitch"><button data-view="day" class="active" data-i18n="day">יום</button><button data-view="week" data-i18n="week">שבוע</button><button data-view="month" data-i18n="month">חודש</button></div></div></div>
     <div class="toolbar">
       <input id="search" data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…">
       <select id="type"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select>
@@ -116,36 +120,70 @@ body.compact .panel{padding:9px;margin:7px 0}body.compact .session{padding:10px}
 
 <div id="dialog" class="dialog"><div class="dialogBox">
   <div class="panelTitle"><h2 data-i18n="settings">הגדרות</h2><button id="closeSettings" data-i18n="close">סגור</button></div>
-
-  <div class="settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
-    <label data-i18n="language">שפה</label>
-    <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
-    <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
+  <div class="settingsTabs">
+    <button class="settingsTabBtn active" data-settings-tab="general" data-i18n="settings_general">כללי</button>
+    <button class="settingsTabBtn" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
+    <button class="settingsTabBtn" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
+    <button class="settingsTabBtn" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
+    <button class="settingsTabBtn" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
   </div>
 
-  <div class="settingsSection"><h3 data-i18n="timeline_actions">פעולות ציר הזמן</h3><div class="settingsActions">
-    <button id="snapshotBtn" data-i18n="save_snapshot">שמור נקודת שחזור</button>
-    <button id="snapshotBrowserBtn" data-i18n="all_snapshots">כל נקודות השחזור</button>
-    <button id="dashboardBtn" data-i18n="activity_dashboard">לוח פעילות</button>
-    <button id="diagnosticsBtn" data-i18n="diagnostics">אבחון</button>
-    <button id="exportBtn" data-i18n="export">ייצוא</button>
-    <button id="importBtn" data-i18n="import">ייבוא</button>
-    <button id="pauseBtn"></button>
-  </div></div>
-
-  <div class="settingsSection"><h3 data-i18n="tracking_storage">מעקב ואחסון</h3>
-    <label data-i18n="max_events">מספר אירועים מרבי</label>
-    <select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select>
-    <label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label>
+  <div class="settingsPane active" data-settings-pane="general">
+    <div class="settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
+      <label data-i18n="language">שפה</label>
+      <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
+      <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
+    </div>
+    <div class="settingsSection"><h3 data-i18n="timeline_actions">פעולות ציר הזמן</h3><div class="settingsActions">
+      <button id="snapshotBtn" data-i18n="save_snapshot">שמור נקודת שחזור</button>
+      <button id="snapshotBrowserBtn" data-i18n="all_snapshots">כל נקודות השחזור</button>
+      <button id="dashboardBtn" data-i18n="activity_dashboard">לוח פעילות</button>
+      <button id="diagnosticsBtn" data-i18n="diagnostics">אבחון</button>
+      <button id="pauseBtn"></button>
+    </div></div>
   </div>
 
-  <div class="settingsSection"><h3 data-i18n="integrations">אינטגרציות</h3>
-    <label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label>
-    <label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label>
+  <div class="settingsPane" data-settings-pane="tracking">
+    <div class="settingsSection"><h3 data-i18n="tracking_types">מה לתעד</h3>
+      <label class="checkRow"><input id="trackBooks" type="checkbox"><span data-i18n="track_books">פתיחת ספרים</span></label>
+      <label class="checkRow"><input id="trackRefs" type="checkbox"><span data-i18n="track_positions">מיקומי קריאה</span></label>
+      <label class="checkRow"><input id="trackPlugins" type="checkbox"><span data-i18n="track_plugins">תוספים</span></label>
+      <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
+      <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
+      <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
+    </div>
+    <div class="settingsSection"><h3 data-i18n="privacy_mode">מצב פרטיות</h3><div class="settingsActions">
+      <button id="privacyHourBtn" data-i18n="pause_one_hour">השהה לשעה</button>
+      <button id="privacySessionBtn" data-i18n="pause_until_restart">השהה עד הפעלה מחדש</button>
+      <button id="privacyResumeBtn" data-i18n="resume_now">חדש עכשיו</button>
+    </div><div id="privacyStatus" class="muted" style="margin-top:8px"></div></div>
+    <div class="settingsSection"><label data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select>
+      <label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label>
+    </div>
   </div>
 
-  <div class="settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3>
-    <div class="actions"><button id="clearBtn" class="danger" data-i18n="clear_all">נקה את כל ציר הזמן</button></div>
+  <div class="settingsPane" data-settings-pane="backup">
+    <div class="settingsSection"><h3 data-i18n="backup_restore_actions">גיבוי ושחזור</h3><div class="settingsActions">
+      <button id="exportBtn" data-i18n="export">ייצוא</button><button id="importBtn" data-i18n="import">ייבוא</button>
+      <button id="openArchiveBtn" data-i18n="open_archive">פתח ארכיון מתומצת</button>
+    </div></div>
+    <div class="settingsSection"><label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label></div>
+  </div>
+
+  <div class="settingsPane" data-settings-pane="integrations">
+    <div class="settingsSection"><h3 data-i18n="integrations">אינטגרציות</h3>
+      <label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label>
+      <label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label>
+    </div>
+  </div>
+
+  <div class="settingsPane" data-settings-pane="maintenance">
+    <div class="settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3>
+      <select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select>
+      <textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב..."></textarea>
+      <div class="actions" style="margin-top:8px"><button id="sendFeedbackBtn" class="primary" data-i18n="send_feedback">שלח משוב</button></div>
+    </div>
+    <div class="settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="actions"><button id="clearBtn" class="danger" data-i18n="clear_all">נקה את כל ציר הזמן</button></div></div>
   </div>
 
   <div class="actions" style="margin-top:14px"><button id="saveSettings" class="primary" data-i18n="save">שמור</button></div>
