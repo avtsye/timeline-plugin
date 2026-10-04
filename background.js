@@ -18,6 +18,37 @@ let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolB
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
 const set=(k,v)=>call('storage.set',{key:k,value:v});
+async function bgLanguage(){
+  const s=await get(SETTINGS,{});
+  if(s.language&&s.language!=='auto')return s.language==='en'?'en':'he';
+  const r=await call('app.getLocale');
+  const lang=r&&r.success&&r.data&&(r.data.language||r.data.locale)||'he';
+  return String(lang).toLowerCase().startsWith('en')?'en':'he';
+}
+async function bgText(key){
+  const lang=await bgLanguage();
+  const map={
+    he:{
+      trackingIncomplete:'מעקב ציר הזמן אינו מלא: חסרות הרשאות רקע',
+      snapshotStale:'ציר הזמן פעיל אך לא נוצרה נקודת שחזור זמן רב',
+      snapshotSaved:'נקודת שחזור נשמרה',
+      openTimeline:'פתח ציר זמן',
+      saveSnapshot:'שמור נקודת שחזור בציר הזמן'
+    },
+    en:{
+      trackingIncomplete:'Timeline tracking is incomplete: background permissions are missing',
+      snapshotStale:'Timeline is active, but no restore point has been created for a while',
+      snapshotSaved:'Restore point saved',
+      openTimeline:'Open Timeline',
+      saveSnapshot:'Save a Timeline restore point'
+    }
+  };
+  return map[lang][key]||map.he[key]||key;
+}
+async function registerLocalizedShortcuts(){
+  await call('app.registerShortcut',{id:'open-timeline',label:await bgText('openTimeline'),key:'ctrl+alt+t',command:'openTimeline'});
+  await call('app.registerShortcut',{id:'save-timeline-snapshot',label:await bgText('saveSnapshot'),key:'ctrl+alt+s',command:'saveTimelineSnapshot'});
+}
 const clean=o=>{const x={};for(const k of ['book','bookId','bookUid','id','type','source','index','currentBook','currentBookId','currentIndex','currentRef','screen','workspaceId','toolId','title'])if(o&&o[k]!=null)x[k]=o[k];return x};
 const bookKey=d=>d.bookUid||d.currentBookId||d.bookId||d.currentBook||d.book||d.toolId||'';
 
@@ -90,10 +121,10 @@ async function checkHealth(force=false){
   await set(HEALTH,h);
   const lastWarn=Number(health.lastWarningAt||0);
   if(missing.length&&now-lastWarn>6*60*60*1000){
-    await notify('מעקב Timeline אינו מלא: חסרות הרשאות רקע','error');
+    await notify(await bgText('trackingIncomplete'),'error');
     h.lastWarningAt=now;await set(HEALTH,h);
   }else if(lastSnap&&Number(health.lastEventAt||0)>lastSnap&&now-lastSnap>STALE_SNAPSHOT&&now-lastWarn>60*60*1000){
-    await notify('Timeline פעיל אך לא נוצר Snapshot זמן רב','error');
+    await notify(await bgText('snapshotStale'),'error');
     h.lastWarningAt=now;await set(HEALTH,h);
   }
 }
@@ -136,11 +167,12 @@ function wire(){
   Otzaria.on('app.command',async p=>{
     if(!p)return;
     if(p.command==='openTimeline')await call('plugin.openSelf',{param:{view:'timeline'}});
-    if(p.command==='saveTimelineSnapshot'){const s=await snapshot(true);if(s)await notify('Snapshot נשמר','success')}
+    if(p.command==='saveTimelineSnapshot'){const s=await snapshot(true);if(s)await notify(await bgText('snapshotSaved'),'success')}
   });
 }
 Otzaria.on('plugin.boot',async()=>{
   wire();
+  await registerLocalizedShortcuts();
   await snapshot(false);
   await rotateBackups(false);
   await checkHealth(true);
