@@ -578,17 +578,15 @@ async function createSnapshot(renderAfter=true,showNotice=true){
   snaps.push({id:'snap-'+Date.now().toString(36),time:Date.now(),workspace:ws.success?ws.data:null,active:{bookUid:rs.data.bookUid,bookId:rs.data.currentBookId,index:rs.data.currentIndex},tabs:rs.data.openTabs||[]});
   if(snaps.length>300)snaps.splice(0,snaps.length-300);await set(SNAPS,snaps);render();await notify('Snapshot נשמר','success');
 }
-async function exportData(){
-  const payload={schemaVersion:1,plugin:'timeline-plugin',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const begin=await call('fs.beginBinaryWrite',{purpose:'user-file',expectedSize:blob.size});
-  if(!begin.success){await notify('לא ניתן להתחיל ייצוא','error');return}
-  try{
-    const res=await fetch(begin.data.uploadUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body:blob});
-    if(!res.ok)throw new Error('upload '+res.status);
-    const save=await call('fs.commitUserFileWrite',{writeToken:begin.data.writeToken,suggestedName:'otzaria-timeline-'+dk(Date.now()),extension:'json',title:'ייצוא ציר הזמן'});
-    if(save.success&&!save.data.cancelled)await notify('ציר הזמן יוצא לקובץ','success');
-  }catch(_){await call('fs.abortBinaryWrite',{writeToken:begin.data.writeToken});await notify('ייצוא הקובץ נכשל','error')}
+function showExportDialog(){
+  showModal('ייצוא Timeline',body=>{
+    const p=document.createElement('p');p.className='muted';p.textContent='בחר מה לייצא לקובץ JSON.';body.appendChild(p);
+    const actions=document.createElement('div');actions.className='actions';
+    const all=document.createElement('button');all.textContent='הכול';all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
+    const filteredBtn=document.createElement('button');filteredBtn.textContent='רק התצוגה המסוננת';filteredBtn.onclick=()=>{const ev=filtered(),ids=new Set(ev.map(e=>e.sessionId));exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>{const near=events.find(e=>ids.has(e.sessionId)&&Math.abs(e.time-s.time)<20*60000);return!!near})},'otzaria-timeline-filtered-'+dk(Date.now()))};
+    const day=document.createElement('button');day.textContent='היום';day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
+    actions.appendChild(all);actions.appendChild(filteredBtn);actions.appendChild(day);body.appendChild(actions);
+  });
 }
 function mergeById(a,b){const m=new Map();[...(a||[]),...(b||[])].forEach(x=>{const k=x&&x.id?x.id:JSON.stringify([x.time,x.type,x.sessionId,x.label]);if(k)m.set(k,x)});return[...m.values()].sort((x,y)=>(x.time||0)-(y.time||0))}
 async function importData(){
@@ -706,13 +704,31 @@ $('range').onchange=()=>{datePreset='all';selectedDayKey='';updateQuickButtons()
 document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{viewMode=btn.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===btn));render()});
 document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{datePreset=btn.dataset.preset;selectedDayKey='';updateQuickButtons();render()});
 $('favoritesOnly').onclick=()=>{favoritesOnly=!favoritesOnly;updateQuickButtons();render()};
+$('saveFilterBtn').onclick=saveCurrentFilter;
+$('savedFilterSelect').onchange=e=>{if(e.target.value!=='')applySavedFilter(e.target.value)};
+$('zoomIn').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)+.2);
+$('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
+$('snapshotBrowserBtn').onclick=showSnapshotBrowser;
+$('dashboardBtn').onclick=showDashboard;
+$('diagnosticsBtn').onclick=showDiagnostics;
 $('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?'תיעוד ציר הזמן הושהה':'תיעוד ציר הזמן חודש',settings.paused?'info':'success')};
-$('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);$('snapshotBtn').onclick=createSnapshot;$('exportBtn').onclick=exportData;$('importBtn').onclick=importData;
-$('clearBtn').onclick=async()=>{if(confirm('למחוק את כל ציר הזמן וה-Snapshots?')){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),persistMeta()]);render();await notify('ציר הזמן נוקה','success')}};
+$('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
+$('snapshotBtn').onclick=()=>createSnapshot(true,true);
+$('exportBtn').onclick=showExportDialog;
+$('importBtn').onclick=importData;
+$('clearBtn').onclick=async()=>{if(confirm('למחוק את כל ציר הזמן וה-Snapshots?')){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify('ציר הזמן נוקה','success')}};
 $('settingsBtn').onclick=()=>$('dialog').classList.add('open');$('closeSettings').onclick=()=>$('dialog').classList.remove('open');
-$('saveSettings').onclick=async()=>{settings.maxEvents=+$('maxEvents').value||5000;settings.inAppNotifications=$('notificationsEnabled').checked;settings.compactMode=$('compactMode').checked;await set(SETTINGS,settings);$('dialog').classList.remove('open');sync();render();await notify('הגדרות ציר הזמן נשמרו','success')};
+$('saveSettings').onclick=async()=>{
+  settings.maxEvents=+$('maxEvents').value||5000;
+  settings.inAppNotifications=$('notificationsEnabled').checked;
+  settings.compactMode=$('compactMode').checked;
+  settings.newTabIntegration=$('newTabIntegration').checked;
+  settings.homepageIntegration=$('homepageIntegration').checked;
+  await set(SETTINGS,settings);$('dialog').classList.remove('open');sync();await applyNewTabIntegration();await publishHomepageState();render();await notify('הגדרות ציר הזמן נשמרו','success');
+};
 
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await load()});
+Otzaria.on('plugin.page_opened',async data=>{const param=data&&data.param;if(param&&param.action==='continueLatest'&&snaps.length)restoreSnapshot(snaps[snaps.length-1]);if(param&&param.view==='diagnostics')showDiagnostics();});
 Otzaria.on('theme.changed',theme);
 Otzaria.on('plugin.resumed',load);
 })();
