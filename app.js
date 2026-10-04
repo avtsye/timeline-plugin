@@ -484,13 +484,25 @@ function showDashboard(){
     body.appendChild(grid);
   });
 }
+async function restoreInternalBackup(path){
+  if(!confirm('לשחזר את הגיבוי הפנימי הזה? הנתונים הנוכחיים יוחלפו.'))return;
+  const read=await call('fs.readFile',{path});
+  if(!read.success||!read.data||typeof read.data.content!=='string'){await notify('קריאת הגיבוי נכשלה','error');return}
+  try{
+    const data=JSON.parse(read.data.content);
+    if(!Array.isArray(data.events)||!Array.isArray(data.snaps))throw new Error('bad');
+    events=data.events;snaps=data.snaps;if(data.settings)settings=Object.assign(settings,data.settings);
+    await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings)]);
+    sync();render();await publishHomepageState();await notify('הגיבוי שוחזר','success');
+  }catch(_){await notify('קובץ הגיבוי אינו תקין','error')}
+}
 async function showDiagnostics(){
   const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
   const ps=perms.success&&perms.data&&Array.isArray(perms.data.permissions)?perms.data.permissions:[];
   const required=['app.run_on_startup','app.background_keep_alive','reader.open','workspace.manage','notifications.send'];
   const missing=required.filter(x=>!ps.includes(x));
   const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
-  const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file'):[];
+  const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
   showModal('Diagnostics',body=>{
     const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
     body.innerHTML='<div class="modalGrid">'+
@@ -499,148 +511,25 @@ async function showDiagnostics(){
       '<div class="miniCard"><h3>Snapshot אחרון</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):'אין')+'</div></div>'+
       '<div class="miniCard"><h3>גיבויים פנימיים</h3><div>'+backupEntries.length+' גרסאות</div><div class="muted">'+(health.lastBackupAt?'אחרון '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):'אין נתון')+'</div></div>'+
       '<div class="miniCard"><h3>מעקב</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?'אירוע אחרון '+fmt(health.lastEventAt):'אין אירוע')+'</div></div>'+
-      '<div class="miniCard"><h3>תוספים חסרים</h3><div>'+topPlugins(100).filter(x=>x.missing).length+'</div></div>'+
+      '<div class="miniCard"><h3>תוספים חסרים</h3><div>'+missingPluginIds().length+'</div></div>'+
       '</div>';
-  });
-}
-function render(){
-  const list=filtered(),ss=sessions(list);renderStats(list,ss);renderHeatmap();renderSearches();renderSnapshots();renderPlugins();
-  const cont=$('content');cont.innerHTML='';
-  if(!ss.length){cont.innerHTML='<div class="empty">אין פעילות שתואמת למסנן.</div>';updateContinue();return}
-  const buckets=new Map();for(const s of ss){const key=bucketKey(s.start);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(s)}
-  for(const[key,items]of buckets){
-    const wrap=document.createElement('section');wrap.className='bucket';
-    if(viewMode==='day'){
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="timelineRail"></div>';
-      const rail=wrap.querySelector('.timelineRail');
-      items.forEach((s,i)=>{
-        const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');
-        if(i>0){
-          const prev=items[i-1];
-          const gapMin=Math.max(0,Math.abs(prev.start-s.start)/60000);
-          node.style.marginTop=Math.round(Math.max(14,Math.min(220,gapMin*1.25*Number(settings.timelineZoom||1))))+'px';
-        }
-        const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
-        const dot=document.createElement('div');dot.className='timelineDot';
-        const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
-        const marks=document.createElement('div');marks.className='snapshotMarks';
-        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title='Snapshot '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
-        node.appendChild(cw);node.appendChild(dot);node.appendChild(stamp);node.appendChild(marks);rail.appendChild(node);
+
+    const actions=document.createElement('div');actions.className='actions';actions.style.margin='16px 0';
+    const mig=document.createElement('button');mig.textContent='מיפוי תוספים חסרים';mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
+    const snapBtn=document.createElement('button');snapBtn.textContent='פתח Snapshot Browser';snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);
+    body.appendChild(actions);
+
+    if(backupEntries.length){
+      const h=document.createElement('h3');h.textContent='שחזור גיבוי פנימי';body.appendChild(h);
+      const grid=document.createElement('div');grid.className='modalGrid';
+      backupEntries.slice(0,5).forEach(x=>{
+        const m=String(x.name).match(/backup-(\d+)\.json/),ts=m?Number(m[1]):0,card=document.createElement('div');card.className='miniCard';
+        card.innerHTML='<b>'+(ts?esc(fmtDate(ts)+' · '+fmt(ts)):esc(x.name))+'</b><div class="muted">'+Math.round(Number(x.size||0)/1024)+' KB</div>';
+        const b=document.createElement('button');b.textContent='שחזר';b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
       });
-    }else{
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' סשנים</span></div><div class="sessionGrid"></div>';
-      const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>grid.appendChild(createSessionCard(s)));
+      body.appendChild(grid);
     }
-    cont.appendChild(wrap);
-  }
-  updateContinue();
-}
-function updateContinue(){
-  const latest=snaps[snaps.length-1];$('continueBtn').disabled=!latest;
-  $('continueInfo').textContent=latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length+' ספרים · '+fmtDate(latest.time)+' · '+fmt(latest.time)):'אין Snapshot זמין';
-}
-async function performRestoreSnapshot(s,selectedBookKeys=null){
-  const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
-  if(s.workspace&&s.workspace.id){
-    const wl=await call('workspace.list');
-    if(wl.success&&(wl.data||[]).some(w=>w.id===s.workspace.id))await call('workspace.switch',{id:s.workspace.id});
-  }
-  const undo=await createSnapshot(true,false);
-  const st=await call('reader.getCurrentState');
-  if(st.success&&st.data&&(!keys||keys.size)){
-    const tabs=st.data.openTabs||[];
-    for(let i=tabs.length-1;i>=0;i--){
-      const t=tabs[i];
-      if(!t.isSelf&&t.bookId&&!t.toolId&&(!keys||keys.has(String(t.bookUid||t.bookId))))await call('reader.closeTab',{index:i});
-    }
-  }
-  for(const t of (s.tabs||[]).filter(t=>t.bookId&&!t.toolId)){
-    const identity=String(t.bookUid||t.bookId);
-    if(keys&&!keys.has(identity))continue;
-    const p={};for(const k of ['bookUid','id','bookId','type','source'])if(t[k]!=null)p[k]=t[k];
-    if(t.index!=null)p.index=t.index;p.navigateToPositionIfReused=true;
-    await call('reader.openBook',p);
-  }
-  await call('navigation.goTo',{target:'reading'});
-  settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;await set(SETTINGS,settings);
-  await notify('ה-Snapshot שוחזר בהצלחה','success');
-}
-function restoreSnapshot(s){
-  if(!s)return;
-  const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId);
-  const plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-  showModal('Preview לפני שחזור',body=>{
-    const intro=document.createElement('div');
-    intro.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">בחר אילו ספרים לשחזר. טאבי כלים ותוספים קיימים לא ייסגרו.</p>';
-    body.appendChild(intro);
-    const grid=document.createElement('div');grid.className='modalGrid';
-    const checks=[];
-    for(const t of books){
-      const id=String(t.bookUid||t.bookId),card=document.createElement('label');card.className='miniCard';
-      card.innerHTML='<input type="checkbox" checked> <b>'+esc(t.book||t.bookId||id)+'</b><div class="muted">'+esc(t.currentRef||('מיקום '+(t.index??'')))+'</div>';
-      checks.push({id,input:card.querySelector('input')});grid.appendChild(card);
-    }
-    body.appendChild(grid);
-    if(plugins.length){
-      const p=document.createElement('p');p.className='muted';p.textContent='ב-Snapshot היו גם '+plugins.length+' תוספים/כלים. הם מוצגים למידע בלבד ולא נסגרים בשחזור.';body.appendChild(p);
-    }
-    const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='16px';
-    const all=document.createElement('button');all.textContent='בחר הכל';all.onclick=()=>checks.forEach(x=>x.input.checked=true);
-    const none=document.createElement('button');none.textContent='בטל הכל';none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='primary';go.textContent='שחזר נבחרים';go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);if(!sel.length&&!confirm('לא נבחר אף ספר. להמשיך רק למעבר Workspace?'))return;document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
-    actions.appendChild(all);actions.appendChild(none);actions.appendChild(go);body.appendChild(actions);
   });
-}
-function showSnapshotBrowser(){
-  showModal('כל ה-Snapshots',body=>{
-    if(!snaps.length){body.innerHTML='<div class="empty">אין Snapshots</div>';return}
-    const grid=document.createElement('div');grid.className='modalGrid';
-    snaps.slice().reverse().forEach(s=>{
-      const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-      const card=document.createElement('div');card.className='miniCard';
-      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' ספרים · '+plugins.length+' תוספים/כלים</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
-      const btn=document.createElement('button');btn.textContent='Preview / שחזור';btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
-    });
-    body.appendChild(grid);
-  });
-}
-async function createSnapshot(renderAfter=true,showNotice=true){
-  const[rs,ws]=await Promise.all([call('reader.getCurrentState'),call('workspace.getActive')]);if(!rs.success||!rs.data)return;
-  snaps.push({id:'snap-'+Date.now().toString(36),time:Date.now(),workspace:ws.success?ws.data:null,active:{bookUid:rs.data.bookUid,bookId:rs.data.currentBookId,index:rs.data.currentIndex},tabs:rs.data.openTabs||[]});
-  if(snaps.length>300)snaps.splice(0,snaps.length-300);await set(SNAPS,snaps);render();await notify('Snapshot נשמר','success');
-}
-function showExportDialog(){
-  showModal('ייצוא Timeline',body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent='בחר מה לייצא לקובץ JSON.';body.appendChild(p);
-    const actions=document.createElement('div');actions.className='actions';
-    const all=document.createElement('button');all.textContent='הכול';all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
-    const filteredBtn=document.createElement('button');filteredBtn.textContent='רק התצוגה המסוננת';filteredBtn.onclick=()=>{const ev=filtered(),ids=new Set(ev.map(e=>e.sessionId));exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>{const near=events.find(e=>ids.has(e.sessionId)&&Math.abs(e.time-s.time)<20*60000);return!!near})},'otzaria-timeline-filtered-'+dk(Date.now()))};
-    const day=document.createElement('button');day.textContent='היום';day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
-    actions.appendChild(all);actions.appendChild(filteredBtn);actions.appendChild(day);body.appendChild(actions);
-  });
-}
-function mergeById(a,b){const m=new Map();[...(a||[]),...(b||[])].forEach(x=>{const k=x&&x.id?x.id:JSON.stringify([x.time,x.type,x.sessionId,x.label]);if(k)m.set(k,x)});return[...m.values()].sort((x,y)=>(x.time||0)-(y.time||0))}
-async function importData(){
-  const pick=await call('fs.pickUserFile',{title:'ייבוא ציר זמן',extensions:['json'],access:'read'});if(!pick.success||pick.data.cancelled)return;
-  const read=await call('fs.readTextFile',{token:pick.data.token});await call('fs.revokeFile',{token:pick.data.token});
-  if(!read.success){await notify('קריאת הקובץ נכשלה','error');return}
-  try{
-    const data=JSON.parse(read.data);
-    if(!data||data.plugin!=='timeline-plugin'||!Array.isArray(data.events))throw new Error('bad');
-    if(!confirm('למזג את קובץ ה-Timeline עם הנתונים הקיימים?'))return;
-    events=mergeById(events,data.events);snaps=mergeById(snaps,data.snaps||[]);
-    if(data.settings)settings=Object.assign(settings,data.settings);
-    pinned=new Set([...pinned,...(data.pins||[])]);collapsed=new Set([...collapsed,...(data.collapsed||[])]);favorites=new Set([...favorites,...(data.favorites||[])]);names=Object.assign({},names,data.names||{});
-    await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings),persistMeta()]);sync();render();await notify('הייבוא הושלם','success');
-  }catch(_){await notify('קובץ Timeline לא תקין','error')}
-}
-async function updateTrackingStatus(){
-  const info=await call('app.getGrantedPermissions');
-  const perms=info.success&&info.data&&Array.isArray(info.data.permissions)?info.data.permissions:[];
-  const hasRun=perms.includes('app.run_on_startup'),hasKeep=perms.includes('app.background_keep_alive');
-  if(hasRun&&hasKeep){$('trackingStatus').textContent='פעיל';$('trackingDetail').textContent='מעקב רציף אחר ספרים, תוספים וכלים פתוחים'}
-  else if(hasRun){$('trackingStatus').textContent='חלקי';$('trackingDetail').textContent='הרשאת keep-alive לא אושרה; מעקב התוספים עלול להיפסק לאחר חוסר פעילות'}
-  else{$('trackingStatus').textContent='מוגבל';$('trackingDetail').textContent='הרשאת run-on-startup לא אושרה; מעקב רקע אינו מלא'}
 }
 function updateSavedFilterSelect(){
   const el=$('savedFilterSelect');
