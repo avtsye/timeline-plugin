@@ -95,7 +95,7 @@ function smartTitle(s){
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
   if(books.length===1&&plugins.length===0&&tools.length===0)return 'קריאה ב'+books[0];
   if(plugins.length===1&&books.length===0)return 'עבודה עם '+plugins[0];
-  if(plugins.length||tools.length)return (books.length?books.length+' ספרים · ':'')+(plugins.length?plugins.length+' תוספים · ':'')+(tools.length?tools.length+' כלים':'').replace(/ · $/,'');
+  if(plugins.length||tools.length){const parts=[];if(books.length)parts.push(books.length+' ספרים');if(plugins.length)parts.push(plugins.length+' תוספים');if(tools.length)parts.push(tools.length+' כלים');return parts.join(' · ');}
   if(books.length>1)return books.length+' ספרים';
   return 'פעילות באוצריא';
 }
@@ -230,6 +230,7 @@ async function restoreSnapshot(s){
     await call('reader.openBook',p);
   }
   await call('navigation.goTo',{target:'reading'});
+  await notify('ה-Snapshot שוחזר בהצלחה','success');
 }
 async function createSnapshot(){
   const [rs,ws]=await Promise.all([call('reader.getCurrentState'),call('workspace.getActive')]);
