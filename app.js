@@ -225,11 +225,11 @@ function recentPlaces(limit=12){
 }
 
 
-function dayTitle(t){
-  const k=dk(t),now=Date.now();
+function dayTitle(ts){
+  const k=dk(ts),now=Date.now();
   if(k===dk(now))return t('today');
   if(k===dk(now-86400000))return t('yesterday');
-  return new Intl.DateTimeFormat(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(t));
+  return new Intl.DateTimeFormat(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(ts));
 }
 function startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
 function startOfWeek(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getTime()}
