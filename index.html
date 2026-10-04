@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ציר זמן</title>
+<style>
+:root{--bg:#fffbfe;--surface:#fff;--surface2:#f7f2fa;--text:#1d1b20;--muted:#625f66;--primary:#6750a4;--outline:#cac4d0;--danger:#b3261e}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:auto;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit}.app{max-width:1180px;margin:auto;padding:24px}.top{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{margin:0;font-size:32px}.subtitle{color:var(--muted);margin-top:4px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,.chip{border:1px solid var(--outline);background:var(--surface);border-radius:999px;padding:9px 14px;cursor:pointer;color:var(--text)}button.primary{background:var(--primary);color:white;border-color:var(--primary)}
+.toolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;margin:22px 0}.toolbar input,.toolbar select{border:1px solid var(--outline);border-radius:14px;padding:11px 13px;background:var(--surface);color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}.stat{background:var(--surface);border:1px solid var(--outline);border-radius:18px;padding:16px}.stat b{font-size:24px;display:block}.stat span{color:var(--muted);font-size:13px}
+.day{margin:26px 0}.dayhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}.dayhead h2{font-size:18px;margin:0}.dayhead small{color:var(--muted)}
+.timeline{position:relative;padding-right:26px}.timeline:before{content:"";position:absolute;right:8px;top:0;bottom:0;width:2px;background:var(--outline)}
+.event{position:relative;background:var(--surface);border:1px solid var(--outline);border-radius:18px;padding:14px 16px;margin:0 0 10px}.event:before{content:"";position:absolute;right:-23px;top:21px;width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--bg)}
+.eventtop{display:flex;align-items:start;justify-content:space-between;gap:12px}.event h3{margin:0 0 5px;font-size:16px}.meta{color:var(--muted);font-size:13px}.open{margin-top:10px}.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.dialog{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:20px}.dialog.open{display:flex}.panel{width:min(520px,100%);background:var(--surface);border-radius:24px;padding:22px}.panel h2{margin-top:0}.field{margin:14px 0}.field label{display:block;margin-bottom:6px}.field input,.field select{width:100%;padding:10px;border:1px solid var(--outline);border-radius:12px;background:var(--surface);color:var(--text)}
+@media(max-width:720px){.app{padding:14px}.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.eventtop{display:block}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div><h1>ציר זמן</h1><div class="subtitle">הפעילות שלך באוצריא, מקומית על המחשב</div></div>
+    <div class="actions"><button id="pauseBtn"></button><button id="settingsBtn">הגדרות</button><button id="clearBtn">נקה היסטוריה</button></div>
+  </div>
+  <div class="toolbar">
+    <input id="search" placeholder="חיפוש בציר הזמן…">
+    <select id="type"><option value="">כל הפעילויות</option><option value="book">ספרים</option><option value="navigation">ניווט</option><option value="workspace">סביבות עבודה</option><option value="startup">הפעלות</option></select>
+    <select id="range"><option value="7">7 ימים</option><option value="30" selected>30 ימים</option><option value="90">90 ימים</option><option value="0">הכול</option></select>
+  </div>
+  <div class="stats"><div class="stat"><b id="count">0</b><span>אירועים</span></div><div class="stat"><b id="sessions">0</b><span>סשנים</span></div><div class="stat"><b id="books">0</b><span>פתיחות ספר</span></div><div class="stat"><b id="days">0</b><span>ימים פעילים</span></div></div>
+  <main id="content"></main>
+</div>
+<div class="dialog" id="settingsDialog"><div class="panel">
+  <h2>הגדרות ציר הזמן</h2>
+  <div class="field"><label>מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option></select></div>
+  <div class="actions"><button class="primary" id="saveSettings">שמור</button><button id="closeSettings">ביטול</button></div>
+</div></div>
+<script src="app.js"></script>
+</body></html>
