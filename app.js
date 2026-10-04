@@ -16,18 +16,131 @@ const HEALTH='timeline.health.v1';
 
 const $=id=>document.getElementById(id);
 let events=[],snaps=[],searches=[],installed=[];
-let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true};
+let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto'};
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
-let pluginMap=new Map(),health={};
+let pluginMap=new Map(),health={},currentLang='he';
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
 const set=(k,v)=>call('storage.set',{key:k,value:v});
+const I18N={
+he:{
+settings:'הגדרות',close:'סגור',save:'שמור',language:'שפה',language_auto:'אוטומטי לפי אוצריא',language_appearance:'שפה ומראה',
+compact_mode:'מצב קומפקטי',timeline_actions:'פעולות ציר הזמן',save_snapshot:'שמור נקודת שחזור',all_snapshots:'כל נקודות השחזור',
+activity_dashboard:'לוח פעילות',diagnostics:'אבחון',export:'ייצוא',import:'ייבוא',tracking_storage:'מעקב ואחסון',
+max_events:'מספר אירועים מרבי',in_app_notifications:'התראות פנימיות של אוצריא',integrations:'אינטגרציות',
+plus_target:'השתמש בציר הזמן כיעד של כפתור +',homepage_integration:'פרסם “המשך עבודה” לדף הבית',
+danger_zone:'פעולות מתקדמות',clear_all:'נקה את כל ציר הזמן',tracking_status:'מצב מעקב',continue_title:'המשך מהמקום שבו הפסקת',
+continue_work:'המשך עבודה',events:'אירועים',sessions:'הפעלות',books:'ספרים',plugins:'תוספים',estimated_book_time:'זמן ספרים משוער',
+estimated_plugin_time:'זמן תוספים/כלים משוער',quick_navigation:'ניווט מהיר',save_filter:'שמור מסנן',saved_filters:'מסננים שמורים',
+today:'היום',yesterday:'אתמול',this_week:'השבוע',all:'הכול',favorites:'מועדפים',last_35_days:'35 הימים האחרונים',
+activity_intensity:'עוצמת פעילות',recent_snapshots:'נקודות שחזור אחרונות',recent_searches:'חיפושים אחרונים',timeline_view:'תצוגת ציר הזמן',
+day:'יום',week:'שבוע',month:'חודש',search_placeholder:'חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…',all_types:'כל הסוגים',
+book:'ספר',reading_position:'מיקום קריאה',workspace:'סביבת עבודה',plugin:'תוסף',built_in_tool:'כלי מובנה',navigation:'ניווט',
+all_plugins:'כל התוספים',days_7:'7 ימים',days_30:'30 ימים',days_90:'90 ימים',newest_first:'חדש לישן',oldest_first:'ישן לחדש',
+pause_tracking:'השהה תיעוד',resume_tracking:'המשך תיעוד',active:'פעיל',partial:'חלקי',limited:'מוגבל',
+tracking_active:'מעקב רציף אחר ספרים, תוספים וכלים פתוחים',
+tracking_partial:'הרשאת שמירה ברקע לא אושרה; מעקב התוספים עלול להיפסק לאחר חוסר פעילות',
+tracking_limited:'הרשאת הפעלה עם אוצריא לא אושרה; מעקב הרקע אינו מלא',
+no_activity:'אין פעילות שתואמת למסנן.',no_recent_searches:'אין חיפושים אחרונים',no_snapshots:'עדיין אין נקודות שחזור',
+saved:'שמורים',minutes:'דקות',position_changes:'שינויי מקום',activity_in_otzaria:'פעילות באוצריא',no_identified_activity:'לא זוהתה פעילות בסוף ההפעלה',
+reading_in:'קריאה ב',work_with:'עבודה עם',tool:'כלי',opened_during_session:'נפתח במהלך ההפעלה',pinned:'מוצמד',
+name:'שם',note:'הערה',pin:'הצמד',unpin:'בטל הצמדה',collapse:'קפל',expand:'פתח',to_workspace:'לסביבת עבודה',
+restore:'שחזר',delete:'מחק',session_note:'הערה להפעלה',session_name:'שם להפעלה',workspace_name:'שם סביבת העבודה',
+delete_session_confirm:'למחוק את ההפעלה הזאת מציר הזמן?',session_deleted:'ההפעלה נמחקה',workspace_create_failed:'יצירת סביבת העבודה נכשלה',
+session_saved_workspace:'ההפעלה נשמרה כסביבת עבודה',note_saved:'הערת ההפעלה נשמרה',snapshot_saved:'נקודת שחזור נשמרה',
+snapshot_restored:'נקודת השחזור שוחזרה בהצלחה',snapshot_create_failed:'לא ניתן ליצור נקודת שחזור',restore_preview:'תצוגה מקדימה לפני שחזור',
+select_books_restore:'בחר אילו ספרים לשחזר. טאבי תוספים וכלים לא ייסגרו.',select_all:'בחר הכל',clear_selection:'בטל הכל',
+restore_selected:'שחזר נבחרים',all_restore_points:'כל נקודות השחזור',preview_restore:'תצוגה מקדימה / שחזור',
+export_timeline:'ייצוא ציר הזמן',choose_export:'בחר מה לייצא לקובץ JSON.',filtered_view:'התצוגה המסוננת',
+import_timeline:'ייבוא ציר הזמן',merge_import_confirm:'למזג את קובץ ציר הזמן עם הנתונים הקיימים?',import_done:'הייבוא הושלם',
+invalid_timeline_file:'קובץ ציר זמן לא תקין',read_file_failed:'קריאת הקובץ נכשלה',export_saved:'הייצוא נשמר',export_failed:'הייצוא נכשל',
+diagnostics_title:'אבחון',health:'בריאות',storage:'אחסון',last_snapshot:'נקודת שחזור אחרונה',internal_backups:'גיבויים פנימיים',
+tracking:'מעקב',missing_plugins:'תוספים חסרים',versions:'גרסאות',last:'אחרון',no_data:'אין נתון',no_event:'אין אירוע',
+permissions_ok:'ההרשאות המרכזיות תקינות',missing_permissions:'הרשאות חסרות',open_snapshot_browser:'פתח דפדפן נקודות שחזור',
+restore_internal_backup:'שחזור גיבוי פנימי',restore_internal_confirm:'לשחזר את הגיבוי הפנימי הזה? הנתונים הנוכחיים יוחלפו.',
+backup_restored:'הגיבוי שוחזר',backup_invalid:'קובץ הגיבוי אינו תקין',save_filter_name:'שם למסנן השמור',filter_saved:'המסנן נשמר',
+plugin_missing:'התוסף אינו מותקן. ניתן למפות אותו באבחון.',plugin_disabled:'התוסף מושבת',plugin_open_failed:'לא ניתן לפתוח את התוסף',
+builtin_open_unavailable:'אין ממשק כללי לפתיחה מחדש של כלי מובנה בגרסה זו של אוצריא',settings_saved:'הגדרות ציר הזמן נשמרו',
+timeline_cleared:'ציר הזמן נוקה',clear_all_confirm:'למחוק את כל ציר הזמן ונקודות השחזור?',tracking_paused:'תיעוד ציר הזמן הושהה',
+tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים אחרונים',weeks_activity:'12 שבועות אחרונים',months_activity:'12 חודשים אחרונים',
+year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
+book_visits:'ביקורים בספר',plugin_timeline:'ציר זמן של תוסף',visits:'אירועים',days:'ימים',places:'מקומות',open:'פתח',
+restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסרים',no_missing_plugins:'אין תוספים חסרים',choose_replacement:'בחר תוסף חלופי…',
+save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה'
+},
+en:{
+settings:'Settings',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
+compact_mode:'Compact mode',timeline_actions:'Timeline actions',save_snapshot:'Save restore point',all_snapshots:'All restore points',
+activity_dashboard:'Activity dashboard',diagnostics:'Diagnostics',export:'Export',import:'Import',tracking_storage:'Tracking & storage',
+max_events:'Maximum events',in_app_notifications:'Otzaria in-app notifications',integrations:'Integrations',
+plus_target:'Use Timeline as the + button destination',homepage_integration:'Publish “Continue working” to Home Page',
+danger_zone:'Advanced actions',clear_all:'Clear the entire timeline',tracking_status:'Tracking status',continue_title:'Continue where you left off',
+continue_work:'Continue working',events:'Events',sessions:'Sessions',books:'Books',plugins:'Plugins',estimated_book_time:'Estimated book time',
+estimated_plugin_time:'Estimated plugin/tool time',quick_navigation:'Quick navigation',save_filter:'Save filter',saved_filters:'Saved filters',
+today:'Today',yesterday:'Yesterday',this_week:'This week',all:'All',favorites:'Favorites',last_35_days:'Last 35 days',
+activity_intensity:'Activity intensity',recent_snapshots:'Recent restore points',recent_searches:'Recent searches',timeline_view:'Timeline view',
+day:'Day',week:'Week',month:'Month',search_placeholder:'Search by book, plugin, workspace, or event…',all_types:'All types',
+book:'Book',reading_position:'Reading position',workspace:'Workspace',plugin:'Plugin',built_in_tool:'Built-in tool',navigation:'Navigation',
+all_plugins:'All plugins',days_7:'7 days',days_30:'30 days',days_90:'90 days',newest_first:'Newest first',oldest_first:'Oldest first',
+pause_tracking:'Pause tracking',resume_tracking:'Resume tracking',active:'Active',partial:'Partial',limited:'Limited',
+tracking_active:'Continuous tracking of books, plugins, and open tools',
+tracking_partial:'Background keep-alive permission is not granted; plugin tracking may stop after inactivity',
+tracking_limited:'Run-on-startup permission is not granted; background tracking is limited',
+no_activity:'No activity matches the current filters.',no_recent_searches:'No recent searches',no_snapshots:'No restore points yet',
+saved:'saved',minutes:'minutes',position_changes:'position changes',activity_in_otzaria:'Activity in Otzaria',no_identified_activity:'No identified activity at the end of this session',
+reading_in:'Reading',work_with:'Working with',tool:'Tool',opened_during_session:'Opened during the session',pinned:'Pinned',
+name:'Name',note:'Note',pin:'Pin',unpin:'Unpin',collapse:'Collapse',expand:'Expand',to_workspace:'To workspace',
+restore:'Restore',delete:'Delete',session_note:'Session note',session_name:'Session name',workspace_name:'Workspace name',
+delete_session_confirm:'Delete this session from the timeline?',session_deleted:'Session deleted',workspace_create_failed:'Workspace creation failed',
+session_saved_workspace:'Session saved as a workspace',note_saved:'Session note saved',snapshot_saved:'Restore point saved',
+snapshot_restored:'Restore point restored successfully',snapshot_create_failed:'Could not create a restore point',restore_preview:'Restore preview',
+select_books_restore:'Choose which books to restore. Existing plugin and tool tabs will not be closed.',select_all:'Select all',clear_selection:'Clear selection',
+restore_selected:'Restore selected',all_restore_points:'All restore points',preview_restore:'Preview / restore',
+export_timeline:'Export Timeline',choose_export:'Choose what to export to a JSON file.',filtered_view:'Filtered view',
+import_timeline:'Import Timeline',merge_import_confirm:'Merge this Timeline file with the existing data?',import_done:'Import completed',
+invalid_timeline_file:'Invalid Timeline file',read_file_failed:'Could not read the file',export_saved:'Export saved',export_failed:'Export failed',
+diagnostics_title:'Diagnostics',health:'Health',storage:'Storage',last_snapshot:'Last restore point',internal_backups:'Internal backups',
+tracking:'Tracking',missing_plugins:'Missing plugins',versions:'versions',last:'Last',no_data:'No data',no_event:'No event',
+permissions_ok:'Core permissions are available',missing_permissions:'Missing permissions',open_snapshot_browser:'Open restore point browser',
+restore_internal_backup:'Restore internal backup',restore_internal_confirm:'Restore this internal backup? Current data will be replaced.',
+backup_restored:'Backup restored',backup_invalid:'The backup file is invalid',save_filter_name:'Saved filter name',filter_saved:'Filter saved',
+plugin_missing:'The plugin is not installed. You can map it in Diagnostics.',plugin_disabled:'The plugin is disabled',plugin_open_failed:'Could not open the plugin',
+builtin_open_unavailable:'There is no general API for reopening built-in tools in this Otzaria version',settings_saved:'Timeline settings saved',
+timeline_cleared:'Timeline cleared',clear_all_confirm:'Clear the entire timeline and all restore points?',tracking_paused:'Timeline tracking paused',
+tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_activity:'Last 12 weeks',months_activity:'Last 12 months',
+year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
+book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days:'days',places:'places',open:'Open',
+restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
+save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour'
+}};
+const t=(key,vars={})=>{
+  let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
+  for(const [k,v] of Object.entries(vars))s=s.replaceAll('{'+k+'}',String(v));
+  return s;
+};
+const locale=()=>currentLang==='en'?'en-US':'he-IL';
+async function resolveLanguage(){
+  if(settings.language&&settings.language!=='auto')currentLang=settings.language;
+  else{
+    const r=await call('app.getLocale');
+    const lang=r&&r.success&&r.data&&(r.data.language||r.data.locale)||'he';
+    currentLang=String(lang).toLowerCase().startsWith('en')?'en':'he';
+  }
+  document.documentElement.lang=currentLang;
+  document.documentElement.dir=currentLang==='he'?'rtl':'ltr';
+}
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;if(I18N[currentLang][key])el.textContent=t(key)});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const key=el.dataset.i18nPlaceholder;if(I18N[currentLang][key])el.placeholder=t(key)});
+  document.title=currentLang==='he'?'ציר זמן':'Timeline';
+  $('settingsFab').title=t('settings');$('settingsFab').setAttribute('aria-label',t('settings'));
+}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-const fmt=t=>new Intl.DateTimeFormat('he-IL',{hour:'2-digit',minute:'2-digit'}).format(new Date(t));
-const fmtDate=t=>new Intl.DateTimeFormat('he-IL',{day:'numeric',month:'short',year:'numeric'}).format(new Date(t));
+const fmt=v=>new Intl.DateTimeFormat(locale(),{hour:'2-digit',minute:'2-digit'}).format(new Date(v));
+const fmtDate=v=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'short',year:'numeric'}).format(new Date(v));
 
 async function notify(message,type='info'){
   if(settings.inAppNotifications===false)return;
