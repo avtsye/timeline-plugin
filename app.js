@@ -484,6 +484,11 @@ function render(){
       const rail=wrap.querySelector('.timelineRail');
       items.forEach((s,i)=>{
         const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');
+        if(i>0){
+          const prev=items[i-1];
+          const gapMin=Math.max(0,Math.abs(prev.start-s.start)/60000);
+          node.style.marginTop=Math.round(Math.max(14,Math.min(220,gapMin*1.25*Number(settings.timelineZoom||1))))+'px';
+        }
         const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
         const dot=document.createElement('div');dot.className='timelineDot';
         const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
