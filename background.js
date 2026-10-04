@@ -13,7 +13,7 @@ const SNAP_GAP=15*60*1000;
 const TOOL_POLL_MS=5000;
 const BACKUP_GAP=30*60*1000;
 const STALE_SNAPSHOT=35*60*1000;
-let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false;
+let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -78,8 +78,10 @@ async function rotateBackups(force=false){
   await set(HEALTH,{...(await get(HEALTH,{})),lastBackupAt:now});
 }
 
-async function checkHealth(){
+async function checkHealth(force=false){
   const now=Date.now();
+  if(!force&&now-lastHealthTick<60000)return;
+  lastHealthTick=now;
   const[perms,snaps,health]=await Promise.all([call('app.getGrantedPermissions'),get(SNAPS,[]),get(HEALTH,{})]);
   const ps=perms.success&&perms.data&&Array.isArray(perms.data.permissions)?perms.data.permissions:[];
   const missing=['app.run_on_startup','app.background_keep_alive'].filter(x=>!ps.includes(x));
@@ -90,7 +92,7 @@ async function checkHealth(){
   if(missing.length&&now-lastWarn>6*60*60*1000){
     await notify('מעקב Timeline אינו מלא: חסרות הרשאות רקע','error');
     h.lastWarningAt=now;await set(HEALTH,h);
-  }else if(lastSnap&&now-lastSnap>STALE_SNAPSHOT&&now-lastWarn>60*60*1000){
+  }else if(lastSnap&&Number(health.lastEventAt||0)>lastSnap&&now-lastSnap>STALE_SNAPSHOT&&now-lastWarn>60*60*1000){
     await notify('Timeline פעיל אך לא נוצר Snapshot זמן רב','error');
     h.lastWarningAt=now;await set(HEALTH,h);
   }
@@ -141,7 +143,7 @@ Otzaria.on('plugin.boot',async()=>{
   wire();
   await snapshot(false);
   await rotateBackups(false);
-  await checkHealth();
+  await checkHealth(true);
   await startPolling();
 });
 })();
