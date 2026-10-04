@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.1.0",
-  "description": "ציר זמן מקומי לאוצריא: פעילות אחרונה, סשנים, חיפוש ושחזור מקומות עבודה.",
+  "version": "0.2.0",
+  "description": "ציר זמן מקומי לאוצריא עם סשנים, Snapshots, Heatmap ושחזור מצב עבודה.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
   "entrypoint": "index.html",
@@ -15,33 +15,21 @@
     "app.startup_contributions",
     "history.read",
     "reader.open",
+    "workspace.read",
+    "workspace.manage",
     "plugin.storage.read",
     "plugin.storage.write",
     "events.subscribe:navigation.changed",
     "events.subscribe:reader.current_book_changed",
+    "events.subscribe:reader.current_ref_changed",
     "events.subscribe:workspace.changed"
   ],
-  "network": {
-    "enabled": false,
-    "allowlist": []
-  },
+  "network": {"enabled": false, "allowlist": []},
   "contributes": {
-    "toolTab": {
-      "title": "ציר זמן",
-      "iconName": "history_24_regular",
-      "order": 80,
-      "defaultPinned": true
-    },
-    "background": {
-      "entrypoint": "background.html"
-    },
+    "toolTab": {"title":"ציר זמן","iconName":"history_24_regular","order":80,"defaultPinned":true},
+    "background": {"entrypoint":"background.html"},
     "startup": {
-      "activationEvents": [
-        "app.startup",
-        "navigation.changed",
-        "reader.current_book_changed",
-        "workspace.changed"
-      ],
+      "activationEvents":["app.startup","navigation.changed","reader.current_book_changed","reader.current_ref_changed","workspace.changed"],
       "keepAlive": false
     }
   },
