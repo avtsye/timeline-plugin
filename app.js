@@ -529,22 +529,29 @@ function renderStats(list,ss){
 function showBookHistory(bookKey){
   const visits=eventsForBook(bookKey);
   const title=visits.length?bookTitleFromEvent(visits[0]):String(bookKey);
-  showModal('ביקורים בספר — '+title,body=>{
-    if(!visits.length){body.innerHTML='<div class="empty">אין ביקורים</div>';return}
+  showModal(t('book_visits')+' — '+title,body=>{
+    if(!visits.length){body.innerHTML='<div class="empty">'+esc(t('no_activity'))+'</div>';return}
     const places=[];const seen=new Set();
     for(const e of visits){const d=e.data||{},ref=d.currentRef||d.ref||'',key=ref+'|'+(d.currentIndex??d.index??'');if(!seen.has(key)){seen.add(key);places.push(e)}}
-    const summary=document.createElement('p');summary.className='muted';summary.textContent=visits.length+' אירועים · '+new Set(visits.map(e=>dk(e.time))).size+' ימים · '+places.length+' מקומות';body.appendChild(summary);
+    const summary=document.createElement('p');summary.className='muted';
+    summary.textContent=visits.length+' '+t('visits')+' · '+new Set(visits.map(e=>dk(e.time))).size+' '+t('days')+' · '+places.length+' '+t('places');body.appendChild(summary);
     const grid=document.createElement('div');grid.className='modalGrid';
-    visits.slice(0,80).forEach(e=>{const d=e.data||{},card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div>'+esc(d.currentRef||d.ref||'מיקום ללא כותרת')+'</div><div class="muted">אינדקס '+esc(d.currentIndex??d.index??'')+'</div>';const b=document.createElement('button');b.textContent='פתח';b.onclick=()=>openEvent(e);card.appendChild(b);grid.appendChild(card)});body.appendChild(grid);
+    visits.slice(0,80).forEach(e=>{
+      const d=e.data||{},card=document.createElement('div');card.className='miniCard';
+      card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div>'+esc(d.currentRef||d.ref||'')+'</div><div class="muted">'+esc(String(d.currentIndex??d.index??''))+'</div>';
+      const b=document.createElement('button');b.textContent=t('open');b.onclick=()=>openEvent(e);card.appendChild(b);grid.appendChild(card);
+    });
+    body.appendChild(grid);
   });
 }
 function showPluginHistory(pluginId){
   const list=eventsForPlugin(pluginId),name=pluginName(pluginId);
-  showModal('Timeline של תוסף — '+name,body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent=list.length+' פתיחות שנרשמו';body.appendChild(p);
-    const open=document.createElement('button');open.textContent='פתח את התוסף';open.onclick=()=>openPlugin(pluginId);body.appendChild(open);
+  showModal(t('plugin_timeline')+' — '+name,body=>{
+    const p=document.createElement('p');p.className='muted';p.textContent=list.length+' '+t('visits');body.appendChild(p);
+    const open=document.createElement('button');open.textContent=t('open')+' '+t('plugin');open.onclick=()=>openPlugin(pluginId);body.appendChild(open);
     const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='12px';
-    list.slice(0,100).forEach(e=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div class="muted">'+esc((e.data||{}).toolId||'')+'</div>';grid.appendChild(card)});body.appendChild(grid);
+    list.slice(0,100).forEach(e=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div class="muted">'+esc((e.data||{}).toolId||'')+'</div>';grid.appendChild(card)});
+    body.appendChild(grid);
   });
 }
 function aggregateDaily(days=30){
@@ -581,31 +588,29 @@ function aggregateWeeks(count=12){
 }
 function aggregateMonths(count=12){
   const out=[],now=new Date();
-  for(let i=count-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1),next=new Date(d.getFullYear(),d.getMonth()+1,1);out.push({time:d.getTime(),label:new Intl.DateTimeFormat('he-IL',{month:'short'}).format(d),count:events.filter(e=>e.time>=d.getTime()&&e.time<next.getTime()).length})}
+  for(let i=count-1;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1),next=new Date(d.getFullYear(),d.getMonth()+1,1);
+    out.push({time:d.getTime(),label:new Intl.DateTimeFormat(locale(),{month:'short'}).format(d),count:events.filter(e=>e.time>=d.getTime()&&e.time<next.getTime()).length});
+  }
   return out;
 }
 function showDashboard(){
-  showModal('Dashboard פעילות',body=>{
+  showModal(t('activity_dashboard'),body=>{
     const daily=aggregateDaily(30);
-    body.innerHTML='<h3>30 ימים אחרונים</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
-    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent='12 שבועות אחרונים';body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat('he-IL',{day:'numeric',month:'numeric'}).format(new Date(x.time))));
-    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent='12 חודשים אחרונים';body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
-
-    const yearTitle=document.createElement('h3');yearTitle.textContent='Heatmap שנתי';body.appendChild(yearTitle);
+    body.innerHTML='<h3>'+esc(t('day_activity'))+'</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
+    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent=t('weeks_activity');body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))));
+    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent=t('months_activity');body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
+    const yearTitle=document.createElement('h3');yearTitle.textContent=t('year_heatmap');body.appendChild(yearTitle);
     const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
-    for(let i=364;i>=0;i--){const t=Date.now()-i*86400000,n=counts[dk(t)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(t)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(t);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}
+    for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(tm)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}
     body.appendChild(year);
-
     const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='18px';
-    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>Top Books</h3>';
+    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>'+esc(t('top_books'))+'</h3>';
     topBooks().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')';b.onclick=()=>showBookHistory(x.key);bcard.appendChild(b)});grid.appendChild(bcard);
-
-    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>Top Plugins</h3>';
-    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — חסר':'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
-
-    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>מקומות אחרונים</h3>';
+    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>'+esc(t('top_plugins'))+'</h3>';
+    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — '+t('missing_plugins'):'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
+    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>'+esc(t('recent_places'))+'</h3>';
     recentPlaces().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+(x.ref?' — '+x.ref:'');b.onclick=()=>openEvent(x.event);rcard.appendChild(b)});grid.appendChild(rcard);
-
     body.appendChild(grid);
   });
 }
