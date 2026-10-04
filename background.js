@@ -2,7 +2,7 @@
 'use strict';
 const EVENTS='timeline.events.v2', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1';
 const SESSION_GAP=30*60*1000, MERGE_GAP=2*60*1000, SNAP_GAP=15*60*1000, TOOL_POLL_MS=5000;
-let q=Promise.resolve(), wired=false, pollTimer=null, knownToolTabs=new Set();
+let q=Promise.resolve(), wired=false, pollTimer=null, knownToolTabs=new Set(), toolBaselineReady=false;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -46,11 +46,12 @@ async function detectToolTabs(){
   for(const t of tabs){
     const key=t.toolId+'|'+(t.book||t.bookId||'');
     current.add(key);
-    if(!knownToolTabs.has(key)){
+    if(toolBaselineReady&&!knownToolTabs.has(key)){
       record(toolKind(t.toolId),{toolId:t.toolId,title:t.book||t.bookId||t.toolId});
     }
   }
   knownToolTabs=current;
+  toolBaselineReady=true;
 }
 
 async function snapshot(force=false){
