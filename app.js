@@ -68,7 +68,7 @@ tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים
 year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
 book_visits:'ביקורים בספר',plugin_timeline:'ציר זמן של תוסף',visits:'אירועים',days:'ימים',places:'מקומות',open:'פתח',
 restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסרים',no_missing_plugins:'אין תוספים חסרים',choose_replacement:'בחר תוסף חלופי…',
-save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא מפוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד'
+save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא מפוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד'
 },
 en:{
 settings:'Settings',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
@@ -113,7 +113,7 @@ tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_a
 year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
 book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days:'days',places:'places',open:'Open',
 restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
-save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More'
+save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More'
 }};
 const tr=(key,vars={})=>{
   let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
@@ -925,30 +925,47 @@ async function load(){
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
   const pf=$('pluginFilter');
   pf.innerHTML='<option value="">'+esc(tr('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
-  sync();render();await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
+  sync();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
 function theme(payload){
   if(!payload||!payload.colorScheme)return;
   const cs=payload.colorScheme,tg=payload.typography||{},r=document.documentElement.style;
   const roles={
-    '--bg':cs.surfaceContainerLowest||cs.surface,'--surface':cs.surface,'--surface-low':cs.surfaceContainerLow||cs.surfaceContainer,
-    '--surface-container':cs.surfaceContainer,'--surface-high':cs.surfaceContainerHigh,'--surface-highest':cs.surfaceContainerHighest,
-    '--text':cs.onSurface,'--muted':cs.onSurfaceVariant,'--primary':cs.primary,'--on-primary':cs.onPrimary,
-    '--primary-container':cs.primaryContainer,'--on-primary-container':cs.onPrimaryContainer,'--secondary':cs.secondary,'--on-secondary':cs.onSecondary,
-    '--secondary-container':cs.secondaryContainer,'--on-secondary-container':cs.onSecondaryContainer,'--tertiary':cs.tertiary,'--on-tertiary':cs.onTertiary,
-    '--tertiary-container':cs.tertiaryContainer,'--on-tertiary-container':cs.onTertiaryContainer,'--outline':cs.outline,'--outline-variant':cs.outlineVariant,
-    '--error':cs.error,'--on-error':cs.onError,'--error-container':cs.errorContainer,'--on-error-container':cs.onErrorContainer,
-    '--inverse-surface':cs.inverseSurface,'--on-inverse-surface':cs.onInverseSurface,'--inverse-primary':cs.inversePrimary,
-    '--shadow':cs.shadow,'--scrim':cs.scrim,'--surface-tint':cs.surfaceTint
+    '--color-primary':cs.primary,'--color-on-primary':cs.onPrimary,
+    '--color-primary-container':cs.primaryContainer,'--color-on-primary-container':cs.onPrimaryContainer,
+    '--color-secondary':cs.secondary,'--color-on-secondary':cs.onSecondary,
+    '--color-secondary-container':cs.secondaryContainer,'--color-on-secondary-container':cs.onSecondaryContainer,
+    '--color-tertiary':cs.tertiary,'--color-on-tertiary':cs.onTertiary,
+    '--color-tertiary-container':cs.tertiaryContainer,'--color-on-tertiary-container':cs.onTertiaryContainer,
+    '--color-surface':cs.surface,'--color-on-surface':cs.onSurface,'--color-on-surface-variant':cs.onSurfaceVariant,
+    '--color-surface-container-lowest':cs.surfaceContainerLowest,'--color-surface-container-low':cs.surfaceContainerLow,
+    '--color-surface-container':cs.surfaceContainer,'--color-surface-container-high':cs.surfaceContainerHigh,
+    '--color-surface-container-highest':cs.surfaceContainerHighest,
+    '--color-error':cs.error,'--color-on-error':cs.onError,'--color-error-container':cs.errorContainer,'--color-on-error-container':cs.onErrorContainer,
+    '--color-outline':cs.outline,'--color-outline-variant':cs.outlineVariant,
+    '--color-inverse-surface':cs.inverseSurface,'--color-on-inverse-surface':cs.onInverseSurface,'--color-inverse-primary':cs.inversePrimary,
+    '--color-shadow':cs.shadow,'--color-scrim':cs.scrim,'--color-surface-tint':cs.surfaceTint
   };
   for(const[k,v]of Object.entries(roles))if(v)r.setProperty(k,v);
-  if(tg.uiFontFamily)r.setProperty('--ui',"'"+tg.uiFontFamily+"',system-ui,sans-serif");
-  if(tg.fontFamily)r.setProperty('--reading',"'"+tg.fontFamily+"','David',serif");
-  if(tg.fontSize)r.setProperty('--base-font-size',String(tg.fontSize)+'px');
+  if(tg.uiFontFamily)r.setProperty('--font-ui',"'"+tg.uiFontFamily+"',system-ui,sans-serif");
+  if(tg.fontFamily)r.setProperty('--font-main',"'"+tg.fontFamily+"','David',serif");
+  if(tg.fontSize)r.setProperty('--font-size-base',String(tg.fontSize)+'px');
   if(tg.lineHeight)r.setProperty('--line-height',String(tg.lineHeight));
   document.body.classList.toggle('dark-mode',payload.mode==='dark');
 }
+function switchScreen(name){
+  const valid=['timeline','overview','restore','analytics','diagnostics','settings'];
+  if(!valid.includes(name))name='timeline';
+  document.querySelectorAll('[data-screen-panel]').forEach(p=>p.classList.toggle('active',p.dataset.screenPanel===name));
+  document.querySelectorAll('.nav-item[data-screen]').forEach(b=>b.classList.toggle('active',b.dataset.screen===name));
+  const titleKeys={timeline:'screen_timeline',overview:'screen_overview',restore:'screen_restore',analytics:'screen_analytics',diagnostics:'screen_diagnostics',settings:'settings'};
+  const title=$('currentScreenTitle');if(title)title.textContent=tr(titleKeys[name]||'screen_timeline');
+  settings.lastScreen=name;set(SETTINGS,settings);
+  if(name==='timeline')setTimeout(()=>{const q=$('search');if(q)q.focus()},0);
+  if(name==='diagnostics')updateTrackingStatus();
+}
 
+document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 $('search').oninput=render;$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
 $('range').onchange=()=>{datePreset='all';selectedDayKey='';updateQuickButtons();render()};
 document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{viewMode=btn.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===btn));render()});
@@ -974,8 +991,8 @@ $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
 $('clearBtn').onclick=async()=>{if(confirm(tr('clear_all_confirm'))){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
-$('settingsFab').onclick=()=>$('dialog').classList.add('open');
-$('closeSettings').onclick=()=>$('dialog').classList.remove('open');
+$('settingsFab').onclick=()=>switchScreen('settings');
+$('closeSettings').onclick=()=>switchScreen('timeline');
 $('saveSettings').onclick=async()=>{
   settings.maxEvents=+$('maxEvents').value||5000;
   settings.inAppNotifications=$('notificationsEnabled').checked;
@@ -992,12 +1009,11 @@ $('saveSettings').onclick=async()=>{
   settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
   await set(SETTINGS,settings);
   await resolveLanguage();applyTranslations();sync();
-  $('dialog').classList.remove('open');
   await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(tr('settings_saved'),'success');
 };
 
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await load()});
-Otzaria.on('plugin.page_opened',async data=>{const param=data&&data.param;if(param&&param.action==='continueLatest'&&snaps.length)restoreSnapshot(snaps[snaps.length-1]);if(param&&param.view==='diagnostics')showDiagnostics();});
+Otzaria.on('plugin.page_opened',async data=>{const param=data&&data.param;if(param&&param.action==='continueLatest'&&snaps.length)restoreSnapshot(snaps[snaps.length-1]);if(param&&param.view==='diagnostics')switchScreen('diagnostics');});
 Otzaria.on('theme.changed',theme);
 Otzaria.on('plugin.resumed',load);
 })();
