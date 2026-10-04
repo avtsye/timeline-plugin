@@ -115,7 +115,7 @@ book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days
 restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
 save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More'
 }};
-const t=(key,vars={})=>{
+const tr=(key,vars={})=>{
   let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
   for(const [k,v] of Object.entries(vars))s=s.replaceAll('{'+k+'}',String(v));
   return s;
@@ -135,7 +135,7 @@ function applyTranslations(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;if(I18N[currentLang][key])el.textContent=t(key)});
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const key=el.dataset.i18nPlaceholder;if(I18N[currentLang][key])el.placeholder=t(key)});
   document.title=currentLang==='he'?'ציר זמן':'Timeline';
-  $('settingsFab').title=t('settings');$('settingsFab').setAttribute('aria-label',t('settings'));
+  $('settingsFab').title=tr('settings');$('settingsFab').setAttribute('aria-label',tr('settings'));
 }
 async function registerLocalizedShortcuts(){
   await call('app.registerShortcut',{id:'open-timeline',label:currentLang==='he'?'פתח ציר זמן':'Open Timeline',key:'ctrl+alt+t',command:'openTimeline'});
@@ -168,7 +168,7 @@ function showModal(title,bodyBuilder){
   const box=document.createElement('div');box.className='modalBox';
   const head=document.createElement('div');head.className='modalHead';
   const h=document.createElement('h2');h.textContent=title;
-  const close=document.createElement('button');close.textContent=t('close');close.onclick=()=>ov.remove();
+  const close=document.createElement('button');close.textContent=tr('close');close.onclick=()=>ov.remove();
   head.appendChild(h);head.appendChild(close);box.appendChild(head);
   const body=document.createElement('div');box.appendChild(body);ov.appendChild(box);document.body.appendChild(ov);
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
@@ -181,7 +181,7 @@ function bookKeyFromEvent(e){
 }
 function bookTitleFromEvent(e){
   const d=e.data||{};
-  return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||t('book');
+  return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||tr('book');
 }
 function eventsForBook(key){
   return events.filter(e=>['book','ref'].includes(e.type)&&String(bookKeyFromEvent(e))===String(key)).sort((a,b)=>b.time-a.time);
@@ -198,9 +198,9 @@ function sessionSummary(s){
     if(e.type==='ref')refs++;
   }
   const mins=Math.max(1,Math.round((s.end-s.start)/60000));
-  const parts=[mins+' '+t('minutes'),books.size+' '+t('books')];
-  if(plugins.size)parts.push(plugins.size+' '+t('plugins'));
-  if(refs)parts.push(refs+' '+t('position_changes'));
+  const parts=[mins+' '+tr('minutes'),books.size+' '+tr('books')];
+  if(plugins.size)parts.push(plugins.size+' '+tr('plugins'));
+  if(refs)parts.push(refs+' '+tr('position_changes'));
   return parts.join(' · ');
 }
 function dominantType(s){
@@ -227,8 +227,8 @@ function recentPlaces(limit=12){
 
 function dayTitle(ts){
   const k=dk(ts),now=Date.now();
-  if(k===dk(now))return t('today');
-  if(k===dk(now-86400000))return t('yesterday');
+  if(k===dk(now))return tr('today');
+  if(k===dk(now-86400000))return tr('yesterday');
   return new Intl.DateTimeFormat(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(ts));
 }
 function startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
@@ -241,7 +241,7 @@ function bucketKey(ts){
 }
 function bucketTitle(key,ts){
   if(viewMode==='day')return dayTitle(ts);
-  if(viewMode==='week'){const start=Number(key.slice(2));return t('week')+' '+fmtDate(start)+' – '+fmtDate(start+6*86400000)}
+  if(viewMode==='week'){const start=Number(key.slice(2));return tr('week')+' '+fmtDate(start)+' – '+fmtDate(start+6*86400000)}
   return new Intl.DateTimeFormat(locale(),{month:'long',year:'numeric'}).format(new Date(ts));
 }
 function matchesPreset(e){
@@ -341,29 +341,29 @@ function renderHeatmap(){
   for(let i=34;i>=0;i--){
     const t=Date.now()-i*86400000,k=dk(t),n=counts[k]||0,b=document.createElement('button');
     b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
-    b.title=k+' · '+n+' '+t('events');
+    b.title=k+' · '+n+' '+tr('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();render()};
     box.appendChild(b);
   }
 }
 function renderSearches(){
   const b=$('recentSearches');
-  b.innerHTML=searches.length?searches.slice(0,10).map(x=>'<button class="searchChip" data-q="'+esc(x.query)+'">'+esc(x.query)+'</button>').join(''):'<span class="muted">'+esc(t('no_recent_searches'))+'</span>';
+  b.innerHTML=searches.length?searches.slice(0,10).map(x=>'<button class="searchChip" data-q="'+esc(x.query)+'">'+esc(x.query)+'</button>').join(''):'<span class="muted">'+esc(tr('no_recent_searches'))+'</span>';
   b.querySelectorAll('button').forEach(btn=>btn.onclick=async()=>{
     await call('reader.openSearchTab',{query:btn.dataset.q,autoSearch:true});
     await call('navigation.goTo',{target:'reading'});
   });
 }
 function renderSnapshots(){
-  $('snapshotCount').textContent=snaps.length?snaps.length+' '+t('saved'):'';
+  $('snapshotCount').textContent=snaps.length?snaps.length+' '+tr('saved'):'';
   const box=$('snapshotGallery');box.innerHTML='';
   const recent=snaps.slice(-12).reverse();
-  if(!recent.length){box.innerHTML='<span class="muted">'+esc(t('no_snapshots'))+'</span>';return}
+  if(!recent.length){box.innerHTML='<span class="muted">'+esc(tr('no_snapshots'))+'</span>';return}
   for(const s of recent){
     const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId);
     const tools=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
     const el=document.createElement('button');el.className='snapshotCard';
-    el.innerHTML='<b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' '+esc(t('books'))+' · '+tools.length+' '+esc(t('plugins'))+'/'+esc(t('built_in_tool'))+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small>';
+    el.innerHTML='<b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' '+esc(tr('books'))+' · '+tools.length+' '+esc(tr('plugins'))+'/'+esc(tr('built_in_tool'))+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small>';
     el.onclick=()=>restoreSnapshot(s);box.appendChild(el);
   }
 }
@@ -372,34 +372,34 @@ function smartTitle(s){
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
   const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
-  if(books.length===1&&!plugins.length&&!tools.length)return t('reading_in')+' '+books[0];
-  if(plugins.length===1&&!books.length)return t('work_with')+' '+pluginName(plugins[0]);
+  if(books.length===1&&!plugins.length&&!tools.length)return tr('reading_in')+' '+books[0];
+  if(plugins.length===1&&!books.length)return tr('work_with')+' '+pluginName(plugins[0]);
   const parts=[];
-  if(books.length)parts.push(books.length+' '+t('books'));
-  if(plugins.length)parts.push(plugins.length+' '+t('plugins'));
-  if(tools.length)parts.push(tools.length+' '+t('built_in_tool'));
-  return parts.join(' · ')||t('activity_in_otzaria');
+  if(books.length)parts.push(books.length+' '+tr('books'));
+  if(plugins.length)parts.push(plugins.length+' '+tr('plugins'));
+  if(tools.length)parts.push(tools.length+' '+tr('built_in_tool'));
+  return parts.join(' · ')||tr('activity_in_otzaria');
 }
 function previewForSession(s){
   const last=s.events.slice().reverse().find(e=>['book','ref','plugin','tool'].includes(e.type));
-  if(!last)return{title:t('activity_in_otzaria'),ref:t('no_identified_activity')};
+  if(!last)return{title:tr('activity_in_otzaria'),ref:tr('no_identified_activity')};
   const d=last.data||{};
-  if(last.type==='plugin')return{title:t('plugin')+': '+pluginName(d.toolId||''),ref:t('opened_during_session')};
-  if(last.type==='tool')return{title:t('tool')+': '+String(d.toolId||last.label).replace(/^builtin\./,''),ref:t('opened_during_session')};
-  return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||t('book'),ref:d.currentRef||d.ref||''};
+  if(last.type==='plugin')return{title:tr('plugin')+': '+pluginName(d.toolId||''),ref:tr('opened_during_session')};
+  if(last.type==='tool')return{title:tr('tool')+': '+String(d.toolId||last.label).replace(/^builtin\./,''),ref:tr('opened_during_session')};
+  return{title:d.currentBook||d.book||d.currentBookId||d.bookId||last.label||tr('book'),ref:d.currentRef||d.ref||''};
 }
 async function openPlugin(id){
   const target=resolvedPluginId(id);
   const p=pluginInfo(target);
-  if(!p){await notify(t('plugin_missing'),'error');return}
-  if(!p.enabled){await notify(t('plugin_disabled'),'error');return}
+  if(!p){await notify(tr('plugin_missing'),'error');return}
+  if(!p.enabled){await notify(tr('plugin_disabled'),'error');return}
   const r=await call('plugin.openOther',{pluginId:target,param:{source:'timeline-plugin'}});
-  if(!r.success)await notify(t('plugin_open_failed'),'error');
+  if(!r.success)await notify(tr('plugin_open_failed'),'error');
 }
 async function openEvent(e){
   const d=e.data||{};
   if(e.type==='plugin'&&d.toolId){await openPlugin(d.toolId);return}
-  if(e.type==='tool'){await notify(t('builtin_open_unavailable'),'info');return}
+  if(e.type==='tool'){await notify(tr('builtin_open_unavailable'),'info');return}
   if(!['book','ref'].includes(e.type))return;
   const p={};const map={bookUid:d.bookUid,id:d.id,bookId:d.currentBookId||d.bookId||d.currentBook||d.book,type:d.type,source:d.source,index:d.currentIndex??d.index};
   for(const[k,v]of Object.entries(map))if(v!=null&&v!=='')p[k]=v;
@@ -408,24 +408,24 @@ async function openEvent(e){
   if(r.success)await call('navigation.goTo',{target:'reading'});
 }
 async function renameSession(s){
-  const next=prompt(t('session_name'),names[s.id]||smartTitle(s));
+  const next=prompt(tr('session_name'),names[s.id]||smartTitle(s));
   if(next===null)return;
   if(next.trim())names[s.id]=next.trim();else delete names[s.id];
   await set(NAMES,names);render();
 }
 async function deleteSession(s){
-  if(!confirm(t('delete_session_confirm')))return;
+  if(!confirm(tr('delete_session_confirm')))return;
   events=events.filter(e=>e.sessionId!==s.id);
   s.events.forEach(e=>favorites.delete(e.id));
   pinned.delete(s.id);collapsed.delete(s.id);delete names[s.id];delete sessionNotes[s.id];
   await Promise.all([set(EVENTS,events),set(NOTES,sessionNotes),persistMeta()]);
-  render();await notify(t('session_deleted'),'success');
+  render();await notify(tr('session_deleted'),'success');
 }
 async function saveSessionAsWorkspace(s){
-  const name=prompt(t('workspace_name'),names[s.id]||smartTitle(s));
+  const name=prompt(tr('workspace_name'),names[s.id]||smartTitle(s));
   if(!name||!name.trim())return;
   const cr=await call('workspace.create',{name:name.trim(),switchTo:true,reuseExisting:false});
-  if(!cr.success){await notify(t('workspace_create_failed'),'error');return}
+  if(!cr.success){await notify(tr('workspace_create_failed'),'error');return}
   const seen=new Set();
   for(const e of s.events){
     if(['book','ref'].includes(e.type)){
@@ -439,16 +439,16 @@ async function saveSessionAsWorkspace(s){
     }
   }
   await call('navigation.goTo',{target:'reading'});
-  await notify(t('session_saved_workspace'),'success');
+  await notify(tr('session_saved_workspace'),'success');
 }
 function editSessionNote(s){
-  showModal(t('session_note'),body=>{
+  showModal(tr('session_note'),body=>{
     const ta=document.createElement('textarea');ta.className='noteBox';ta.value=sessionNotes[s.id]||'';body.appendChild(ta);
     const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='12px';
-    const save=document.createElement('button');save.className='primary';save.textContent=t('save');
+    const save=document.createElement('button');save.className='primary';save.textContent=tr('save');
     save.onclick=async()=>{
       if(ta.value.trim())sessionNotes[s.id]=ta.value.trim();else delete sessionNotes[s.id];
-      await set(NOTES,sessionNotes);document.querySelector('.modalOverlay')?.remove();render();await notify(t('note_saved'),'success');
+      await set(NOTES,sessionNotes);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('note_saved'),'success');
     };
     actions.appendChild(save);body.appendChild(actions);
   });
@@ -456,13 +456,13 @@ function editSessionNote(s){
 async function exportPayload(payload,suggested){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const begin=await call('fs.beginBinaryWrite',{purpose:'user-file',expectedSize:blob.size});
-  if(!begin.success){await notify(t('export_failed'),'error');return}
+  if(!begin.success){await notify(tr('export_failed'),'error');return}
   try{
     const res=await fetch(begin.data.uploadUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body:blob});
     if(!res.ok)throw new Error('upload');
-    const save=await call('fs.commitUserFileWrite',{writeToken:begin.data.writeToken,suggestedName:suggested,extension:'json',title:t('export_timeline')});
-    if(save.success&&!save.data.cancelled)await notify(t('export_saved'),'success');
-  }catch(_){await call('fs.abortBinaryWrite',{writeToken:begin.data.writeToken});await notify(t('export_failed'),'error')}
+    const save=await call('fs.commitUserFileWrite',{writeToken:begin.data.writeToken,suggestedName:suggested,extension:'json',title:tr('export_timeline')});
+    if(save.success&&!save.data.cancelled)await notify(tr('export_saved'),'success');
+  }catch(_){await call('fs.abortBinaryWrite',{writeToken:begin.data.writeToken});await notify(tr('export_failed'),'error')}
 }
 function exportSession(s){
   exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'session',exportedAt:new Date().toISOString(),events:s.events,snapshots:snapshotsForSession(s),name:names[s.id]||null,note:sessionNotes[s.id]||null},'timeline-session-'+dk(s.start));
@@ -477,15 +477,15 @@ function createSessionCard(s){
   const card=document.createElement('section');
   card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
   card.innerHTML=
-    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(t('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+(nearest?' · '+esc(t('recent_snapshots'))+' '+fmt(nearest.time):'')+'</div></div>'+
-    '<div class="sessionTools">'+(nearest?'<button class="restoreNearest">'+esc(t('restore'))+'</button>':'')+
-    '<details class="sessionMenu"><summary title="'+esc(t('session_actions'))+'">⋯</summary><div class="sessionMenuPanel">'+
-    '<button class="renameBtn">'+esc(t('name'))+'</button><button class="noteBtn">'+esc(t('note'))+'</button>'+
-    '<button class="pinBtn">'+esc(isPinned?t('unpin'):t('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?t('expand'):t('collapse'))+'</button>'+
-    '<button class="workspaceBtn">'+esc(t('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(t('export'))+'</button>'+
-    (ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(t('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+'</option>').join('')+'</select>':'')+
-    '<button class="deleteBtn danger">'+esc(t('delete'))+'</button></div></details></div></div>'+
-    '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' '+esc(t('books'))+' · '+plugins.length+' '+esc(t('plugins'))+' · '+tools.length+' '+esc(t('built_in_tool'))+(note?' · '+esc(t('note')):'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
+    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(tr('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+(nearest?' · '+esc(tr('recent_snapshots'))+' '+fmt(nearest.time):'')+'</div></div>'+
+    '<div class="sessionTools">'+(nearest?'<button class="restoreNearest">'+esc(tr('restore'))+'</button>':'')+
+    '<details class="sessionMenu"><summary title="'+esc(tr('session_actions'))+'">⋯</summary><div class="sessionMenuPanel">'+
+    '<button class="renameBtn">'+esc(tr('name'))+'</button><button class="noteBtn">'+esc(tr('note'))+'</button>'+
+    '<button class="pinBtn">'+esc(isPinned?tr('unpin'):tr('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?tr('expand'):tr('collapse'))+'</button>'+
+    '<button class="workspaceBtn">'+esc(tr('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(tr('export'))+'</button>'+
+    (ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(tr('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+'</option>').join('')+'</select>':'')+
+    '<button class="deleteBtn danger">'+esc(tr('delete'))+'</button></div></details></div></div>'+
+    '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' '+esc(tr('books'))+' · '+plugins.length+' '+esc(tr('plugins'))+' · '+tools.length+' '+esc(tr('built_in_tool'))+(note?' · '+esc(tr('note')):'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
     '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">'+pluginIconHtml(x)+' '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
 
   const eb=card.querySelector('.events');
@@ -494,7 +494,7 @@ function createSessionCard(s){
     const main=document.createElement('div');main.style.flex='1';
     main.innerHTML='<b>'+esc(ev.type==='plugin'?pluginName(d.toolId):ev.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'')+'</small>';
     main.onclick=()=>openEvent(ev);
-    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(ev.id)?'★':'☆';fav.title=t('favorites');
+    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(ev.id)?'★':'☆';fav.title=tr('favorites');
     fav.onclick=async e=>{e.stopPropagation();favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()};
     const time=document.createElement('time');time.textContent=fmt(ev.time);
     row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
@@ -520,26 +520,26 @@ function renderStats(list,ss){
 function showBookHistory(bookKey){
   const visits=eventsForBook(bookKey);
   const title=visits.length?bookTitleFromEvent(visits[0]):String(bookKey);
-  showModal(t('book_visits')+' — '+title,body=>{
-    if(!visits.length){body.innerHTML='<div class="empty">'+esc(t('no_activity'))+'</div>';return}
+  showModal(tr('book_visits')+' — '+title,body=>{
+    if(!visits.length){body.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';return}
     const places=[];const seen=new Set();
     for(const e of visits){const d=e.data||{},ref=d.currentRef||d.ref||'',key=ref+'|'+(d.currentIndex??d.index??'');if(!seen.has(key)){seen.add(key);places.push(e)}}
     const summary=document.createElement('p');summary.className='muted';
-    summary.textContent=visits.length+' '+t('visits')+' · '+new Set(visits.map(e=>dk(e.time))).size+' '+t('days')+' · '+places.length+' '+t('places');body.appendChild(summary);
+    summary.textContent=visits.length+' '+tr('visits')+' · '+new Set(visits.map(e=>dk(e.time))).size+' '+tr('days')+' · '+places.length+' '+tr('places');body.appendChild(summary);
     const grid=document.createElement('div');grid.className='modalGrid';
     visits.slice(0,80).forEach(e=>{
       const d=e.data||{},card=document.createElement('div');card.className='miniCard';
       card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div>'+esc(d.currentRef||d.ref||'')+'</div><div class="muted">'+esc(String(d.currentIndex??d.index??''))+'</div>';
-      const b=document.createElement('button');b.textContent=t('open');b.onclick=()=>openEvent(e);card.appendChild(b);grid.appendChild(card);
+      const b=document.createElement('button');b.textContent=tr('open');b.onclick=()=>openEvent(e);card.appendChild(b);grid.appendChild(card);
     });
     body.appendChild(grid);
   });
 }
 function showPluginHistory(pluginId){
   const list=eventsForPlugin(pluginId),name=pluginName(pluginId);
-  showModal(t('plugin_timeline')+' — '+name,body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent=list.length+' '+t('visits');body.appendChild(p);
-    const open=document.createElement('button');open.textContent=t('open')+' '+t('plugin');open.onclick=()=>openPlugin(pluginId);body.appendChild(open);
+  showModal(tr('plugin_timeline')+' — '+name,body=>{
+    const p=document.createElement('p');p.className='muted';p.textContent=list.length+' '+tr('visits');body.appendChild(p);
+    const open=document.createElement('button');open.textContent=tr('open')+' '+tr('plugin');open.onclick=()=>openPlugin(pluginId);body.appendChild(open);
     const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='12px';
     list.slice(0,100).forEach(e=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div class="muted">'+esc((e.data||{}).toolId||'')+'</div>';grid.appendChild(card)});
     body.appendChild(grid);
@@ -586,21 +586,21 @@ function aggregateMonths(count=12){
   return out;
 }
 function showDashboard(){
-  showModal(t('activity_dashboard'),body=>{
+  showModal(tr('activity_dashboard'),body=>{
     const daily=aggregateDaily(30);
-    body.innerHTML='<h3>'+esc(t('day_activity'))+'</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
-    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent=t('weeks_activity');body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))));
-    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent=t('months_activity');body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
-    const yearTitle=document.createElement('h3');yearTitle.textContent=t('year_heatmap');body.appendChild(yearTitle);
+    body.innerHTML='<h3>'+esc(tr('day_activity'))+'</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
+    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent=tr('weeks_activity');body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))));
+    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent=tr('months_activity');body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
+    const yearTitle=document.createElement('h3');yearTitle.textContent=tr('year_heatmap');body.appendChild(yearTitle);
     const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
     for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(tm)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}
     body.appendChild(year);
     const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='18px';
-    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>'+esc(t('top_books'))+'</h3>';
+    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>'+esc(tr('top_books'))+'</h3>';
     topBooks().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')';b.onclick=()=>showBookHistory(x.key);bcard.appendChild(b)});grid.appendChild(bcard);
-    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>'+esc(t('top_plugins'))+'</h3>';
-    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — '+t('missing_plugins'):'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
-    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>'+esc(t('recent_places'))+'</h3>';
+    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>'+esc(tr('top_plugins'))+'</h3>';
+    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — '+tr('missing_plugins'):'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
+    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>'+esc(tr('recent_places'))+'</h3>';
     recentPlaces().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+(x.ref?' — '+x.ref:'');b.onclick=()=>openEvent(x.event);rcard.appendChild(b)});grid.appendChild(rcard);
     body.appendChild(grid);
   });
@@ -610,13 +610,13 @@ function render(){
   const list=filtered(),ss=sessions(list);
   renderStats(list,ss);renderHeatmap();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
-  if(!ss.length){cont.innerHTML='<div class="empty">'+esc(t('no_activity'))+'</div>';updateContinue();return}
+  if(!ss.length){cont.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';updateContinue();return}
   const buckets=new Map();
   for(const s of ss){const key=bucketKey(s.start);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(s)}
   for(const[key,items]of buckets){
     const wrap=document.createElement('section');wrap.className='bucket';
     if(viewMode==='day'){
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(t('sessions'))+'</span></div><div class="timelineRail"></div>';
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="timelineRail"></div>';
       const rail=wrap.querySelector('.timelineRail');
       items.forEach((s,i)=>{
         const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');
@@ -628,12 +628,12 @@ function render(){
         const dot=document.createElement('div');dot.className='timelineDot';
         const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
         const marks=document.createElement('div');marks.className='snapshotMarks';
-        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=t('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
+        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
         const tip=document.createElement('div');tip.className='timelineTooltip';tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
         node.appendChild(cw);node.appendChild(dot);node.appendChild(stamp);node.appendChild(marks);node.appendChild(tip);rail.appendChild(node);
       });
     }else{
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(t('sessions'))+'</span></div><div class="sessionGrid"></div>';
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="sessionGrid"></div>';
       const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>grid.appendChild(createSessionCard(s)));
     }
     cont.appendChild(wrap);
@@ -642,14 +642,14 @@ function render(){
 }
 function updateContinue(){
   const latest=snaps[snaps.length-1];$('continueBtn').disabled=!latest;
-  $('continueInfo').textContent=latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length+' '+t('books')+' · '+fmtDate(latest.time)+' · '+fmt(latest.time)):t('no_snapshots');
+  $('continueInfo').textContent=latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length+' '+tr('books')+' · '+fmtDate(latest.time)+' · '+fmt(latest.time)):tr('no_snapshots');
 }
 async function createSnapshot(renderAfter=true,showNotice=true){
   const[rs,ws]=await Promise.all([call('reader.getCurrentState'),call('workspace.getActive')]);
-  if(!rs.success||!rs.data){if(showNotice)await notify(t('snapshot_create_failed'),'error');return null}
+  if(!rs.success||!rs.data){if(showNotice)await notify(tr('snapshot_create_failed'),'error');return null}
   const snap={id:'snap-'+Date.now().toString(36),time:Date.now(),workspace:ws.success?ws.data:null,active:{bookUid:rs.data.bookUid,bookId:rs.data.currentBookId,index:rs.data.currentIndex},tabs:rs.data.openTabs||[]};
   snaps.push(snap);if(snaps.length>300)snaps.splice(0,snaps.length-300);
-  await set(SNAPS,snaps);if(renderAfter)render();if(showNotice)await notify(t('snapshot_saved'),'success');await publishHomepageState();return snap;
+  await set(SNAPS,snaps);if(renderAfter)render();if(showNotice)await notify(tr('snapshot_saved'),'success');await publishHomepageState();return snap;
 }
 async function performRestoreSnapshot(s,selectedBookKeys=null){
   const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
@@ -674,13 +674,13 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
   }
   await call('navigation.goTo',{target:'reading'});
   settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;await set(SETTINGS,settings);
-  await notify(t('snapshot_restored'),'success');
+  await notify(tr('snapshot_restored'),'success');
 }
 function restoreSnapshot(s){
   if(!s)return;
   const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-  showModal(t('restore_preview'),body=>{
-    body.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">'+esc(t('select_books_restore'))+'</p>';
+  showModal(tr('restore_preview'),body=>{
+    body.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">'+esc(tr('select_books_restore'))+'</p>';
     const grid=document.createElement('div');grid.className='modalGrid',checks=[];
     for(const tb of books){
       const id=String(tb.bookUid||tb.bookId),card=document.createElement('label');card.className='miniCard';
@@ -688,33 +688,33 @@ function restoreSnapshot(s){
       checks.push({id,input:card.querySelector('input')});grid.appendChild(card);
     }
     body.appendChild(grid);
-    if(plugins.length){const p=document.createElement('p');p.className='muted';p.textContent=plugins.length+' '+t('plugins')+'/'+t('built_in_tool');body.appendChild(p)}
+    if(plugins.length){const p=document.createElement('p');p.className='muted';p.textContent=plugins.length+' '+tr('plugins')+'/'+tr('built_in_tool');body.appendChild(p)}
     const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='14px';
-    const all=document.createElement('button');all.textContent=t('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
-    const none=document.createElement('button');none.textContent=t('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='primary';go.textContent=t('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
+    const all=document.createElement('button');all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
+    const none=document.createElement('button');none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
+    const go=document.createElement('button');go.className='primary';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
     actions.appendChild(all);actions.appendChild(none);actions.appendChild(go);body.appendChild(actions);
   });
 }
 function showSnapshotBrowser(){
-  showModal(t('all_restore_points'),body=>{
-    if(!snaps.length){body.innerHTML='<div class="empty">'+esc(t('no_snapshots'))+'</div>';return}
+  showModal(tr('all_restore_points'),body=>{
+    if(!snaps.length){body.innerHTML='<div class="empty">'+esc(tr('no_snapshots'))+'</div>';return}
     const grid=document.createElement('div');grid.className='modalGrid';
     snaps.slice().reverse().forEach(s=>{
       const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
       const card=document.createElement('div');card.className='miniCard';
-      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' '+esc(t('books'))+' · '+plugins.length+' '+esc(t('plugins'))+'</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
-      const btn=document.createElement('button');btn.textContent=t('preview_restore');btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
+      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' '+esc(tr('books'))+' · '+plugins.length+' '+esc(tr('plugins'))+'</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
+      const btn=document.createElement('button');btn.textContent=tr('preview_restore');btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
     });body.appendChild(grid);
   });
 }
 function showExportDialog(){
-  showModal(t('export_timeline'),body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent=t('choose_export');body.appendChild(p);
+  showModal(tr('export_timeline'),body=>{
+    const p=document.createElement('p');p.className='muted';p.textContent=tr('choose_export');body.appendChild(p);
     const actions=document.createElement('div');actions.className='actions';
-    const all=document.createElement('button');all.textContent=t('all');all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
-    const filteredBtn=document.createElement('button');filteredBtn.textContent=t('filtered_view');filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
-    const day=document.createElement('button');day.textContent=t('today');day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
+    const all=document.createElement('button');all.textContent=tr('all');all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
+    const filteredBtn=document.createElement('button');filteredBtn.textContent=tr('filtered_view');filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
+    const day=document.createElement('button');day.textContent=tr('today');day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
     actions.appendChild(all);actions.appendChild(filteredBtn);actions.appendChild(day);body.appendChild(actions);
   });
 }
@@ -724,34 +724,34 @@ function mergeById(a,b){
   return[...m.values()].sort((x,y)=>(x.time||0)-(y.time||0));
 }
 async function importData(){
-  const pick=await call('fs.pickUserFile',{title:t('import_timeline'),extensions:['json'],access:'read'});
+  const pick=await call('fs.pickUserFile',{title:tr('import_timeline'),extensions:['json'],access:'read'});
   if(!pick.success||pick.data.cancelled)return;
   const read=await call('fs.readTextFile',{token:pick.data.token});await call('fs.revokeFile',{token:pick.data.token});
-  if(!read.success){await notify(t('read_file_failed'),'error');return}
+  if(!read.success){await notify(tr('read_file_failed'),'error');return}
   try{
     const data=JSON.parse(read.data);
     if(!data||data.plugin!=='timeline-plugin'||!Array.isArray(data.events))throw new Error('bad');
-    if(!confirm(t('merge_import_confirm')))return;
+    if(!confirm(tr('merge_import_confirm')))return;
     events=mergeById(events,data.events);snaps=mergeById(snaps,data.snaps||data.snapshots||[]);
     if(data.settings)settings=Object.assign(settings,data.settings);
     pinned=new Set([...pinned,...(data.pins||[])]);collapsed=new Set([...collapsed,...(data.collapsed||[])]);favorites=new Set([...favorites,...(data.favorites||[])]);
     names=Object.assign({},names,data.names||{});sessionNotes=Object.assign({},sessionNotes,data.sessionNotes||{});pluginMigrations=Object.assign({},pluginMigrations,data.pluginMigrations||{});
     if(Array.isArray(data.savedFilters))savedFilters=[...savedFilters,...data.savedFilters].slice(-30);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings),set(NOTES,sessionNotes),set(MIGRATIONS,pluginMigrations),set(SAVED_FILTERS,savedFilters),persistMeta()]);
-    await resolveLanguage();await registerLocalizedShortcuts();applyTranslations();sync();render();await publishHomepageState();await notify(t('import_done'),'success');
-  }catch(_){await notify(t('invalid_timeline_file'),'error')}
+    await resolveLanguage();await registerLocalizedShortcuts();applyTranslations();sync();render();await publishHomepageState();await notify(tr('import_done'),'success');
+  }catch(_){await notify(tr('invalid_timeline_file'),'error')}
 }
 async function restoreInternalBackup(path){
-  if(!confirm(t('restore_internal_confirm')))return;
+  if(!confirm(tr('restore_internal_confirm')))return;
   const read=await call('fs.readFile',{path});
-  if(!read.success||!read.data||typeof read.data.content!=='string'){await notify(t('read_file_failed'),'error');return}
+  if(!read.success||!read.data||typeof read.data.content!=='string'){await notify(tr('read_file_failed'),'error');return}
   try{
     const data=JSON.parse(read.data.content);
     if(!Array.isArray(data.events)||!Array.isArray(data.snaps))throw new Error('bad');
     events=data.events;snaps=data.snaps;if(data.settings)settings=Object.assign(settings,data.settings);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings)]);
-    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(t('backup_restored'),'success');
-  }catch(_){await notify(t('backup_invalid'),'error')}
+    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(tr('backup_restored'),'success');
+  }catch(_){await notify(tr('backup_invalid'),'error')}
 }
 async function showDiagnostics(){
   const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
@@ -760,26 +760,26 @@ async function showDiagnostics(){
   const missing=required.filter(x=>!ps.includes(x));
   const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
   const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
-  showModal(t('diagnostics_title'),body=>{
+  showModal(tr('diagnostics_title'),body=>{
     const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
     body.innerHTML='<div class="modalGrid">'+
-      '<div class="miniCard"><h3>'+esc(t('health'))+'</h3><div class="'+(missing.length?'diagBad':'diagGood')+'">'+esc(missing.length?t('missing_permissions')+': '+missing.length:t('permissions_ok'))+'</div><div class="muted">'+esc(missing.join(', '))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(t('storage'))+'</h3><div>'+events.length+' '+esc(t('events'))+' · '+snaps.length+' '+esc(t('recent_snapshots'))+'</div><div class="muted">~'+Math.round(bytes/1024)+' KB</div></div>'+
-      '<div class="miniCard"><h3>'+esc(t('last_snapshot'))+'</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):esc(t('no_data')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(t('internal_backups'))+'</h3><div>'+backupEntries.length+' '+esc(t('versions'))+'</div><div class="muted">'+(health.lastBackupAt?esc(t('last'))+' '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):esc(t('no_data')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(t('tracking'))+'</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?esc(t('last'))+' '+fmt(health.lastEventAt):esc(t('no_event')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(t('missing_plugins'))+'</h3><div>'+missingPluginIds().length+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('health'))+'</h3><div class="'+(missing.length?'diagBad':'diagGood')+'">'+esc(missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'))+'</div><div class="muted">'+esc(missing.join(', '))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('storage'))+'</h3><div>'+events.length+' '+esc(tr('events'))+' · '+snaps.length+' '+esc(tr('recent_snapshots'))+'</div><div class="muted">~'+Math.round(bytes/1024)+' KB</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('last_snapshot'))+'</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):esc(tr('no_data')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('internal_backups'))+'</h3><div>'+backupEntries.length+' '+esc(tr('versions'))+'</div><div class="muted">'+(health.lastBackupAt?esc(tr('last'))+' '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):esc(tr('no_data')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('tracking'))+'</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?esc(tr('last'))+' '+fmt(health.lastEventAt):esc(tr('no_event')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(tr('missing_plugins'))+'</h3><div>'+missingPluginIds().length+'</div></div>'+
       '</div>';
     const actions=document.createElement('div');actions.className='actions';actions.style.margin='16px 0';
-    const mig=document.createElement('button');mig.textContent=t('missing_plugin_mapping');mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
-    const snapBtn=document.createElement('button');snapBtn.textContent=t('open_snapshot_browser');snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);body.appendChild(actions);
+    const mig=document.createElement('button');mig.textContent=tr('missing_plugin_mapping');mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
+    const snapBtn=document.createElement('button');snapBtn.textContent=tr('open_snapshot_browser');snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);body.appendChild(actions);
     if(backupEntries.length){
-      const h=document.createElement('h3');h.textContent=t('restore_internal_backup');body.appendChild(h);
+      const h=document.createElement('h3');h.textContent=tr('restore_internal_backup');body.appendChild(h);
       const grid=document.createElement('div');grid.className='modalGrid';
       backupEntries.slice(0,5).forEach(x=>{
         const m=String(x.name).match(/backup-(\d+)\.json/),ts=m?Number(m[1]):0,card=document.createElement('div');card.className='miniCard';
         card.innerHTML='<b>'+(ts?esc(fmtDate(ts)+' · '+fmt(ts)):esc(x.name))+'</b><div class="muted">'+Math.round(Number(x.size||0)/1024)+' KB</div>';
-        const b=document.createElement('button');b.textContent=t('restore_backup');b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
+        const b=document.createElement('button');b.textContent=tr('restore_backup');b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
       });
       body.appendChild(grid);
     }
@@ -787,13 +787,13 @@ async function showDiagnostics(){
 }
 function updateSavedFilterSelect(){
   const el=$('savedFilterSelect');
-  el.innerHTML='<option value="">'+esc(t('saved_filters'))+'</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
+  el.innerHTML='<option value="">'+esc(tr('saved_filters'))+'</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
 }
 async function saveCurrentFilter(){
-  const name=prompt(t('save_filter_name'));if(!name||!name.trim())return;
+  const name=prompt(tr('save_filter_name'));if(!name||!name.trim())return;
   savedFilters.push({name:name.trim(),search:$('search').value,type:$('type').value,plugin:$('pluginFilter').value,range:$('range').value,sort:$('sort').value,datePreset,selectedDayKey,favoritesOnly});
   if(savedFilters.length>30)savedFilters.shift();
-  await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify(t('filter_saved'),'success');
+  await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify(tr('filter_saved'),'success');
 }
 function applySavedFilter(i){
   const x=savedFilters[Number(i)];if(!x)return;
@@ -807,7 +807,7 @@ function setTimelineZoom(v){
 }
 async function applyNewTabIntegration(){
   const r=await call('plugin.setNewTabPage',{enabled:!!settings.newTabIntegration});
-  if(!r.success&&settings.newTabIntegration)await notify(t('plugin_open_failed'),'error');
+  if(!r.success&&settings.newTabIntegration)await notify(tr('plugin_open_failed'),'error');
 }
 async function publishHomepageState(){
   if(!settings.homepageIntegration){
@@ -815,7 +815,7 @@ async function publishHomepageState(){
   }
   const latest=snaps[snaps.length-1],recent=events.slice(-1)[0];
   await call('publishedData.upsert',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue',payload:{
-    title:t('continue_work'),count:latest?((latest.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId).length):0,
+    title:tr('continue_work'),count:latest?((latest.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId).length):0,
     label:latest?((currentLang==='he'?'ציר זמן':'Timeline')+' · '+fmtDate(latest.time)+' '+fmt(latest.time)):(currentLang==='he'?'ציר זמן':'Timeline'),source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
   }});
 }
@@ -825,27 +825,27 @@ function missingPluginIds(){
 }
 function showMigrationManager(){
   const missing=missingPluginIds();
-  showModal(t('missing_plugin_mapping'),body=>{
-    if(!missing.length){body.innerHTML='<div class="empty">'+esc(t('no_missing_plugins'))+'</div>';return}
+  showModal(tr('missing_plugin_mapping'),body=>{
+    if(!missing.length){body.innerHTML='<div class="empty">'+esc(tr('no_missing_plugins'))+'</div>';return}
     for(const oldId of missing){
       const row=document.createElement('div');row.className='miniCard';row.style.margin='8px 0';
-      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">'+esc(t('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
       const title=document.createElement('b');title.textContent=oldId;
-      const btn=document.createElement('button');btn.textContent=t('save_mapping');btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(t('mapping_saved'),'success')};
+      const btn=document.createElement('button');btn.textContent=tr('save_mapping');btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('mapping_saved'),'success')};
       row.appendChild(title);row.appendChild(document.createElement('br'));row.appendChild(sel);row.appendChild(btn);body.appendChild(row);
     }
   });
 }
 function updatePrivacyStatus(){
   const now=Date.now();
-  if(settings.pauseUntilRestart){$('privacyStatus').textContent=t('privacy_active_restart');return}
-  if(Number(settings.pauseUntil||0)>now){$('privacyStatus').textContent=t('privacy_active_until')+' '+fmt(settings.pauseUntil);return}
-  $('privacyStatus').textContent=t('privacy_inactive');
+  if(settings.pauseUntilRestart){$('privacyStatus').textContent=tr('privacy_active_restart');return}
+  if(Number(settings.pauseUntil||0)>now){$('privacyStatus').textContent=tr('privacy_active_until')+' '+fmt(settings.pauseUntil);return}
+  $('privacyStatus').textContent=tr('privacy_inactive');
 }
 function setFocusMode(on){
   settings.focusMode=!!on;
   document.body.classList.toggle('focus-mode',settings.focusMode);
-  $('focusModeBtn').textContent=settings.focusMode?t('exit_focus'):t('focus_mode');
+  $('focusModeBtn').textContent=settings.focusMode?tr('exit_focus'):tr('focus_mode');
   set(SETTINGS,settings);
 }
 function activateSettingsTab(name){
@@ -854,27 +854,27 @@ function activateSettingsTab(name){
 }
 async function sendFeedback(){
   const details=$('feedbackText').value.trim();
-  if(!details){await notify(t('feedback_empty'),'error');return}
+  if(!details){await notify(tr('feedback_empty'),'error');return}
   const reportType=$('feedbackType').value||'other';
   const r=await call('feedback.report',{details,reportType});
-  if(!r.success){await notify(t('feedback_empty'),'error');return}
-  if(r.data==='sent'){await notify(t('feedback_sent'),'success');$('feedbackText').value=''}
-  else if(r.data==='queued'){await notify(t('feedback_queued'),'success');$('feedbackText').value=''}
-  else if(r.data==='cancelled'){await notify(t('feedback_cancelled'),'info')}
+  if(!r.success){await notify(tr('feedback_empty'),'error');return}
+  if(r.data==='sent'){await notify(tr('feedback_sent'),'success');$('feedbackText').value=''}
+  else if(r.data==='queued'){await notify(tr('feedback_queued'),'success');$('feedbackText').value=''}
+  else if(r.data==='cancelled'){await notify(tr('feedback_cancelled'),'info')}
 }
 async function showSummaryArchive(){
   const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
-  if(!r.success||!r.data||typeof r.data.content!=='string'){await notify(t('archive_empty'),'info');return}
+  if(!r.success||!r.data||typeof r.data.content!=='string'){await notify(tr('archive_empty'),'info');return}
   try{
     const data=JSON.parse(r.data.content);
-    showModal(t('archive_title'),body=>{
+    showModal(tr('archive_title'),body=>{
       const totals=data.totals||{};
-      body.innerHTML='<div class="modalGrid"><div class="miniCard"><h3>'+esc(t('archive_events'))+'</h3><div>'+Number(totals.events||0)+'</div></div><div class="miniCard"><h3>'+esc(t('archive_days'))+'</h3><div>'+Number(totals.days||0)+'</div></div><div class="miniCard"><h3>'+esc(t('recent_snapshots'))+'</h3><div>'+Number(totals.snapshots||0)+'</div></div></div>';
+      body.innerHTML='<div class="modalGrid"><div class="miniCard"><h3>'+esc(tr('archive_events'))+'</h3><div>'+Number(totals.events||0)+'</div></div><div class="miniCard"><h3>'+esc(tr('archive_days'))+'</h3><div>'+Number(totals.days||0)+'</div></div><div class="miniCard"><h3>'+esc(tr('recent_snapshots'))+'</h3><div>'+Number(totals.snapshots||0)+'</div></div></div>';
       const days=Object.entries(data.days||{}).sort((a,b)=>b[0].localeCompare(a[0]));
       const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='14px';
-      days.slice(0,120).forEach(([date,x])=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(date)+'</h3><div>'+Number(x.events||0)+' '+esc(t('events'))+' · '+Number(x.sessions||0)+' '+esc(t('sessions'))+'</div>';grid.appendChild(card)});body.appendChild(grid);
+      days.slice(0,120).forEach(([date,x])=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(date)+'</h3><div>'+Number(x.events||0)+' '+esc(tr('events'))+' · '+Number(x.sessions||0)+' '+esc(tr('sessions'))+'</div>';grid.appendChild(card)});body.appendChild(grid);
     });
-  }catch(_){await notify(t('archive_empty'),'error')}
+  }catch(_){await notify(tr('archive_empty'),'error')}
 }
 function updateQuickButtons(){
   document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===datePreset&&!selectedDayKey));
@@ -884,12 +884,12 @@ async function updateTrackingStatus(){
   const info=await call('app.getGrantedPermissions');
   const perms=info.success&&info.data&&Array.isArray(info.data.permissions)?info.data.permissions:[];
   const hasRun=perms.includes('app.run_on_startup'),hasKeep=perms.includes('app.background_keep_alive');
-  if(hasRun&&hasKeep){$('trackingStatus').textContent=t('active');$('trackingDetail').textContent=t('tracking_active')}
-  else if(hasRun){$('trackingStatus').textContent=t('partial');$('trackingDetail').textContent=t('tracking_partial')}
-  else{$('trackingStatus').textContent=t('limited');$('trackingDetail').textContent=t('tracking_limited')}
+  if(hasRun&&hasKeep){$('trackingStatus').textContent=tr('active');$('trackingDetail').textContent=tr('tracking_active')}
+  else if(hasRun){$('trackingStatus').textContent=tr('partial');$('trackingDetail').textContent=tr('tracking_partial')}
+  else{$('trackingStatus').textContent=tr('limited');$('trackingDetail').textContent=tr('tracking_limited')}
 }
 function sync(){
-  $('pauseBtn').textContent=settings.paused?t('resume_tracking'):t('pause_tracking');
+  $('pauseBtn').textContent=settings.paused?tr('resume_tracking'):tr('pause_tracking');
   $('maxEvents').value=String(settings.maxEvents||5000);
   $('notificationsEnabled').checked=settings.inAppNotifications!==false;
   $('compactMode').checked=!!settings.compactMode;
@@ -904,7 +904,7 @@ function sync(){
   $('trackNavigation').checked=settings.trackNavigation!==false;
   $('summaryArchiveEnabled').checked=settings.summaryArchiveEnabled!==false;
   document.body.classList.toggle('focus-mode',!!settings.focusMode);
-  $('focusModeBtn').textContent=settings.focusMode?t('exit_focus'):t('focus_mode');
+  $('focusModeBtn').textContent=settings.focusMode?tr('exit_focus'):tr('focus_mode');
   updatePrivacyStatus();
   $('zoomLabel').textContent=Math.round(Number(settings.timelineZoom||1)*100)+'%';
   document.body.classList.toggle('compact',!!settings.compactMode);
@@ -924,7 +924,7 @@ async function load(){
   const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
   const pf=$('pluginFilter');
-  pf.innerHTML='<option value="">'+esc(t('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
+  pf.innerHTML='<option value="">'+esc(tr('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
   sync();render();await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
 function theme(payload){
@@ -965,15 +965,15 @@ $('openArchiveBtn').onclick=showSummaryArchive;
 $('sendFeedbackBtn').onclick=sendFeedback;
 $('focusModeBtn').onclick=()=>setFocusMode(!settings.focusMode);
 document.querySelectorAll('.settingsTabBtn').forEach(btn=>btn.onclick=()=>activateSettingsTab(btn.dataset.settingsTab));
-$('privacyHourBtn').onclick=async()=>{settings.pauseUntil=Date.now()+60*60*1000;settings.pauseUntilRestart=false;await set(SETTINGS,settings);updatePrivacyStatus();await notify(t('tracking_paused'),'info')};
-$('privacySessionBtn').onclick=async()=>{settings.pauseUntilRestart=true;settings.pauseUntil=0;await set(SETTINGS,settings);updatePrivacyStatus();await notify(t('tracking_paused'),'info')};
-$('privacyResumeBtn').onclick=async()=>{settings.pauseUntilRestart=false;settings.pauseUntil=0;settings.paused=false;await set(SETTINGS,settings);sync();await notify(t('tracking_resumed'),'success')};
-$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?t('tracking_paused'):t('tracking_resumed'),settings.paused?'info':'success')};
+$('privacyHourBtn').onclick=async()=>{settings.pauseUntil=Date.now()+60*60*1000;settings.pauseUntilRestart=false;await set(SETTINGS,settings);updatePrivacyStatus();await notify(tr('tracking_paused'),'info')};
+$('privacySessionBtn').onclick=async()=>{settings.pauseUntilRestart=true;settings.pauseUntil=0;await set(SETTINGS,settings);updatePrivacyStatus();await notify(tr('tracking_paused'),'info')};
+$('privacyResumeBtn').onclick=async()=>{settings.pauseUntilRestart=false;settings.pauseUntil=0;settings.paused=false;await set(SETTINGS,settings);sync();await notify(tr('tracking_resumed'),'success')};
+$('pauseBtn').onclick=async()=>{settings.paused=!settings.paused;await set(SETTINGS,settings);sync();await notify(settings.paused?tr('tracking_paused'):tr('tracking_resumed'),settings.paused?'info':'success')};
 $('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
 $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
-$('clearBtn').onclick=async()=>{if(confirm(t('clear_all_confirm'))){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(t('timeline_cleared'),'success')}};
+$('clearBtn').onclick=async()=>{if(confirm(tr('clear_all_confirm'))){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
 $('settingsFab').onclick=()=>$('dialog').classList.add('open');
 $('closeSettings').onclick=()=>$('dialog').classList.remove('open');
 $('saveSettings').onclick=async()=>{
@@ -993,7 +993,7 @@ $('saveSettings').onclick=async()=>{
   await set(SETTINGS,settings);
   await resolveLanguage();applyTranslations();sync();
   $('dialog').classList.remove('open');
-  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(t('settings_saved'),'success');
+  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(tr('settings_saved'),'success');
 };
 
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await load()});
