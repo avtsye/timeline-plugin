@@ -15,7 +15,8 @@ for(const token of required){
   if(!app.includes(token)) throw new Error('Missing runtime function: '+token);
 }
 
-if(/function\s+dayTitle\s*\(t\)/.test(app)) throw new Error('i18n collision: dayTitle(t) shadows translator t()');
+if(!app.includes('const tr=(key,vars={})=>')) throw new Error('Translator tr() is missing');
+if(/\bt\(/.test(app)) throw new Error('Legacy t() translation call remains and may collide with local time variables');
 if(app.includes("$('settingsBtn')")) throw new Error('Legacy settingsBtn reference remains');
 if(app.includes("$('pluginGrid')")||app.includes("$('installedCount')")) throw new Error('Removed last-per-plugin panel is still referenced');
 
