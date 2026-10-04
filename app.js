@@ -732,34 +732,34 @@ function mergeById(a,b){
   return[...m.values()].sort((x,y)=>(x.time||0)-(y.time||0));
 }
 async function importData(){
-  const pick=await call('fs.pickUserFile',{title:'ייבוא ציר זמן',extensions:['json'],access:'read'});
+  const pick=await call('fs.pickUserFile',{title:t('import_timeline'),extensions:['json'],access:'read'});
   if(!pick.success||pick.data.cancelled)return;
   const read=await call('fs.readTextFile',{token:pick.data.token});await call('fs.revokeFile',{token:pick.data.token});
-  if(!read.success){await notify('קריאת הקובץ נכשלה','error');return}
+  if(!read.success){await notify(t('read_file_failed'),'error');return}
   try{
     const data=JSON.parse(read.data);
     if(!data||data.plugin!=='timeline-plugin'||!Array.isArray(data.events))throw new Error('bad');
-    if(!confirm('למזג את קובץ ה-Timeline עם הנתונים הקיימים?'))return;
+    if(!confirm(t('merge_import_confirm')))return;
     events=mergeById(events,data.events);snaps=mergeById(snaps,data.snaps||data.snapshots||[]);
     if(data.settings)settings=Object.assign(settings,data.settings);
     pinned=new Set([...pinned,...(data.pins||[])]);collapsed=new Set([...collapsed,...(data.collapsed||[])]);favorites=new Set([...favorites,...(data.favorites||[])]);
     names=Object.assign({},names,data.names||{});sessionNotes=Object.assign({},sessionNotes,data.sessionNotes||{});pluginMigrations=Object.assign({},pluginMigrations,data.pluginMigrations||{});
     if(Array.isArray(data.savedFilters))savedFilters=[...savedFilters,...data.savedFilters].slice(-30);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings),set(NOTES,sessionNotes),set(MIGRATIONS,pluginMigrations),set(SAVED_FILTERS,savedFilters),persistMeta()]);
-    sync();render();await publishHomepageState();await notify('הייבוא הושלם','success');
-  }catch(_){await notify('קובץ Timeline לא תקין','error')}
+    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(t('import_done'),'success');
+  }catch(_){await notify(t('invalid_timeline_file'),'error')}
 }
 async function restoreInternalBackup(path){
-  if(!confirm('לשחזר את הגיבוי הפנימי הזה? הנתונים הנוכחיים יוחלפו.'))return;
+  if(!confirm(t('restore_internal_confirm')))return;
   const read=await call('fs.readFile',{path});
-  if(!read.success||!read.data||typeof read.data.content!=='string'){await notify('קריאת הגיבוי נכשלה','error');return}
+  if(!read.success||!read.data||typeof read.data.content!=='string'){await notify(t('read_file_failed'),'error');return}
   try{
     const data=JSON.parse(read.data.content);
     if(!Array.isArray(data.events)||!Array.isArray(data.snaps))throw new Error('bad');
     events=data.events;snaps=data.snaps;if(data.settings)settings=Object.assign(settings,data.settings);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings)]);
-    sync();render();await publishHomepageState();await notify('הגיבוי שוחזר','success');
-  }catch(_){await notify('קובץ הגיבוי אינו תקין','error')}
+    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(t('backup_restored'),'success');
+  }catch(_){await notify(t('backup_invalid'),'error')}
 }
 async function showDiagnostics(){
   const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
@@ -768,29 +768,26 @@ async function showDiagnostics(){
   const missing=required.filter(x=>!ps.includes(x));
   const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
   const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
-  showModal('Diagnostics',body=>{
+  showModal(t('diagnostics_title'),body=>{
     const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
     body.innerHTML='<div class="modalGrid">'+
-      '<div class="miniCard"><h3>בריאות</h3><div class="'+(missing.length?'diagBad':'diagGood')+'">'+(missing.length?'חסרות '+missing.length+' הרשאות':'הרשאות מרכזיות תקינות')+'</div><div class="muted">'+esc(missing.join(', '))+'</div></div>'+
-      '<div class="miniCard"><h3>אחסון</h3><div>'+events.length+' Events · '+snaps.length+' Snapshots</div><div class="muted">כ-'+Math.round(bytes/1024)+' KB ב-JSON</div></div>'+
-      '<div class="miniCard"><h3>Snapshot אחרון</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):'אין')+'</div></div>'+
-      '<div class="miniCard"><h3>גיבויים פנימיים</h3><div>'+backupEntries.length+' גרסאות</div><div class="muted">'+(health.lastBackupAt?'אחרון '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):'אין נתון')+'</div></div>'+
-      '<div class="miniCard"><h3>מעקב</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?'אירוע אחרון '+fmt(health.lastEventAt):'אין אירוע')+'</div></div>'+
-      '<div class="miniCard"><h3>תוספים חסרים</h3><div>'+missingPluginIds().length+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('health'))+'</h3><div class="'+(missing.length?'diagBad':'diagGood')+'">'+esc(missing.length?t('missing_permissions')+': '+missing.length:t('permissions_ok'))+'</div><div class="muted">'+esc(missing.join(', '))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('storage'))+'</h3><div>'+events.length+' '+esc(t('events'))+' · '+snaps.length+' '+esc(t('recent_snapshots'))+'</div><div class="muted">~'+Math.round(bytes/1024)+' KB</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('last_snapshot'))+'</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):esc(t('no_data')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('internal_backups'))+'</h3><div>'+backupEntries.length+' '+esc(t('versions'))+'</div><div class="muted">'+(health.lastBackupAt?esc(t('last'))+' '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):esc(t('no_data')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('tracking'))+'</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?esc(t('last'))+' '+fmt(health.lastEventAt):esc(t('no_event')))+'</div></div>'+
+      '<div class="miniCard"><h3>'+esc(t('missing_plugins'))+'</h3><div>'+missingPluginIds().length+'</div></div>'+
       '</div>';
-
     const actions=document.createElement('div');actions.className='actions';actions.style.margin='16px 0';
-    const mig=document.createElement('button');mig.textContent='מיפוי תוספים חסרים';mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
-    const snapBtn=document.createElement('button');snapBtn.textContent='פתח Snapshot Browser';snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);
-    body.appendChild(actions);
-
+    const mig=document.createElement('button');mig.textContent=t('missing_plugin_mapping');mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
+    const snapBtn=document.createElement('button');snapBtn.textContent=t('open_snapshot_browser');snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);body.appendChild(actions);
     if(backupEntries.length){
-      const h=document.createElement('h3');h.textContent='שחזור גיבוי פנימי';body.appendChild(h);
+      const h=document.createElement('h3');h.textContent=t('restore_internal_backup');body.appendChild(h);
       const grid=document.createElement('div');grid.className='modalGrid';
       backupEntries.slice(0,5).forEach(x=>{
         const m=String(x.name).match(/backup-(\d+)\.json/),ts=m?Number(m[1]):0,card=document.createElement('div');card.className='miniCard';
         card.innerHTML='<b>'+(ts?esc(fmtDate(ts)+' · '+fmt(ts)):esc(x.name))+'</b><div class="muted">'+Math.round(Number(x.size||0)/1024)+' KB</div>';
-        const b=document.createElement('button');b.textContent='שחזר';b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
+        const b=document.createElement('button');b.textContent=t('restore_backup');b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
       });
       body.appendChild(grid);
     }
@@ -798,13 +795,13 @@ async function showDiagnostics(){
 }
 function updateSavedFilterSelect(){
   const el=$('savedFilterSelect');
-  el.innerHTML='<option value="">מסננים שמורים</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
+  el.innerHTML='<option value="">'+esc(t('saved_filters'))+'</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
 }
 async function saveCurrentFilter(){
-  const name=prompt('שם למסנן השמור');if(!name||!name.trim())return;
+  const name=prompt(t('save_filter_name'));if(!name||!name.trim())return;
   savedFilters.push({name:name.trim(),search:$('search').value,type:$('type').value,plugin:$('pluginFilter').value,range:$('range').value,sort:$('sort').value,datePreset,selectedDayKey,favoritesOnly});
   if(savedFilters.length>30)savedFilters.shift();
-  await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify('המסנן נשמר','success');
+  await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify(t('filter_saved'),'success');
 }
 function applySavedFilter(i){
   const x=savedFilters[Number(i)];if(!x)return;
@@ -818,19 +815,16 @@ function setTimelineZoom(v){
 }
 async function applyNewTabIntegration(){
   const r=await call('plugin.setNewTabPage',{enabled:!!settings.newTabIntegration});
-  if(!r.success&&settings.newTabIntegration)await notify('לא ניתן להפעיל אינטגרציה עם +','error');
+  if(!r.success&&settings.newTabIntegration)await notify(t('plugin_open_failed'),'error');
 }
 async function publishHomepageState(){
   if(!settings.homepageIntegration){
-    await call('publishedData.remove',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue'});
-    return;
+    await call('publishedData.remove',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue'});return;
   }
-  const latest=snaps[snaps.length-1];
-  const recent=events.slice(-1)[0];
+  const latest=snaps[snaps.length-1],recent=events.slice(-1)[0];
   await call('publishedData.upsert',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue',payload:{
-    title:'המשך עבודה',count:latest?((latest.tabs||[]).filter(t=>t.bookId&&!t.toolId).length):0,
-    label:latest?'Timeline · '+fmtDate(latest.time)+' '+fmt(latest.time):'Timeline',
-    source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
+    title:t('continue_work'),count:latest?((latest.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId).length):0,
+    label:latest?'Timeline · '+fmtDate(latest.time)+' '+fmt(latest.time):'Timeline',source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
   }});
 }
 function missingPluginIds(){
@@ -839,13 +833,13 @@ function missingPluginIds(){
 }
 function showMigrationManager(){
   const missing=missingPluginIds();
-  showModal('מיפוי תוספים חסרים',body=>{
-    if(!missing.length){body.innerHTML='<div class="empty">אין תוספים חסרים</div>';return}
+  showModal(t('missing_plugin_mapping'),body=>{
+    if(!missing.length){body.innerHTML='<div class="empty">'+esc(t('no_missing_plugins'))+'</div>';return}
     for(const oldId of missing){
       const row=document.createElement('div');row.className='miniCard';row.style.margin='8px 0';
-      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">בחר תוסף חלופי…</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">'+esc(t('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
       const title=document.createElement('b');title.textContent=oldId;
-      const btn=document.createElement('button');btn.textContent='שמור מיפוי';btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify('מיפוי התוסף נשמר','success')};
+      const btn=document.createElement('button');btn.textContent=t('save_mapping');btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(t('mapping_saved'),'success')};
       row.appendChild(title);row.appendChild(document.createElement('br'));row.appendChild(sel);row.appendChild(btn);body.appendChild(row);
     }
   });
