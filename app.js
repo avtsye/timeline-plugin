@@ -254,7 +254,7 @@ function renderPlugins(){
   const grid=$('pluginGrid');grid.innerHTML='';
   $('installedCount').textContent=installed.length+' מותקנים';
   const lastByPlugin=new Map();
-  events.filter(e=>e.type==='plugin'&&(e.data||{}).toolId).sort((a,b)=>b.time-a.time).forEach(e=>{if(!lastByPlugin.has(e.data.toolId))lastByPlugin.set(e.data.toolId,e)});
+  events.filter(e=>e.type==='plugin'&&(e.data||{}).toolId).sort((a,b)=>b.time-a.time).forEach(e=>{const id=resolvedPluginId(e.data.toolId);if(!lastByPlugin.has(id))lastByPlugin.set(id,e)});
   for(const p of installed){
     if(p.pluginId==='timeline-plugin')continue;
     const last=lastByPlugin.get(p.pluginId);
@@ -335,7 +335,7 @@ async function saveSessionAsWorkspace(s){
       await call('reader.openBook',p);
     }
     if(e.type==='plugin'&&(e.data||{}).toolId){
-      const id=e.data.toolId;if(seen.has('p:'+id))continue;seen.add('p:'+id);await call('plugin.openOther',{pluginId:id,param:{source:'timeline-workspace'}});
+      const id=resolvedPluginId(e.data.toolId);if(seen.has('p:'+id)||!pluginMap.has(id))continue;seen.add('p:'+id);await call('plugin.openOther',{pluginId:id,param:{source:'timeline-workspace'}});
     }
   }
   await call('navigation.goTo',{target:'reading'});
