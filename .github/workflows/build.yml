@@ -3,22 +3,65 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Validate manifest JSON
-        run: python -m json.tool manifest.json >/dev/null
+        run: node -e "const m=JSON.parse(require('fs').readFileSync('manifest.json','utf8')); if(m.minAppVersion!=='0.9.97') throw new Error('minAppVersion must stay 0.9.97'); console.log('manifest OK, Otzaria >= 0.9.97')"
+
       - name: Check JavaScript syntax
         run: |
           node --check app.js
           node --check background.js
-      - name: Build package
+
+      - name: Check 0.9.97 API compatibility
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const source=['app.js','background.js','index.html'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+          const api098=[
+            'library.getBookDetails',
+            'library.setProviderBooks',
+            'tools.biographies',
+            'fs.deleteFolder',
+            'fs.moveEntry',
+            'fs.pickUserFolder',
+            'fs.listUserFolder',
+            'fs.openFolderFile',
+            'fs.revokeFolder'
+          ];
+          const used=api098.filter(x=>source.includes(x));
+          if(used.length) throw new Error('0.9.98-only APIs detected: '+used.join(', '));
+          console.log('No known 0.9.98-only API calls detected');
+          NODE
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('manifest.json','utf8')).version)")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build otzplugin package
+        shell: bash
         run: |
           mkdir -p dist
-          zip -r dist/timeline-plugin.otzplugin manifest.json index.html app.js background.html background.js README.md
+          FILE="timeline-plugin-${{ steps.version.outputs.version }}.otzplugin"
+          rm -f "dist/$FILE"
+          zip -9 -j "dist/$FILE" manifest.json index.html app.js background.html background.js README.md
+          unzip -t "dist/$FILE"
+          echo "Built dist/$FILE"
+
       - uses: actions/upload-artifact@v4
         with:
-          name: timeline-plugin
-          path: dist/timeline-plugin.otzplugin
+          name: timeline-plugin-${{ steps.version.outputs.version }}
+          path: dist/*.otzplugin
+          if-no-files-found: error
