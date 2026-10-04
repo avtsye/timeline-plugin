@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.4.0",
-  "description": "ציר זמן מקומי לאוצריא עם Sessions, Snapshots, Heatmap ותצוגות יום/שבוע/חודש.",
+  "version": "0.5.0",
+  "description": "ציר זמן מקומי לאוצריא עם Sessions, תוספים, Snapshots, התראות ותצוגות יום/שבוע/חודש.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
   "entrypoint": "index.html",
@@ -12,11 +12,13 @@
   "permissions": [
     "app.info.read",
     "app.run_on_startup",
+    "app.background_keep_alive",
     "app.startup_contributions",
     "history.read",
     "reader.open",
     "workspace.read",
     "workspace.manage",
+    "notifications.send",
     "plugin.storage.read",
     "plugin.storage.write",
     "events.subscribe:navigation.changed",
@@ -30,7 +32,7 @@
     "background": {"entrypoint":"background.html"},
     "startup": {
       "activationEvents":["app.startup","navigation.changed","reader.current_book_changed","reader.current_ref_changed","workspace.changed"],
-      "keepAlive": false
+      "keepAlive": true
     }
   },
   "stability": "experimental"
