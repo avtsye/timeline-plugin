@@ -809,7 +809,7 @@ async function publishHomepageState(){
   const latest=snaps[snaps.length-1],recent=events.slice(-1)[0];
   await call('publishedData.upsert',{type:'tool.badge',scope:'global',key:'timeline-plugin:continue',payload:{
     title:t('continue_work'),count:latest?((latest.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId).length):0,
-    label:latest?'Timeline · '+fmtDate(latest.time)+' '+fmt(latest.time):'Timeline',source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
+    label:latest?((currentLang==='he'?'ציר זמן':'Timeline')+' · '+fmtDate(latest.time)+' '+fmt(latest.time)):(currentLang==='he'?'ציר זמן':'Timeline'),source:'timeline-plugin',updatedAt:new Date().toISOString(),lastEvent:recent?recent.label:null
   }});
 }
 function missingPluginIds(){
