@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const EVENTS='timeline.events.v2', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1';
+const EVENTS='timeline.events.v2', SNAPS='timeline.snapshots.v1', SETTINGS='timeline.settings.v1', TOOL_STATE='timeline.tool_state.v1';
 const SESSION_GAP=30*60*1000, MERGE_GAP=2*60*1000, SNAP_GAP=15*60*1000, TOOL_POLL_MS=5000;
 let q=Promise.resolve(), wired=false, pollTimer=null, knownToolTabs=new Set(), toolBaselineReady=false;
 
@@ -52,6 +52,7 @@ async function detectToolTabs(){
   }
   knownToolTabs=current;
   toolBaselineReady=true;
+  await set(TOOL_STATE,{open:[...current],updatedAt:Date.now()});
 }
 
 async function snapshot(force=false){
@@ -104,15 +105,15 @@ function record(type,p){
   return q;
 }
 
-function startPolling(){
+async function startPolling(){
   if(pollTimer)return;
-  detectToolTabs();
+  const saved=await get(TOOL_STATE,{open:[]});
+  if(!toolBaselineReady&&saved&&Array.isArray(saved.open)){
+    knownToolTabs=new Set(saved.open);
+    toolBaselineReady=true;
+  }
+  await detectToolTabs();
   pollTimer=setInterval(detectToolTabs,TOOL_POLL_MS);
-}
-function stopPolling(){
-  if(!pollTimer)return;
-  clearInterval(pollTimer);
-  pollTimer=null;
 }
 function wire(){
   if(wired) return;
@@ -120,14 +121,15 @@ function wire(){
   Otzaria.on('navigation.changed',p=>record('navigation',p));
   Otzaria.on('reader.current_book_changed',p=>record('book',p));
   Otzaria.on('reader.current_ref_changed',p=>record('ref',p));
-  Otzaria.on('workspace.changed',p=>record('workspace',p));
-  Otzaria.on('plugin.suspended',stopPolling);
-  Otzaria.on('plugin.resumed',startPolling);
+  Otzaria.on('workspace.changed',p=>{record('workspace',p);detectToolTabs()});
+  Otzaria.on('navigation.changed',()=>detectToolTabs());
+  Otzaria.on('reader.current_book_changed',()=>detectToolTabs());
+  Otzaria.on('plugin.resumed',()=>detectToolTabs());
 }
 
-Otzaria.on('plugin.boot',async payload=>{
+Otzaria.on('plugin.boot',async()=>{
   wire();
   await snapshot(false);
-  if(payload&&payload.app&&payload.app.runMode==='background') startPolling();
+  await startPolling();
 });
 })();
