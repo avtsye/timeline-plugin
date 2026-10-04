@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "ציר זמן מקומי לאוצריא עם Sessions, תוספים, Snapshots, התראות ותצוגות יום/שבוע/חודש.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
