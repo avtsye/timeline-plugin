@@ -245,6 +245,23 @@ async function createSnapshot(){
   await set(SNAPS,snaps);render();
   await notify('Snapshot נשמר','success');
 }
+async function updateTrackingStatus(){
+  const info=await call('app.getGrantedPermissions');
+  const perms=info.success&&Array.isArray(info.data)?info.data:(info.success&&info.data&&Array.isArray(info.data.permissions)?info.data.permissions:[]);
+  const hasRun=perms.includes('app.run_on_startup');
+  const hasKeep=perms.includes('app.background_keep_alive');
+  const el=$('trackingStatus'),detail=$('trackingDetail');
+  if(hasRun&&hasKeep){
+    el.textContent='פעיל';
+    detail.textContent='מעקב רציף אחר ספרים, תוספים וכלים פתוחים';
+  }else if(hasRun){
+    el.textContent='חלקי';
+    detail.textContent='מעקב הרקע עשוי להיכבות לאחר חוסר פעילות; אשר app.background_keep_alive למעקב רציף';
+  }else{
+    el.textContent='מוגבל';
+    detail.textContent='הרשאת app.run_on_startup אינה מאושרת; מעקב תוספים ברקע לא יוכל לפעול באופן מלא';
+  }
+}
 async function load(){
   events=await get(EVENTS,[]);
   if(!events.length){
@@ -257,7 +274,7 @@ async function load(){
   collapsed=new Set(await get(COLLAPSED,[]));
   const sr=await call('history.listSearches',{limit:20});
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];
-  sync();render();
+  sync();render();await updateTrackingStatus();
 }
 function sync(){
   $('pauseBtn').textContent=settings.paused?'המשך תיעוד':'השהה תיעוד';
