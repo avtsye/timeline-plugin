@@ -137,6 +137,10 @@ function applyTranslations(){
   document.title=currentLang==='he'?'ציר זמן':'Timeline';
   $('settingsFab').title=t('settings');$('settingsFab').setAttribute('aria-label',t('settings'));
 }
+async function registerLocalizedShortcuts(){
+  await call('app.registerShortcut',{id:'open-timeline',label:currentLang==='he'?'פתח ציר זמן':'Open Timeline',key:'ctrl+alt+t',command:'openTimeline'});
+  await call('app.registerShortcut',{id:'save-timeline-snapshot',label:currentLang==='he'?'שמור נקודת שחזור בציר הזמן':'Save a Timeline restore point',key:'ctrl+alt+s',command:'saveTimelineSnapshot'});
+}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fmt=v=>new Intl.DateTimeFormat(locale(),{hour:'2-digit',minute:'2-digit'}).format(new Date(v));
@@ -727,7 +731,7 @@ async function importData(){
     names=Object.assign({},names,data.names||{});sessionNotes=Object.assign({},sessionNotes,data.sessionNotes||{});pluginMigrations=Object.assign({},pluginMigrations,data.pluginMigrations||{});
     if(Array.isArray(data.savedFilters))savedFilters=[...savedFilters,...data.savedFilters].slice(-30);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings),set(NOTES,sessionNotes),set(MIGRATIONS,pluginMigrations),set(SAVED_FILTERS,savedFilters),persistMeta()]);
-    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(t('import_done'),'success');
+    await resolveLanguage();await registerLocalizedShortcuts();applyTranslations();sync();render();await publishHomepageState();await notify(t('import_done'),'success');
   }catch(_){await notify(t('invalid_timeline_file'),'error')}
 }
 async function restoreInternalBackup(path){
@@ -859,6 +863,7 @@ async function load(){
   snaps=values[0];settings=Object.assign(settings,values[1]);pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
   savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
   await resolveLanguage();
+  await registerLocalizedShortcuts();
   const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
   const pf=$('pluginFilter');
