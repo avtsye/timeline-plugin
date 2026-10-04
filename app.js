@@ -132,8 +132,8 @@ async function resolveLanguage(){
   document.documentElement.dir=currentLang==='he'?'rtl':'ltr';
 }
 function applyTranslations(){
-  document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;if(I18N[currentLang][key])el.textContent=t(key)});
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const key=el.dataset.i18nPlaceholder;if(I18N[currentLang][key])el.placeholder=t(key)});
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.dataset.i18n;if(I18N[currentLang][key])el.textContent=tr(key)});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const key=el.dataset.i18nPlaceholder;if(I18N[currentLang][key])el.placeholder=tr(key)});
   document.title=currentLang==='he'?'ציר זמן':'Timeline';
   $('settingsFab').title=tr('settings');$('settingsFab').setAttribute('aria-label',tr('settings'));
 }
