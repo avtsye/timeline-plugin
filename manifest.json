@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "ציר זמן מקומי לאוצריא עם ממשק Material 3 תואם אוצריא, ניווט צד, שחזור, גיבויים וניתוח פעילות.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
