@@ -46,6 +46,67 @@ function pluginInfo(id){return pluginMap.get(resolvedPluginId(id))||null}
 function pluginName(id){const p=pluginInfo(id);return p&&p.name?p.name:(pluginMigrations[id]?pluginMigrations[id]:id)}
 function pluginIconName(id){const p=pluginInfo(id);return p&&p.toolTabIconName?p.toolTabIconName:'puzzle_piece_24_regular'}
 function pluginIconHtml(id){const name=pluginIconName(id);const map=window.OFFICIAL_FLUENT_ICONS||{};return map[name]||map.puzzle_piece_24_regular||'🧩'}
+function showModal(title,bodyBuilder){
+  const ov=document.createElement('div');ov.className='modalOverlay';
+  const box=document.createElement('div');box.className='modalBox';
+  const head=document.createElement('div');head.className='modalHead';
+  const h=document.createElement('h2');h.textContent=title;
+  const close=document.createElement('button');close.textContent='סגור';close.onclick=()=>ov.remove();
+  head.appendChild(h);head.appendChild(close);box.appendChild(head);
+  const body=document.createElement('div');box.appendChild(body);ov.appendChild(box);document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+  if(bodyBuilder)bodyBuilder(body,()=>ov.remove());
+  return ov;
+}
+function bookKeyFromEvent(e){
+  const d=e.data||{};
+  return d.bookUid||d.currentBookId||d.bookId||d.currentBook||d.book||'';
+}
+function bookTitleFromEvent(e){
+  const d=e.data||{};
+  return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||'ספר';
+}
+function eventsForBook(key){
+  return events.filter(e=>['book','ref'].includes(e.type)&&String(bookKeyFromEvent(e))===String(key)).sort((a,b)=>b.time-a.time);
+}
+function eventsForPlugin(id){
+  return events.filter(e=>e.type==='plugin'&&resolvedPluginId((e.data||{}).toolId)===resolvedPluginId(id)).sort((a,b)=>b.time-a.time);
+}
+function sessionSummary(s){
+  const books=new Set(),plugins=new Set(),searchCount=0;
+  let refs=0;
+  for(const e of s.events){
+    if(['book','ref'].includes(e.type)){const k=bookKeyFromEvent(e);if(k)books.add(k)}
+    if(e.type==='plugin'&&(e.data||{}).toolId)plugins.add(resolvedPluginId(e.data.toolId));
+    if(e.type==='ref')refs++;
+  }
+  const mins=Math.max(1,Math.round((s.end-s.start)/60000));
+  const parts=[mins+' דקות',books.size+' ספרים'];
+  if(plugins.size)parts.push(plugins.size+' תוספים');
+  if(refs)parts.push(refs+' שינויי מקום');
+  return parts.join(' · ');
+}
+function dominantType(s){
+  const counts={book:0,plugin:0,tool:0,workspace:0,navigation:0};
+  for(const e of s.events){if(e.type==='ref')counts.book++;else if(counts[e.type]!=null)counts[e.type]++}
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(!entries[0]||entries[0][1]===0)return'mixed';
+  if(entries[1]&&entries[1][1]===entries[0][1])return'mixed';
+  return entries[0][0];
+}
+function recentPlaces(limit=12){
+  const out=[],seen=new Set();
+  for(const e of events.slice().sort((a,b)=>b.time-a.time)){
+    if(!['book','ref'].includes(e.type))continue;
+    const d=e.data||{},k=bookKeyFromEvent(e),ref=d.currentRef||d.ref||'';
+    const key=k+'|'+ref;
+    if(!k||seen.has(key))continue;
+    seen.add(key);out.push({bookKey:k,title:bookTitleFromEvent(e),ref,time:e.time,event:e});
+    if(out.length>=limit)break;
+  }
+  return out;
+}
+
 
 function dayTitle(t){
   const k=dk(t),now=Date.now();
