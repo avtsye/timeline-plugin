@@ -634,6 +634,74 @@ function aggregateMonths(count=12){
   }
   return out;
 }
+function makeNativeRow({icon='history_24_regular',title='',subtitle='',trailing='',action=null,buttonLabel=''}) {
+  const row=document.createElement('div');row.className='native-row';
+  const lead=document.createElement('span');lead.className='native-row-icon';lead.dataset.icon=icon;
+  const main=document.createElement('div');main.className='native-row-main';
+  const b=document.createElement('b');b.textContent=title;const s=document.createElement('small');s.textContent=subtitle||'';
+  main.append(b,s);row.append(lead,main);
+  if(trailing){const t=document.createElement('span');t.className='native-row-trailing';t.textContent=trailing;row.appendChild(t)}
+  if(action){const btn=document.createElement('button');btn.textContent=buttonLabel||tr('open');btn.onclick=action;row.appendChild(btn)}
+  return row;
+}
+function makeNativeSection(title){
+  const section=document.createElement('section');section.className='native-section';
+  const h=document.createElement('div');h.className='native-section-title';h.textContent=title;
+  const list=document.createElement('div');list.className='native-list';
+  section.append(h,list);return{section,list};
+}
+function renderAnalyticsScreen(){
+  const host=$('analyticsContent');if(!host)return;host.innerHTML='';
+  const charts=document.createElement('div');charts.className='analyticsCharts';
+  const chartDefs=[
+    [tr('day_activity'),aggregateDaily(30),x=>String(new Date(x.time).getDate())],
+    [tr('weeks_activity'),aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))],
+    [tr('months_activity'),aggregateMonths(12),x=>x.label]
+  ];
+  for(const [title,data,labelFn] of chartDefs){
+    const block=document.createElement('section');block.className='native-chart-block';const h=document.createElement('h3');h.textContent=title;
+    block.append(h,buildBarChart(data,labelFn));charts.appendChild(block);
+  }
+  host.appendChild(charts);
+
+  const heatSection=document.createElement('section');heatSection.className='native-section';
+  const hh=document.createElement('div');hh.className='native-section-title';hh.textContent=tr('year_heatmap');
+  const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
+  for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(tm)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
+  heatSection.append(hh,year);host.appendChild(heatSection);
+
+  const tops=document.createElement('div');tops.className='topLists';
+  const books=makeNativeSection(tr('top_books'));topBooks(12).forEach(x=>books.list.appendChild(makeNativeRow({icon:'book_open_24_regular',title:x.title,subtitle:fmtDate(x.last),trailing:String(x.count),action:()=>showBookHistory(x.key)})));tops.appendChild(books.section);
+  const plugins=makeNativeSection(tr('top_plugins'));topPlugins(12).forEach(x=>plugins.list.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:x.title,subtitle:x.missing?tr('missing_plugins'):fmtDate(x.last),trailing:String(x.count),action:()=>showPluginHistory(x.key)})));tops.appendChild(plugins.section);
+  const places=makeNativeSection(tr('recent_places'));recentPlaces(12).forEach(x=>places.list.appendChild(makeNativeRow({icon:'location_24_regular',title:x.title,subtitle:x.ref||'',trailing:fmt(x.time),action:()=>openEvent(x.event)})));tops.appendChild(places.section);
+  host.appendChild(tops);applyShellIcons();
+}
+async function renderDiagnosticsScreen(){
+  const host=$('diagnosticsContent');if(!host)return;host.innerHTML='';
+  const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
+  const ps=perms.success&&perms.data&&Array.isArray(perms.data.permissions)?perms.data.permissions:[];
+  const required=['app.run_on_startup','app.background_keep_alive','reader.open','workspace.manage','notifications.send'];
+  const missing=required.filter(x=>!ps.includes(x));
+  const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
+  const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
+  const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
+
+  const healthSec=makeNativeSection(tr('health'));
+  healthSec.list.appendChild(makeNativeRow({icon:missing.length?'warning_24_regular':'checkmark_circle_24_regular',title:missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'),subtitle:missing.join(', '),trailing:missing.length?'!':'✓'}));
+  healthSec.list.appendChild(makeNativeRow({icon:'database_24_regular',title:tr('storage'),subtitle:events.length+' '+tr('events')+' · '+snaps.length+' '+tr('recent_snapshots'),trailing:'~'+Math.round(bytes/1024)+' KB'}));
+  healthSec.list.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('last_snapshot'),subtitle:lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):tr('no_data'),trailing:lastSnap&&now-lastSnap<35*60000?'✓':'!'}));
+  healthSec.list.appendChild(makeNativeRow({icon:'archive_24_regular',title:tr('internal_backups'),subtitle:backupEntries.length+' '+tr('versions'),trailing:health.lastBackupAt?fmt(health.lastBackupAt):''}));
+  healthSec.list.appendChild(makeNativeRow({icon:'pulse_24_regular',title:tr('tracking'),subtitle:health.lastEventAt?tr('last')+' '+fmt(health.lastEventAt):tr('no_event'),trailing:health.lastEventType||'—'}));
+  healthSec.list.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:tr('missing_plugins'),subtitle:missingPluginIds().join(', '),trailing:String(missingPluginIds().length),action:missingPluginIds().length?showMigrationManager:null,buttonLabel:tr('missing_plugin_mapping')}));
+  host.appendChild(healthSec.section);
+
+  if(backupEntries.length){
+    const backSec=makeNativeSection(tr('restore_internal_backup'));
+    backupEntries.slice(0,5).forEach(x=>{const m=String(x.name).match(/backup-(\d+)\.json/),ts=m?Number(m[1]):0;backSec.list.appendChild(makeNativeRow({icon:'archive_24_regular',title:ts?fmtDate(ts)+' · '+fmt(ts):x.name,subtitle:Math.round(Number(x.size||0)/1024)+' KB',action:()=>restoreInternalBackup(x.path),buttonLabel:tr('restore_backup')}))});
+    host.appendChild(backSec.section);
+  }
+  applyShellIcons();
+}
 function showDashboard(){
   showModal(tr('activity_dashboard'),body=>{
     const daily=aggregateDaily(30);
@@ -1107,7 +1175,8 @@ function switchScreen(name){
   const title=$('currentScreenTitle');if(title)title.textContent=tr(titleKeys[name]||'screen_timeline');
   settings.lastScreen=name;set(SETTINGS,settings);
   if(name==='timeline')setTimeout(()=>{const q=$('search');if(q)q.focus()},0);
-  if(name==='diagnostics')updateTrackingStatus();
+  if(name==='analytics')renderAnalyticsScreen();
+  if(name==='diagnostics'){updateTrackingStatus();renderDiagnosticsScreen();}
 }
 
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
@@ -1122,8 +1191,8 @@ $('savedFilterSelect').onchange=e=>{if(e.target.value!=='')applySavedFilter(e.ta
 $('zoomIn').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)+.2);
 $('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
 $('snapshotBrowserBtn').onclick=showSnapshotBrowser;
-$('dashboardBtn').onclick=showDashboard;
-$('diagnosticsBtn').onclick=showDiagnostics;
+if($('dashboardBtn'))$('dashboardBtn').onclick=()=>switchScreen('analytics');
+if($('diagnosticsBtn'))$('diagnosticsBtn').onclick=()=>switchScreen('diagnostics');
 $('openArchiveBtn').onclick=showSummaryArchive;
 $('sendFeedbackBtn').onclick=sendFeedback;
 $('focusModeBtn').onclick=()=>setFocusMode(!settings.focusMode);
