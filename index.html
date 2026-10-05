@@ -703,6 +703,72 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
 }
 
+
+/* 0.15.4 compact spacing + explicit idle breaks */
+.idleBreak{
+  border-top:0!important;
+  height:18px!important;
+  pointer-events:none;
+}
+.idleBreak::before,
+.idleBreak::after{
+  content:"";
+  position:absolute;
+  inset-inline-start:50%;
+  width:14px;
+  height:2px;
+  background:var(--color-outline-variant);
+  transform-origin:center;
+  z-index:3;
+}
+.idleBreak::before{
+  top:4px;
+  transform:translateX(-50%) rotate(32deg);
+}
+.idleBreak::after{
+  top:10px;
+  transform:translateX(-50%) rotate(-32deg);
+}
+.idleBreakGlyph{
+  position:absolute;
+  inset-inline-start:50%;
+  top:-2px;
+  width:26px;
+  height:18px;
+  transform:translateX(-50%);
+  background:var(--panel-bg);
+  z-index:2;
+}
+.idleBreakLabel{
+  position:absolute;
+  inset-inline-start:calc(50% + 22px);
+  top:-4px;
+  padding:2px 7px;
+  border-radius:999px;
+  background:var(--color-surface-container-high);
+  color:var(--color-on-surface-variant);
+  font-size:10px;
+  white-space:nowrap;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--color-outline-variant) 70%,transparent);
+}
+.adaptiveTimelineRail .timelineEventCard{
+  min-height:36px;
+  padding-block:5px;
+}
+.adaptiveTimelineRail .timelineEventContent b{
+  line-height:1.15;
+}
+@media(max-width:800px){
+  .idleBreak::before,
+  .idleBreak::after,
+  .idleBreakGlyph{
+    inset-inline-start:20px;
+  }
+  .idleBreakLabel{
+    inset-inline-start:46px;
+  }
+}
+
 </style>
 </head>
 <body>
