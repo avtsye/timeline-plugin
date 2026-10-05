@@ -118,42 +118,50 @@ function summarizeArchive(events,snaps){
 }
 async function readSummaryArchive(){
   const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
-  if(!r.success||!r.data||typeof r.data.content!=='string')return{schemaVersion:2,days:{}};
-  try{return JSON.parse(r.data.content)||{schemaVersion:2,days:{}}}catch(_){return{schemaVersion:2,days:{}}}
+  if(!r.success||!r.data||typeof r.data.content!=='string')return{schemaVersion:3,archivedDays:{},days:{}};
+  try{
+    const parsed=JSON.parse(r.data.content)||{};
+    if(!parsed.archivedDays){
+      parsed.archivedDays={};
+      for(const [day,x] of Object.entries(parsed.days||{}))if(x&&x.archived)parsed.archivedDays[day]=x;
+    }
+    return parsed;
+  }catch(_){return{schemaVersion:3,archivedDays:{},days:{}}}
 }
-function mergeArchiveDays(base,incoming,{add=false}={}){
-  const out=base&&typeof base==='object'?base:{schemaVersion:2,days:{}};
-  if(!out.days)out.days={};
-  for(const [day,x] of Object.entries((incoming&&incoming.days)||{})){
-    if(!add||!out.days[day]){out.days[day]=x;continue}
-    const prev=out.days[day],types={...(prev.types||{})};
+function mergeDayMaps(baseDays,incomingDays){
+  const out={...baseDays};
+  for(const [day,x] of Object.entries(incomingDays||{})){
+    if(!out[day]){out[day]={...x};continue}
+    const prev=out[day],types={...(prev.types||{})};
     for(const [k,v] of Object.entries(x.types||{}))types[k]=(types[k]||0)+Number(v||0);
-    const books=new Map([...(prev.topBooks||[]),...(x.topBooks||[])]); // replaced below with counted maps
     const bookCounts={};for(const [k,v] of [...(prev.topBooks||[]),...(x.topBooks||[])])bookCounts[k]=(bookCounts[k]||0)+Number(v||0);
     const pluginCounts={};for(const [k,v] of [...(prev.topPlugins||[]),...(x.topPlugins||[])])pluginCounts[k]=(pluginCounts[k]||0)+Number(v||0);
-    out.days[day]={
+    out[day]={
       events:Number(prev.events||0)+Number(x.events||0),
       sessions:Number(prev.sessions||0)+Number(x.sessions||0),
       types,
       topBooks:Object.entries(bookCounts).sort((a,b)=>b[1]-a[1]).slice(0,10),
-      topPlugins:Object.entries(pluginCounts).sort((a,b)=>b[1]-a[1]).slice(0,10),
-      archived:true
+      topPlugins:Object.entries(pluginCounts).sort((a,b)=>b[1]-a[1]).slice(0,10)
     };
   }
-  const vals=Object.values(out.days);
-  out.schemaVersion=2;out.updatedAt=new Date().toISOString();
-  out.totals={
-    events:vals.reduce((n,x)=>n+Number(x.events||0),0),
-    days:Object.keys(out.days).length,
-    snapshots:Number((incoming&&incoming.totals&&incoming.totals.snapshots)||out.totals&&out.totals.snapshots||0)
-  };
   return out;
+}
+function archivePayload(archivedDays,currentSummary){
+  const currentDays=(currentSummary&&currentSummary.days)||{},days=mergeDayMaps(archivedDays,currentDays),vals=Object.values(days);
+  return{
+    schemaVersion:3,updatedAt:new Date().toISOString(),archivedDays,days,
+    totals:{
+      events:vals.reduce((n,x)=>n+Number(x.events||0),0),
+      days:Object.keys(days).length,
+      snapshots:Number((currentSummary&&currentSummary.totals&&currentSummary.totals.snapshots)||0)
+    }
+  };
 }
 async function archiveExpired(expiredEvents,expiredSnaps=[]){
   if(!expiredEvents.length&&!expiredSnaps.length)return;
-  const old=await readSummaryArchive();
-  const addSummary=summarizeArchive(expiredEvents,expiredSnaps);
-  const merged=mergeArchiveDays(old,addSummary,{add:true});
+  const old=await readSummaryArchive(),addSummary=summarizeArchive(expiredEvents,expiredSnaps);
+  const archivedDays=mergeDayMaps(old.archivedDays||{},addSummary.days||{});
+  const merged=archivePayload(archivedDays,{days:{},totals:{snapshots:0}});
   merged.archivedBefore=Date.now();
   await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(merged)});
 }
@@ -180,14 +188,7 @@ async function applyRetention(force=false){
 async function writeSummaryArchive(events,snaps,settings){
   if(settings.summaryArchiveEnabled===false)return;
   const current=summarizeArchive(events,snaps),old=await readSummaryArchive();
-  const cutoffDays=Number(settings.retentionDays||0);
-  const cutoff=cutoffDays>0?Date.now()-cutoffDays*86400000:0;
-  const preserved={schemaVersion:2,days:{}};
-  for(const [day,x] of Object.entries(old.days||{})){
-    const ts=new Date(day+'T00:00:00').getTime();
-    if(cutoff&&ts<cutoff)preserved.days[day]=x;
-  }
-  const merged=mergeArchiveDays(preserved,current,{add:false});
+  const merged=archivePayload(old.archivedDays||{},current);
   merged.totals.snapshots=Array.isArray(snaps)?snaps.length:0;
   await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(merged)});
 }
