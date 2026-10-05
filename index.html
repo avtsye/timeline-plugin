@@ -64,7 +64,7 @@ button{cursor:pointer}
 .zoomCtl{display:flex;align-items:center;gap:4px}
 .zoomCtl .btn{padding:4px 10px}
 .card{background:transparent;border:0;border-radius:0;padding:14px 0;border-bottom:1px solid var(--color-outline-variant)}
-.card+.card{margin-top:0}.settingsSection.card{background:transparent;border:0;border-radius:0;padding:0;margin:0 0 16px;overflow:visible}.settingsSection.card>h3{padding:8px 16px 10px;margin:0;color:var(--color-primary);font-size:.95em;font-weight:700}.settingsSection.card>*:not(h3){background:var(--color-surface);margin-inline:0;padding-inline:16px}.settingsSection.card>.checkRow{min-height:48px;margin-block:0;border:1px solid var(--color-outline-variant);border-bottom:0}.settingsSection.card>.checkRow:first-of-type{border-radius:20px 20px 0 0}.settingsSection.card>.checkRow:last-of-type{border-bottom:1px solid var(--color-outline-variant);border-radius:0 0 20px 20px}.settingsSection.card>select{min-height:44px;border:1px solid var(--color-outline-variant);border-radius:12px;margin-bottom:8px}
+.card+.card{margin-top:0}
 .page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .page-head h2{margin:0;font-size:1.1em;font-weight:700}
 .page-subtitle{color:var(--color-on-surface-variant);font-size:.88em}
@@ -87,9 +87,7 @@ button{cursor:pointer}
 .settingsTabBtn{border:0;background:transparent;padding:9px 12px;border-radius:var(--radius-sm);text-align:start;color:var(--color-on-surface-variant)}
 .settingsTabBtn.active{background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-weight:600}
 .settingsPane{display:none}.settingsPane.active{display:block}
-.settingsSection{padding:14px 0;border-bottom:1px solid var(--color-outline-variant)}.settingsSection:last-child{border-bottom:0}.settingsSection h3{margin:0 0 10px;font-size:1em}
 .checkRow{display:flex;align-items:center;gap:9px;margin:10px 0}.checkRow input{width:18px;height:18px}
-.settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .feedbackBox{width:100%;min-height:120px;resize:vertical}
 .timelineRail{position:relative;padding:6px 0 24px}
 .timelineRail::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--color-outline-variant);transform:translateX(50%)}
@@ -209,26 +207,6 @@ body{font-size:var(--otz-font-md);background:var(--panel-bg)}
 .settings-tabs{background:var(--color-surface-container-high);border:0;padding:var(--otz-space-sm)}
 .settingsTabBtn{min-height:44px;border-radius:var(--otz-radius);font-size:var(--otz-font-md);padding-inline:var(--otz-space-md)}
 .settingsTabBtn.active{background:color-mix(in srgb,var(--color-primary-container) 30%,transparent);color:var(--color-on-surface)}
-.settingsSection.card{background:transparent;border:0;border-radius:0;margin-bottom:var(--otz-space-md)}
-.settingsSection.card>h3{
-  padding:24px 16px 12px;margin:0;color:var(--color-primary);font-size:var(--otz-font-lg);font-weight:700;background:transparent;
-}
-.settingsSection.card>.checkRow,
-.settingsSection.card>.settingsActions,
-.settingsSection.card>label:not(.checkRow),
-.settingsSection.card>select,
-.settingsSection.card>textarea,
-.settingsSection.card>.actions,
-.settingsSection.card>#privacyStatus{
-  background:var(--card-bg);margin:0;border:0;border-radius:0;
-}
-.settingsSection.card>.checkRow{min-height:56px;padding:8px 16px;border-bottom:var(--card-gap) solid var(--panel-bg)}
-.settingsSection.card>.checkRow:first-of-type{border-radius:var(--otz-radius) var(--otz-radius) 0 0}
-.settingsSection.card>.checkRow:last-of-type{border-radius:0 0 var(--otz-radius) var(--otz-radius);border-bottom:0}
-.settingsSection.card>.settingsActions{padding:12px 16px;border-radius:var(--otz-radius);gap:var(--otz-space-sm)}
-.settingsSection.card>label:not(.checkRow){display:block;padding:12px 16px 4px;font-size:13px;color:var(--color-on-surface-variant)}
-.settingsSection.card>select{width:100%;padding-inline:16px;margin-bottom:var(--card-gap)}
-.settingsSection.card>textarea{width:100%;padding:12px 16px;border-radius:var(--otz-radius);margin-bottom:var(--otz-space-sm)}
 
 /* CustomSwitch (M3 like Otzaria) */
 .checkRow input[type="checkbox"]{
@@ -310,7 +288,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .nativeDialogInput{width:100%;height:48px;border:0;border-radius:28px;background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);padding:0 16px;font:inherit;color:var(--color-on-surface);outline:none}.nativeDialogInput:focus{background:color-mix(in srgb,var(--color-on-surface) 12%,transparent)}.dialogMessage{font-size:var(--otz-font-md);color:var(--color-on-surface);padding:4px 0 16px}.dialogActions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.actionRecommended,.actionGhost,.actionWarning{min-height:40px;border:0;border-radius:20px;padding:0 18px;font:inherit}.actionRecommended{background:var(--color-primary);color:var(--color-on-primary)}.actionGhost{background:transparent;color:var(--color-primary)}.actionWarning{background:transparent;color:var(--color-error)}.actionGhost:hover,.actionWarning:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
 .native-page{max-width:none}.native-page-body{display:flex;flex-direction:column;gap:var(--otz-space-md)}.native-section{background:transparent}.native-section-title{padding:6px 4px 10px;font-size:var(--otz-font-lg);font-weight:600;color:var(--color-on-surface)}.native-list{background:var(--panel-bg);border-radius:var(--otz-radius);overflow:hidden;display:flex;flex-direction:column;gap:var(--card-gap)}.native-row{min-height:52px;display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--card-bg);color:var(--color-on-surface)}.native-row:hover{background:color-mix(in srgb,var(--color-on-surface) 5%,var(--card-bg))}.native-row-icon{width:24px;height:24px;display:grid;place-items:center;color:var(--color-on-surface-variant);flex:0 0 24px}.native-row-icon svg{width:20px;height:20px;fill:currentColor}.native-row-main{min-width:0;flex:1}.native-row-main b,.native-row-main small{display:block}.native-row-main b{font-size:var(--otz-font-md);font-weight:500}.native-row-main small{font-size:12px;color:var(--color-on-surface-variant);margin-top:2px}.native-row-trailing{font-size:12px;color:var(--color-on-surface-variant);white-space:nowrap}.native-row button{min-height:36px;border:0;border-radius:var(--otz-radius);background:transparent;color:var(--color-primary);padding:0 10px}.native-row button:hover{background:color-mix(in srgb,var(--color-primary) 8%,transparent)}.analyticsCharts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--otz-space-md)}.native-chart-block{background:var(--card-bg);border-radius:var(--otz-radius);padding:12px 14px}.native-chart-block h3{margin:0 0 10px;font-size:var(--otz-font-md);font-weight:600}.topLists{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--otz-space-md)}.chart{height:150px}.yearHeat{padding:10px;background:var(--card-bg);border-radius:var(--otz-radius)}.health-good{color:var(--color-primary)}.health-warn{color:var(--color-tertiary)}.health-bad{color:var(--color-error)}
 .checkRow{flex-direction:row-reverse;justify-content:space-between}.settingTileContent{display:flex;align-items:center;gap:16px;min-width:0;flex:1}.settingTileIcon{width:24px;height:24px;display:grid;place-items:center;color:var(--color-on-surface-variant);flex:0 0 24px}.settingTileIcon svg{width:20px;height:20px;fill:currentColor}.settingTileText{min-width:0;flex:1;font-size:var(--otz-font-md);color:var(--color-on-surface)}.appDropdown{position:relative;display:inline-flex;align-items:center;min-width:120px}.appDropdown select{appearance:none;-webkit-appearance:none;width:100%;padding-inline-end:34px!important}.appDropdownChevron{position:absolute;inset-inline-end:10px;width:18px;height:18px;display:grid;place-items:center;pointer-events:none;color:var(--color-on-surface-variant)}.appDropdownChevron svg{width:18px;height:18px;fill:currentColor}.contextMenuIcon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px}.contextMenuIcon svg{width:18px;height:18px;fill:currentColor}.modalClose span,.modalClose svg{width:20px;height:20px;display:block;fill:currentColor}.modalClose{color:var(--color-on-surface-variant)!important}.modalClose:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)!important}
-.settingsNativeList{margin:0;background:var(--panel-bg)}.settingsNativeList .native-row{padding-inline:16px}.settingsNativeList button{color:var(--color-primary)}.settingsNativeList button.danger{color:var(--color-error)}.settingsSection.card>.native-list{background:var(--panel-bg)!important;padding:0!important}
 .toolbarActions{display:flex;align-items:center;gap:4px;margin-inline-start:auto}.toolbarIcon{color:var(--color-on-surface-variant)}.toolbarIcon span,.toolbarIcon svg{width:20px;height:20px;display:block;fill:currentColor}.toolbarPopover{position:absolute;z-index:80;top:48px;inset-inline-end:10px;width:min(340px,calc(100vw - 100px));background:var(--color-surface-container-highest);border-radius:var(--otz-radius);padding:8px;box-shadow:0 3px 8px color-mix(in srgb,var(--color-shadow) 18%,transparent);display:grid;grid-template-columns:1fr 1fr;gap:8px}.toolbarPopover[hidden]{display:none}.toolbarPopover label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--color-on-surface-variant)}.toolbarPopover select{width:100%;height:36px;border-radius:20px;background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);padding-inline:12px;border:0;color:var(--color-on-surface)}.timeline-controls{position:relative}.zoomCtl{background:transparent}.zoomCtl #zoomLabel{font-size:11px;min-width:34px;text-align:center;color:var(--color-on-surface-variant)}
 .sessionHeading{min-width:0;flex:1}.sessionSummary{font-size:12px;color:var(--color-on-surface-variant);margin-top:2px}.sessionStatusIcon{width:16px;height:16px;display:grid;place-items:center;color:var(--color-primary)}.sessionStatusIcon svg{width:16px;height:16px;fill:currentColor}.sessionQuickAction{width:36px;height:36px;min-height:36px;padding:0!important;border-radius:50%!important;display:grid;place-items:center;background:transparent!important;color:var(--color-primary)!important}.sessionQuickAction span,.sessionQuickAction svg{width:20px;height:20px;display:block;fill:currentColor}.sessionMenu>summary span,.sessionMenu>summary svg{width:20px;height:20px;display:block;fill:currentColor}.menuButtonIcon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px}.menuButtonIcon svg{width:18px;height:18px;fill:currentColor}.sessionMenuPanel button{display:flex;align-items:center;gap:10px}.sessionSnapshotChoice{display:flex;align-items:center;gap:8px;padding:4px 8px}.sessionSnapshotChoice>span,.sessionSnapshotChoice svg{width:20px;height:20px;display:block;fill:currentColor;color:var(--color-on-surface-variant)}.sessionSnapshotChoice select{min-width:0;flex:1;height:36px;border:0;border-radius:var(--otz-radius);background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);color:var(--color-on-surface);padding-inline:8px}.preview{display:flex;align-items:flex-start;gap:12px}.previewIcon{width:24px;height:24px;display:grid;place-items:center;color:var(--color-on-surface-variant);flex:0 0 24px}.previewIcon svg{width:20px;height:20px;fill:currentColor}.previewContent{min-width:0;flex:1}.sessionMeta{font-size:12px;color:var(--color-on-surface-variant);margin-top:3px}.sessionNote{font-size:13px;color:var(--color-on-surface);margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 45%,transparent)}.eventMain{min-width:0;flex:1}.eventMain b,.eventMain small{display:block}.eventFav span,.eventFav svg{width:18px;height:18px;display:block;fill:currentColor}
 .overviewStats{display:grid;grid-template-columns:1fr 1fr;gap:var(--otz-space-md)}@media(max-width:720px){.overviewStats{grid-template-columns:1fr}}
@@ -886,13 +863,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   background:var(--color-primary)!important;
   color:var(--color-on-primary)!important;
 }
-
-/* Prevent inherited old card rules from creating rectangular blocks */
-.settingsGroup .native-list,
-.settingsGroup .settingsNativeList{
-  background:transparent!important;
-  border:0!important;
-}
 .settingsGroup select,
 .settingsGroup textarea{
   box-shadow:none!important;
@@ -946,6 +916,23 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(max-width:600px){
   .toolbarPopover{grid-template-columns:1fr}
   .filterQuickRow,.filterSavedRow{grid-column:1}
+}
+
+
+/* UX audit 2: simplified overview */
+.overviewBlock{margin-top:12px!important}
+.overviewBlock .native-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.overviewBlock .searches{
+  min-height:32px;
+  align-items:center;
+}
+.overviewBlock .heatmap{
+  padding-block:4px;
 }
 
 </style>
@@ -1028,8 +1015,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
             </div>
           </div>
         </section>
-        <div class="card"><div class="page-head"><h2 data-i18n="last_35_days">35 הימים האחרונים</h2><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div><div id="heatmap" class="heatmap"></div></div>
-        <div class="card"><div class="page-head"><h2 data-i18n="recent_searches">חיפושים אחרונים</h2></div><div id="recentSearches" class="searches"></div></div>
+        <section class="native-section overviewBlock">
+          <div class="native-section-title"><span data-i18n="last_35_days">35 הימים האחרונים</span><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div>
+          <div id="heatmap" class="heatmap"></div>
+        </section>
+        <section class="native-section overviewBlock">
+          <div class="native-section-title" data-i18n="recent_searches">חיפושים אחרונים</div>
+          <div id="recentSearches" class="searches"></div>
+        </section>
       </section>
 
       <section class="screen native-page" data-screen-panel="restore">
