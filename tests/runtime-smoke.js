@@ -21,3 +21,6 @@ if(app.includes("$('settingsBtn')")) throw new Error('Legacy settingsBtn referen
 if(app.includes("$('pluginGrid')")||app.includes("$('installedCount')")) throw new Error('Removed last-per-plugin panel is still referenced');
 
 console.log('runtime smoke OK: '+ids.length+' DOM references checked');
+
+if(/\b(?:alert|prompt|confirm)\s*\(/.test(app)) throw new Error('Browser-native dialogs are forbidden; use Otzaria-style internal dialogs');
+console.log('Browser-native dialogs: none');
