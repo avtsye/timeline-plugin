@@ -523,13 +523,13 @@ async function saveSessionAsWorkspace(s){
   await notify(tr('session_saved_workspace'),'success');
 }
 function editSessionNote(s){
-  showModal(tr('session_note'),body=>{
+  showModal(tr('session_note'),(body,close)=>{
     const ta=document.createElement('textarea');ta.className='noteBox';ta.value=sessionNotes[s.id]||'';body.appendChild(ta);
-    const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='12px';
-    const save=document.createElement('button');save.className='primary';save.textContent=tr('save');
+    const actions=document.createElement('div');actions.className='dialogActions';
+    const save=document.createElement('button');save.className='actionRecommended';save.textContent=tr('save');
     save.onclick=async()=>{
       if(ta.value.trim())sessionNotes[s.id]=ta.value.trim();else delete sessionNotes[s.id];
-      await set(NOTES,sessionNotes);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('note_saved'),'success');
+      await set(NOTES,sessionNotes);close();render();await notify(tr('note_saved'),'success');
     };
     actions.appendChild(save);body.appendChild(actions);
   });
@@ -1234,7 +1234,7 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
 function restoreSnapshot(s){
   if(!s)return;
   const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-  showModal(tr('restore_preview'),body=>{
+  showModal(tr('restore_preview'),(body,close)=>{
     const summary=document.createElement('div');summary.className='dialogSummary';
     summary.textContent=fmtDate(s.time)+' · '+fmt(s.time)+' — '+tr('select_books_restore');body.appendChild(summary);
     const list=document.createElement('div');list.className='native-list restoreSelectionList',checks=[];
@@ -1254,7 +1254,7 @@ function restoreSnapshot(s){
     const actions=document.createElement('div');actions.className='dialogActions';
     const all=document.createElement('button');all.className='actionGhost';all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
     const none=document.createElement('button');none.className='actionGhost';none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
+    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);close();await performRestoreSnapshot(s,sel)};
     actions.append(all,none,go);body.appendChild(actions);applyShellIcons();
   });
 }
@@ -1355,7 +1355,7 @@ function missingPluginIds(){
 }
 function showMigrationManager(){
   const missing=missingPluginIds();
-  showModal(tr('missing_plugin_mapping'),body=>{
+  showModal(tr('missing_plugin_mapping'),(body,close)=>{
     if(!missing.length){body.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="puzzle_piece_24_regular"></div><div class="emptyTitle">'+esc(tr('no_missing_plugins'))+'</div></div>';applyShellIcons();return}
     const list=document.createElement('div');list.className='native-list';
     for(const oldId of missing){
@@ -1364,7 +1364,7 @@ function showMigrationManager(){
       const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');sub.textContent=tr('choose_replacement');main.append(b,sub);
       const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
       const btn=document.createElement('button');btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
-      btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('mapping_saved'),'success')};
+      btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);close();render();await notify(tr('mapping_saved'),'success')};
       row.append(icon,main,sel,btn);list.appendChild(row);
     }
     body.appendChild(list);applyShellIcons();
@@ -1419,8 +1419,13 @@ async function showSummaryArchive(){
   }catch(_){await notify(tr('archive_empty'),'error')}
 }
 function updateQuickButtons(){
-  document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===datePreset&&!selectedDayKey));
-  $('favoritesOnly').classList.toggle('active',favoritesOnly);
+  document.querySelectorAll('[data-preset]').forEach(b=>{
+    const active=b.dataset.preset===datePreset&&!selectedDayKey;
+    b.classList.toggle('active',active);
+    b.setAttribute('aria-pressed',active?'true':'false');
+  });
+  const fav=$('favoritesOnly');
+  if(fav){fav.classList.toggle('active',favoritesOnly);fav.setAttribute('aria-pressed',favoritesOnly?'true':'false')}
 }
 async function updateTrackingStatus(){
   const info=await call('app.getGrantedPermissions');
