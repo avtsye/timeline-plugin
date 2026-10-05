@@ -941,79 +941,129 @@ function scheduleLiveRefresh(){
 function minuteOfDay(ts){
   const d=new Date(ts);return d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
 }
-function createTimelineNode(s,index,pxPerMinute=1,cardShift=0){
+function timelineEventTitle(ev){
+  const d=ev.data||{};
+  if(ev.type==='plugin')return pluginName(d.toolId);
+  if(ev.type==='book'||ev.type==='ref')return d.currentBook||d.book||d.currentBookId||d.bookId||ev.label;
+  return ev.label||d.title||d.screen||d.toolId||ev.type;
+}
+function timelineEventSubtitle(ev){
+  const d=ev.data||{};
+  return d.currentRef||d.ref||d.screen||d.toolId||d.workspaceName||'';
+}
+function createTimelineEventNode(ev,index,pxPerMinute=1,cardShift=0){
+  const side=index%2===0?'right':'left';
   const node=document.createElement('div');
-  node.className='timelineNode '+(index%2===0?'right':'left');
-  node.tabIndex=0;node.dataset.sessionId=s.id;
+  node.className='timelineEventNode '+side;
+  node.tabIndex=0;
+  node.dataset.eventId=ev.id||'';
   node.style.setProperty('--card-shift',cardShift+'px');
 
-  const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
+  const card=document.createElement('button');
+  card.className='timelineEventCard';
+  card.type='button';
+  card.onclick=()=>openEvent(ev);
 
-  const anchor=document.createElement('div');anchor.className='timelineAnchor';
-  const dot=document.createElement('div');dot.className='timelineDot';anchor.appendChild(dot);
+  const icon=document.createElement('span');
+  icon.className='timelineEventIcon';
+  icon.dataset.icon=eventIconName(ev.type);
 
-  const connector=document.createElement('div');connector.className='timelineConnector';
-  connector.style.setProperty('--connector-drop',Math.max(0,cardShift+18)+'px');
+  const content=document.createElement('span');
+  content.className='timelineEventContent';
+  const title=document.createElement('b');
+  title.textContent=timelineEventTitle(ev);
+  const sub=document.createElement('small');
+  sub.textContent=timelineEventSubtitle(ev);
+  content.append(title,sub);
 
-  const duration=document.createElement('div');duration.className='timelineDuration';
-  const durationMinutes=Math.max(3,(Number(s.end||s.start)-Number(s.start||0))/60000);
-  duration.style.height=Math.max(6,durationMinutes*pxPerMinute)+'px';
-  duration.title=fmt(s.start)+'–'+fmt(s.end||s.start);
+  const time=document.createElement('time');
+  time.textContent=fmt(ev.time);
+  card.append(icon,content,time);
 
-  const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
+  const anchor=document.createElement('span');
+  anchor.className='timelineEventAnchor';
 
-  const marks=document.createElement('div');marks.className='snapshotMarks';
-  snapshotsForSession(s).slice(0,8).forEach(sn=>{
-    const m=document.createElement('button');m.className='snapshotMark';
-    m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m);
-  });
+  const connectorV=document.createElement('span');
+  connectorV.className='timelineEventConnectorV';
+  const elbowY=cardShift+20;
+  connectorV.style.top=Math.min(0,elbowY)+'px';
+  connectorV.style.height=Math.max(1,Math.abs(elbowY))+'px';
 
-  const tip=document.createElement('div');tip.className='timelineTooltip';
-  tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
+  const connectorH=document.createElement('span');
+  connectorH.className='timelineEventConnectorH';
+  connectorH.style.top=elbowY+'px';
 
-  node.oncontextmenu=ev=>{ev.preventDefault();showContextMenu(ev.clientX,ev.clientY,sessionContextItems(s))};
-  node.append(cw,anchor,connector,duration,stamp,marks,tip);
+  if(Number(ev.endTime||0)>Number(ev.time||0)){
+    const duration=document.createElement('span');
+    duration.className='timelineEventDuration';
+    duration.style.height=Math.max(4,((ev.endTime-ev.time)/60000)*pxPerMinute)+'px';
+    node.appendChild(duration);
+  }
+
+  const tip=document.createElement('div');
+  tip.className='timelineTooltip';
+  tip.innerHTML='<b>'+esc(timelineEventTitle(ev))+'</b><div>'+esc(timelineEventSubtitle(ev))+'</div><div>'+esc(fmt(ev.time))+'</div>';
+
+  node.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,eventContextItems(ev))};
+  node.append(card,connectorV,connectorH,anchor,tip);
   return node;
 }
-function renderTrueDayRail(rail,items,dayTs){
+function renderTrueDayRail(rail,sessionItems,dayTs){
   rail.classList.add('trueDayRail');
   const zoom=Math.max(.4,Math.min(3,Number(settings.timelineZoom||1)));
-  const pxPerMinute=.82*zoom,canvasHeight=Math.max(760,1440*pxPerMinute);
+  const pxPerMinute=.82*zoom;
+  const canvasHeight=Math.max(760,1440*pxPerMinute);
   rail.style.height=canvasHeight+'px';
 
   for(let hour=0;hour<=24;hour++){
-    const line=document.createElement('div');line.className='dayHourLine';
+    const line=document.createElement('div');
+    line.className='dayHourLine';
     line.style.top=(hour*60*pxPerMinute)+'px';
     const label=document.createElement('span');
     label.textContent=String(hour%24).padStart(2,'0')+':00';
-    line.appendChild(label);rail.appendChild(line);
+    line.appendChild(label);
+    rail.appendChild(line);
   }
 
   if(dk(dayTs)===dk(Date.now())){
-    const nowLine=document.createElement('div');nowLine.className='dayNowLine';
+    const nowLine=document.createElement('div');
+    nowLine.className='dayNowLine';
     nowLine.style.top=(minuteOfDay(Date.now())*pxPerMinute)+'px';
-    const label=document.createElement('span');label.textContent=tr('now');
-    nowLine.appendChild(label);rail.appendChild(nowLine);
+    const label=document.createElement('span');
+    label.textContent=tr('now');
+    nowLine.appendChild(label);
+    rail.appendChild(nowLine);
   }
 
-  // The timeline anchor always stays at the exact real time.
-  // Only the card is pushed down when cards on the same side would overlap.
-  const sideLastCardTop={left:-Infinity,right:-Infinity},minCardGap=82;
-  const chronological=items.slice().sort((a,b)=>a.start-b.start);
-  chronological.forEach((session,index)=>{
+  const unique=new Map();
+  for(const session of sessionItems){
+    for(const ev of session.events||[]){
+      const key=ev.id||[ev.time,ev.type,timelineEventTitle(ev),timelineEventSubtitle(ev)].join('|');
+      if(!unique.has(key))unique.set(key,ev);
+    }
+  }
+  const eventsForDay=[...unique.values()].sort((a,b)=>a.time-b.time);
+
+  // Every event anchor stays on its exact time. Only the card is shifted.
+  const lastCardTop={left:-Infinity,right:-Infinity};
+  const minCardGap=54;
+
+  eventsForDay.forEach((ev,index)=>{
     const side=index%2===0?'right':'left';
-    const exactY=Math.max(0,Math.min(canvasHeight-4,minuteOfDay(session.start)*pxPerMinute));
-    let visualCardY=exactY-16;
-    if(visualCardY-sideLastCardTop[side]<minCardGap)visualCardY=sideLastCardTop[side]+minCardGap;
-    visualCardY=Math.min(canvasHeight-72,visualCardY);
-    sideLastCardTop[side]=visualCardY;
+    const exactY=Math.max(0,Math.min(canvasHeight-2,minuteOfDay(ev.time)*pxPerMinute));
+
+    let visualCardY=exactY-20;
+    if(visualCardY-lastCardTop[side]<minCardGap)visualCardY=lastCardTop[side]+minCardGap;
+    visualCardY=Math.max(0,Math.min(canvasHeight-48,visualCardY));
+    lastCardTop[side]=visualCardY;
 
     const cardShift=visualCardY-exactY;
-    const node=createTimelineNode(session,index,pxPerMinute,cardShift);
-    node.classList.remove('left','right');node.classList.add(side,'trueTimeNode');
+    const node=createTimelineEventNode(ev,index,pxPerMinute,cardShift);
     node.style.top=exactY+'px';
     rail.appendChild(node);
   });
+
+  rail.dataset.eventCount=String(eventsForDay.length);
 }
 function render(){
   const sig=renderSignature();
@@ -1027,7 +1077,7 @@ function render(){
   for(const[key,items]of buckets){
     const wrap=document.createElement('section');wrap.className='bucket';
     if(viewMode==='day'){
-      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="timelineRail"></div>';
+      const dayEventCount=new Set(items.flatMap(s=>(s.events||[]).map(e=>e.id||[e.time,e.type,timelineEventTitle(e)].join('|')))).size;\n      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+dayEventCount+' '+esc(tr('events'))+'</span></div><div class="timelineRail"></div>';
       renderTrueDayRail(wrap.querySelector('.timelineRail'),items,items[0].start);
     }else{
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="sessionGrid"></div>';
