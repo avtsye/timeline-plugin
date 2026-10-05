@@ -1662,6 +1662,229 @@ html[dir="ltr"] .settingsChecksGrid .checkRow .settingTileContent{flex:0 1 auto!
   }
 }
 
+
+/* ===== 0.15.13 definitive settings layout ===== */
+/* One predictable settings layout: header, top tabs, scrollable pane, footer. */
+#settingsScreen.settings-pane.screen.active{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto minmax(0,1fr) auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+#settingsScreen>.page-head{
+  grid-column:1!important;
+  grid-row:1!important;
+  width:100%!important;
+  margin:0!important;
+}
+#settingsScreen>.settings-tabs{
+  grid-column:1!important;
+  grid-row:2!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+  width:100%!important;
+  min-height:48px!important;
+  padding:5px 18px!important;
+  margin:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  border:0!important;
+  border-bottom:1px solid var(--color-outline-variant)!important;
+  background:var(--panel-bg)!important;
+  box-sizing:border-box!important;
+}
+#settingsScreen>.settings-tabs .settingsTabBtn{
+  flex:0 0 auto!important;
+  min-height:36px!important;
+  padding:6px 14px!important;
+  margin:0!important;
+  border-radius:var(--radius-pill)!important;
+}
+#settingsScreen>.settingsPane,
+#settingsScreen>.settingsPane.active{
+  grid-column:1!important;
+  grid-row:3!important;
+  width:min(100%,760px)!important;
+  max-width:760px!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0!important;
+  margin-left:auto!important;
+  margin-right:0!important;
+  padding:14px 18px 28px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  box-sizing:border-box!important;
+  align-self:stretch!important;
+  justify-self:stretch!important;
+}
+#settingsScreen>.settingsPane:not(.active){display:none!important}
+#settingsScreen>.settingsSaveBar{
+  grid-column:1!important;
+  grid-row:4!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:100%!important;
+  min-height:56px!important;
+  margin:0!important;
+  padding:9px 18px!important;
+  position:relative!important;
+  inset:auto!important;
+  z-index:30!important;
+  background:var(--panel-bg)!important;
+  border-top:1px solid var(--color-outline-variant)!important;
+  box-sizing:border-box!important;
+}
+
+/* Clean, compact groups instead of controls floating across the screen. */
+#settingsScreen .settingsGroup{
+  width:100%!important;
+  max-width:720px!important;
+  margin:0!important;
+  padding:14px 0!important;
+  border-bottom:1px solid color-mix(in srgb,var(--color-outline-variant) 72%,transparent)!important;
+  box-sizing:border-box!important;
+}
+#settingsScreen .settingsGroup:last-child{border-bottom:0!important}
+#settingsScreen .settingsGroup h3{
+  margin:0 0 10px!important;
+  font-size:16px!important;
+  line-height:1.35!important;
+}
+#settingsScreen .settingFieldRow{
+  display:grid!important;
+  grid-template-columns:170px minmax(220px,280px)!important;
+  align-items:center!important;
+  justify-content:start!important;
+  gap:14px!important;
+  width:100%!important;
+  max-width:520px!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:4px 0!important;
+  box-sizing:border-box!important;
+}
+#settingsScreen .settingFieldRow>label{
+  min-width:0!important;
+  text-align:right!important;
+}
+#settingsScreen .settingFieldRow .appDropdown{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+}
+#settingsScreen .settingsChecksGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(220px,1fr))!important;
+  gap:4px 16px!important;
+  width:100%!important;
+  max-width:620px!important;
+  margin:0!important;
+}
+#settingsScreen .settingsGroup .checkRow,
+#settingsScreen .settingsChecksGrid .checkRow{
+  display:flex!important;
+  flex-direction:row-reverse!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  width:100%!important;
+  min-height:44px!important;
+  margin:0!important;
+  padding:4px 0!important;
+  box-sizing:border-box!important;
+}
+#settingsScreen .settingsGroup .checkRow .settingTileContent,
+#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
+  flex:0 1 auto!important;
+  min-width:0!important;
+}
+#settingsScreen .settingsGroupHead{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  flex-wrap:wrap!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:620px!important;
+}
+#settingsScreen .settingsCompactActions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  width:100%!important;
+  max-width:620px!important;
+  margin:8px 0 0!important;
+}
+#settingsScreen .feedbackCompact,
+#settingsScreen .dangerGroup{
+  width:100%!important;
+  max-width:620px!important;
+  margin:0!important;
+}
+#settingsScreen .feedbackToolbar{
+  display:grid!important;
+  grid-template-columns:minmax(220px,1fr) auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  width:100%!important;
+}
+#settingsScreen .feedbackToolbar .appDropdown{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+#settingsScreen .feedbackToolbar .btn{margin:0!important}
+#settingsScreen .feedbackBox{
+  width:100%!important;
+  box-sizing:border-box!important;
+  margin-top:8px!important;
+}
+#settingsScreen .dangerGroup{
+  padding:12px 14px!important;
+  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
+  border-radius:var(--otz-radius)!important;
+  background:color-mix(in srgb,var(--color-error-container) 20%,transparent)!important;
+}
+
+/* English mirrors naturally without changing the physical right anchoring of Hebrew. */
+html[dir="ltr"] #settingsScreen>.settingsPane,
+html[dir="ltr"] #settingsScreen>.settingsPane.active{
+  margin-left:0!important;
+  margin-right:auto!important;
+}
+html[dir="ltr"] #settingsScreen .settingFieldRow>label{text-align:left!important}
+html[dir="ltr"] #settingsScreen .settingsGroup .checkRow,
+html[dir="ltr"] #settingsScreen .settingsChecksGrid .checkRow{
+  flex-direction:row!important;
+}
+
+@media(max-width:760px){
+  #settingsScreen>.settingsPane,
+  #settingsScreen>.settingsPane.active{
+    width:100%!important;
+    max-width:none!important;
+    padding:12px 14px 24px!important;
+  }
+  #settingsScreen>.settings-tabs{padding-inline:14px!important}
+  #settingsScreen .settingsChecksGrid{grid-template-columns:1fr!important}
+  #settingsScreen .settingFieldRow{
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+    max-width:none!important;
+  }
+  #settingsScreen .feedbackToolbar{grid-template-columns:1fr!important}
+  #settingsScreen .feedbackToolbar .btn{width:100%!important}
+}
+
 </style>
 </head>
 <body>
