@@ -950,6 +950,47 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   background:var(--color-surface-container-low);
 }
 
+
+/* UX audit 2: interaction states */
+button:disabled,
+select:disabled,
+input:disabled,
+textarea:disabled{
+  opacity:.45!important;
+  cursor:default!important;
+  pointer-events:none!important;
+}
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible{
+  outline:2px solid var(--color-primary)!important;
+  outline-offset:2px;
+}
+@media(max-width:700px){
+  .settings-tabs{
+    flex-direction:row!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    border-inline-end:0!important;
+    border-bottom:1px solid var(--color-outline-variant);
+    padding:4px!important;
+    scrollbar-width:thin;
+  }
+  .settingsTabBtn{
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    transition-duration:.001ms!important;
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+  }
+}
+
 </style>
 </head>
 <body>
