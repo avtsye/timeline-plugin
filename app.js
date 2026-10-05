@@ -20,6 +20,7 @@ let settings={paused:false,maxEvents:5000,inAppNotifications:true,compactMode:fa
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
+let virtualLimit=80,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -68,7 +69,7 @@ tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים
 year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
 book_visits:'ביקורים בספר',plugin_timeline:'ציר זמן של תוסף',visits:'אירועים',days:'ימים',places:'מקומות',open:'פתח',
 restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסרים',no_missing_plugins:'אין תוספים חסרים',choose_replacement:'בחר תוסף חלופי…',
-save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד'
+save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים'
 },
 en:{
 settings:'Settings',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
@@ -113,7 +114,7 @@ tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_a
 year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
 book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days:'days',places:'places',open:'Open',
 restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
-save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More'
+save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More',copy_details:'Copy details',copied:'Details copied',open_history:'Open history',remove_favorite:'Remove from favorites',add_favorite:'Add to favorites'
 }};
 const tr=(key,vars={})=>{
   let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
@@ -497,6 +498,7 @@ function createSessionCard(s){
     const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(ev.id)?'★':'☆';fav.title=tr('favorites');
     fav.onclick=async e=>{e.stopPropagation();favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()};
     const time=document.createElement('time');time.textContent=fmt(ev.time);
+    row.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();showContextMenu(e.clientX,e.clientY,eventContextItems(ev))};
     row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
   }
   card.querySelector('.renameBtn').onclick=()=>renameSession(s);
@@ -606,11 +608,82 @@ function showDashboard(){
   });
 }
 
+function renderSignature(){
+  return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang]);
+}
+function resetVirtualWindow(){
+  virtualLimit=80;
+  if(virtualObserver){virtualObserver.disconnect();virtualObserver=null}
+}
+function armVirtualSentinel(total){
+  if(virtualLimit>=total)return;
+  const cont=$('content');
+  const sentinel=document.createElement('div');sentinel.className='virtualSentinel';sentinel.setAttribute('aria-hidden','true');
+  const loading=document.createElement('div');loading.className='loadingMore';loading.textContent='…';
+  cont.appendChild(loading);cont.appendChild(sentinel);
+  virtualObserver=new IntersectionObserver(entries=>{
+    if(entries.some(e=>e.isIntersecting)){
+      virtualObserver.disconnect();virtualObserver=null;
+      virtualLimit=Math.min(total,virtualLimit+80);
+      render();
+    }
+  },{root:document.querySelector('.timeline-scroll'),rootMargin:'600px'});
+  virtualObserver.observe(sentinel);
+}
+function closeContextMenu(){
+  const host=$('contextMenuHost');if(host)host.innerHTML='';
+}
+function showContextMenu(x,y,items){
+  closeContextMenu();
+  const host=$('contextMenuHost'),menu=document.createElement('div');menu.className='contextMenu';
+  for(const item of items){
+    if(!item)continue;
+    const b=document.createElement('button');b.textContent=item.label;if(item.danger)b.classList.add('danger');
+    b.onclick=async()=>{closeContextMenu();await item.action()};menu.appendChild(b);
+  }
+  host.appendChild(menu);
+  const rect=menu.getBoundingClientRect();
+  menu.style.left=Math.max(8,Math.min(x,window.innerWidth-rect.width-8))+'px';
+  menu.style.top=Math.max(8,Math.min(y,window.innerHeight-rect.height-8))+'px';
+}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);await notify(tr('copied'),'success')}catch(_){}
+}
+function eventContextItems(ev){
+  const d=ev.data||{},items=[
+    {label:tr('open'),action:()=>openEvent(ev)},
+    {label:favorites.has(ev.id)?tr('remove_favorite'):tr('add_favorite'),action:async()=>{favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()}},
+    {label:tr('copy_details'),action:()=>copyText([ev.label,d.currentRef||d.ref||d.toolId||'',fmtDate(ev.time)+' '+fmt(ev.time)].filter(Boolean).join('\n'))}
+  ];
+  if(['book','ref'].includes(ev.type)&&bookKeyFromEvent(ev))items.splice(2,0,{label:tr('open_history'),action:()=>showBookHistory(bookKeyFromEvent(ev))});
+  if(ev.type==='plugin'&&d.toolId)items.splice(2,0,{label:tr('open_history'),action:()=>showPluginHistory(d.toolId)});
+  return items;
+}
+function sessionContextItems(s){
+  return[
+    {label:tr('name'),action:()=>renameSession(s)},
+    {label:tr('note'),action:()=>editSessionNote(s)},
+    {label:pinned.has(s.id)?tr('unpin'):tr('pin'),action:async()=>{pinned.has(s.id)?pinned.delete(s.id):pinned.add(s.id);await set(PINS,[...pinned]);render()}},
+    {label:tr('export'),action:()=>exportSession(s)},
+    {label:tr('delete'),danger:true,action:()=>deleteSession(s)}
+  ];
+}
+async function refreshTimelineData(){
+  const [ev,sn]=await Promise.all([get(EVENTS,[]),get(SNAPS,[])]);
+  if(Array.isArray(ev))events=ev;if(Array.isArray(sn))snaps=sn;
+  render();
+}
+function scheduleLiveRefresh(){
+  clearTimeout(liveRefreshTimer);
+  liveRefreshTimer=setTimeout(refreshTimelineData,250);
+}
 function render(){
-  const list=filtered(),ss=sessions(list);
-  renderStats(list,ss);renderHeatmap();renderSearches();renderSnapshots();
+  const sig=renderSignature();
+  if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
+  const list=filtered(),allSessions=sessions(list),ss=allSessions.slice(0,virtualLimit);
+  renderStats(list,allSessions);renderHeatmap();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
-  if(!ss.length){cont.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';updateContinue();return}
+  if(!allSessions.length){cont.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';updateContinue();return}
   const buckets=new Map();
   for(const s of ss){const key=bucketKey(s.start);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(s)}
   for(const[key,items]of buckets){
@@ -618,11 +691,17 @@ function render(){
     if(viewMode==='day'){
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="timelineRail"></div>';
       const rail=wrap.querySelector('.timelineRail');
+      let lastHour=null;
       items.forEach((s,i)=>{
-        const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');
+        const hour=new Date(s.start).getHours();
+        if(lastHour!==null&&hour!==lastHour){
+          const hm=document.createElement('div');hm.className='hourMarker';const label=document.createElement('span');label.textContent=String(hour).padStart(2,'0')+':00';hm.appendChild(label);rail.appendChild(hm);
+        }
+        lastHour=hour;
+        const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');node.tabIndex=0;node.dataset.sessionId=s.id;
         if(i>0){
           const prev=items[i-1],gapMin=Math.max(0,Math.abs(prev.start-s.start)/60000);
-          node.style.marginTop=Math.round(Math.max(14,Math.min(220,gapMin*1.25*Number(settings.timelineZoom||1))))+'px';
+          node.style.marginTop=Math.round(Math.max(8,Math.min(180,gapMin*1.1*Number(settings.timelineZoom||1))))+'px';
         }
         const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
         const dot=document.createElement('div');dot.className='timelineDot';
@@ -630,14 +709,16 @@ function render(){
         const marks=document.createElement('div');marks.className='snapshotMarks';
         snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
         const tip=document.createElement('div');tip.className='timelineTooltip';tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
+        node.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};
         node.appendChild(cw);node.appendChild(dot);node.appendChild(stamp);node.appendChild(marks);node.appendChild(tip);rail.appendChild(node);
       });
     }else{
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="sessionGrid"></div>';
-      const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>grid.appendChild(createSessionCard(s)));
+      const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>{const card=createSessionCard(s);card.tabIndex=0;card.dataset.sessionId=s.id;card.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};grid.appendChild(card)});
     }
     cont.appendChild(wrap);
   }
+  armVirtualSentinel(allSessions.length);
   updateContinue();
 }
 function updateContinue(){
@@ -957,10 +1038,9 @@ function theme(payload){
 }
 function applyShellIcons(){
   const map=window.OFFICIAL_FLUENT_ICONS||{};
-  document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>{
-    const el=btn.querySelector('[data-icon]');
-    if(!el)return;
-    const name=btn.classList.contains('active')&&(el.dataset.iconActive||'')?el.dataset.iconActive:el.dataset.icon;
+  document.querySelectorAll('[data-icon]').forEach(el=>{
+    const nav=el.closest('.nav-item[data-screen]');
+    const name=nav&&nav.classList.contains('active')&&el.dataset.iconActive?el.dataset.iconActive:el.dataset.icon;
     const svg=map[name]||map[el.dataset.icon];
     if(svg)el.innerHTML=svg;
   });
@@ -983,7 +1063,8 @@ function switchScreen(name){
 }
 
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
-$('search').oninput=render;$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
+$('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
+$('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
 $('range').onchange=()=>{datePreset='all';selectedDayKey='';updateQuickButtons();render()};
 document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{viewMode=btn.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===btn));render()});
 document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{datePreset=btn.dataset.preset;selectedDayKey='';updateQuickButtons();render()});
@@ -1030,8 +1111,28 @@ $('saveSettings').onclick=async()=>{
   await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(tr('settings_saved'),'success');
 };
 
+document.addEventListener('click',e=>{if(!e.target.closest('.contextMenu'))closeContextMenu()});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){e.preventDefault();switchScreen('timeline');$('search').focus();$('search').select();return}
+  if(e.key==='Escape'){
+    closeContextMenu();
+    if(settings.focusMode){setFocusMode(false);return}
+    if(document.activeElement===$('search')&&$('search').value){$('search').value='';$('searchBox').classList.remove('has-text');render();return}
+  }
+  if(e.altKey&&/^[1-6]$/.test(e.key)){
+    e.preventDefault();const names=['timeline','overview','restore','analytics','diagnostics','settings'];switchScreen(names[Number(e.key)-1]);return
+  }
+  if((e.key==='j'||e.key==='k')&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+    const nodes=[...document.querySelectorAll('.timelineNode,[data-session-id].session')];if(!nodes.length)return;
+    const cur=Math.max(0,nodes.indexOf(document.activeElement));const next=e.key==='j'?Math.min(nodes.length-1,cur+1):Math.max(0,cur-1);nodes[next].focus();nodes[next].scrollIntoView({block:'nearest'});e.preventDefault();
+  }
+});
 Otzaria.on('plugin.boot',async p=>{theme(p.theme);await refreshThemeFromHost();await load()});
 Otzaria.on('plugin.page_opened',async data=>{const param=data&&data.param;if(param&&param.action==='continueLatest'&&snaps.length)restoreSnapshot(snaps[snaps.length-1]);if(param&&param.view==='diagnostics')switchScreen('diagnostics');});
 Otzaria.on('theme.changed',theme);
+Otzaria.on('workspace.changed',scheduleLiveRefresh);
+Otzaria.on('reader.current_book_changed',scheduleLiveRefresh);
+Otzaria.on('reader.current_ref_changed',scheduleLiveRefresh);
+Otzaria.on('navigation.changed',scheduleLiveRefresh);
 Otzaria.on('plugin.resumed',async()=>{await refreshThemeFromHost();await load()});
 })();
