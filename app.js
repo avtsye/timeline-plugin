@@ -422,7 +422,7 @@ function renderHeatmap(){
     const t=Date.now()-i*86400000,k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
     b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
     b.title=k+' · '+n+' '+tr('events');
-    b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();render()};
+    b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();switchScreen('timeline');render()};
     box.appendChild(b);
   }
 }
@@ -1567,6 +1567,11 @@ function switchScreen(name){
   if(name==='diagnostics'){updateTrackingStatus();renderDiagnosticsScreen();}
 }
 
+function closeFilterPopover({focus=false}={}){
+  const p=$('filtersPopover');if(!p)return;
+  p.hidden=true;
+  const toggle=$('filterToggleBtn');if(toggle){toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
+}
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
 $('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
@@ -1576,10 +1581,10 @@ document.querySelectorAll('[data-view]').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('[data-view]').forEach(x=>{const active=x===btn;x.classList.toggle('active',active);x.setAttribute('aria-pressed',active?'true':'false')});
   render()
 });
-document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{datePreset=btn.dataset.preset;selectedDayKey='';updateQuickButtons();render()});
-$('favoritesOnly').onclick=()=>{favoritesOnly=!favoritesOnly;updateQuickButtons();render()};
+document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{datePreset=btn.dataset.preset;selectedDayKey='';updateQuickButtons();closeFilterPopover();render()});
+$('favoritesOnly').onclick=()=>{favoritesOnly=!favoritesOnly;updateQuickButtons();closeFilterPopover();render()};
 $('saveFilterBtn').onclick=saveCurrentFilter;
-$('savedFilterSelect').onchange=e=>{if(e.target.value!=='')applySavedFilter(e.target.value)};
+$('savedFilterSelect').onchange=e=>{if(e.target.value!==''){applySavedFilter(e.target.value);closeFilterPopover()}};
 $('zoomIn').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)+.2);
 $('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
 $('snapshotBrowserBtn').onclick=showSnapshotBrowser;
@@ -1631,11 +1636,11 @@ $('saveSettings').onclick=async()=>{
   await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(tr('settings_saved'),'success');
 };
 
-document.addEventListener('click',e=>{if(!e.target.closest('.contextMenu'))closeContextMenu();const p=$('filtersPopover');if(p&&!p.hidden&&!e.target.closest('#filtersPopover')&&!e.target.closest('#filterToggleBtn')){p.hidden=true;$('filterToggleBtn')?.setAttribute('aria-expanded','false')}});
+document.addEventListener('click',e=>{if(!e.target.closest('.contextMenu'))closeContextMenu();const p=$('filtersPopover');if(p&&!p.hidden&&!e.target.closest('#filtersPopover')&&!e.target.closest('#filterToggleBtn'))closeFilterPopover()});
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){e.preventDefault();switchScreen('timeline');$('search').focus();$('search').select();return}
   if(e.key==='Escape'){
-    const fp=$('filtersPopover');if(fp&&!fp.hidden){fp.hidden=true;$('filterToggleBtn')?.setAttribute('aria-expanded','false');$('filterToggleBtn')?.focus();e.preventDefault();return}
+    const fp=$('filtersPopover');if(fp&&!fp.hidden){closeFilterPopover({focus:true});e.preventDefault();return}
     closeContextMenu();
     if(settings.focusMode){setFocusMode(false);return}
     if(document.activeElement===$('search')&&$('search').value){$('search').value='';$('searchBox').classList.remove('has-text');render();return}
