@@ -1493,6 +1493,175 @@ html[dir="ltr"] .settingsGroupHead{
   }
 }
 
+
+/* ===== 0.15.12 settings right-cluster + footer containment ===== */
+/* The active pane is strictly contained in row 2. The save bar always owns row 3. */
+.settings-pane.screen.active{
+  overflow:hidden!important;
+  grid-template-columns:128px minmax(0,1fr)!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+}
+.settingsPane,
+.settingsPane.active{
+  grid-column:2!important;
+  grid-row:2!important;
+  align-self:stretch!important;
+  justify-self:stretch!important;
+  width:100%!important;
+  max-width:none!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:12px 18px 24px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overscroll-behavior:contain!important;
+}
+.settingsPane:not(.active){display:none!important}
+.settingsSaveBar{
+  grid-column:2!important;
+  grid-row:3!important;
+  align-self:end!important;
+  justify-self:stretch!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:54px!important;
+  margin:0!important;
+  padding:9px 18px!important;
+  position:relative!important;
+  z-index:20!important;
+  box-sizing:border-box!important;
+  background:var(--panel-bg)!important;
+  border-top:1px solid var(--color-outline-variant)!important;
+}
+
+/* In Hebrew, controls form a compact cluster from the right instead of stretching apart. */
+html[dir="rtl"] .settingsGroup{
+  width:100%!important;
+  max-width:760px!important;
+  margin-right:0!important;
+  margin-left:auto!important;
+}
+html[dir="rtl"] .settingFieldRow{
+  display:flex!important;
+  flex-direction:row!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:18px!important;
+  width:100%!important;
+  max-width:620px!important;
+  min-height:46px!important;
+}
+html[dir="rtl"] .settingFieldRow>label{
+  flex:0 0 155px!important;
+  text-align:right!important;
+}
+html[dir="rtl"] .settingFieldRow .appDropdown{
+  flex:0 0 260px!important;
+  width:260px!important;
+  max-width:260px!important;
+  min-width:0!important;
+  justify-self:auto!important;
+}
+html[dir="rtl"] .settingsGroup .checkRow,
+html[dir="rtl"] .settingsChecksGrid .checkRow{
+  display:flex!important;
+  flex-direction:row-reverse!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:12px!important;
+  width:auto!important;
+  max-width:100%!important;
+  min-height:44px!important;
+  padding:5px 2px!important;
+}
+html[dir="rtl"] .settingsGroup .checkRow .settingTileContent,
+html[dir="rtl"] .settingsChecksGrid .checkRow .settingTileContent{
+  flex:0 1 auto!important;
+  min-width:0!important;
+}
+html[dir="rtl"] .settingsChecksGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(220px,300px))!important;
+  justify-content:start!important;
+  gap:4px 22px!important;
+  width:auto!important;
+  max-width:680px!important;
+}
+html[dir="rtl"] .settingsCompactActions,
+html[dir="rtl"] .feedbackCompact,
+html[dir="rtl"] .dangerGroup{
+  margin-right:0!important;
+  margin-left:auto!important;
+}
+html[dir="rtl"] .settingsSaveBar{
+  justify-content:flex-start!important;
+}
+
+/* Mirror cleanly for English. */
+html[dir="ltr"] .settingsGroup{
+  width:100%!important;
+  max-width:760px!important;
+  margin-left:0!important;
+  margin-right:auto!important;
+}
+html[dir="ltr"] .settingFieldRow{
+  display:flex!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:18px!important;
+  width:100%!important;
+  max-width:620px!important;
+}
+html[dir="ltr"] .settingFieldRow>label{flex:0 0 155px!important}
+html[dir="ltr"] .settingFieldRow .appDropdown{
+  flex:0 0 260px!important;
+  width:260px!important;
+  max-width:260px!important;
+}
+html[dir="ltr"] .settingsGroup .checkRow,
+html[dir="ltr"] .settingsChecksGrid .checkRow{
+  display:flex!important;
+  flex-direction:row!important;
+  justify-content:flex-start!important;
+  gap:12px!important;
+  width:auto!important;
+}
+html[dir="ltr"] .settingsGroup .checkRow .settingTileContent,
+html[dir="ltr"] .settingsChecksGrid .checkRow .settingTileContent{flex:0 1 auto!important}
+
+@media(max-width:900px){
+  html[dir="rtl"] .settingsChecksGrid{grid-template-columns:minmax(220px,320px)!important}
+}
+@media(max-width:700px){
+  .settingsPane,.settingsPane.active{
+    grid-column:1!important;
+    grid-row:3!important;
+    padding:10px 14px 20px!important;
+  }
+  .settingsSaveBar{
+    grid-column:1!important;
+    grid-row:4!important;
+  }
+  html[dir="rtl"] .settingFieldRow,
+  html[dir="ltr"] .settingFieldRow{
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:5px!important;
+    max-width:none!important;
+  }
+  html[dir="rtl"] .settingFieldRow>label,
+  html[dir="ltr"] .settingFieldRow>label{flex:0 0 auto!important}
+  html[dir="rtl"] .settingFieldRow .appDropdown,
+  html[dir="ltr"] .settingFieldRow .appDropdown{
+    flex:0 0 auto!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
