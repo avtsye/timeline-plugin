@@ -459,6 +459,193 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
 }
 
+
+/* 0.15.2 exact event-to-axis timeline */
+.trueDayRail{
+  position:relative!important;
+  padding:0!important;
+  margin-top:8px;
+  overflow:visible;
+}
+.trueDayRail::before{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  inset-inline-start:50%;
+  width:2px;
+  background:var(--color-outline-variant);
+  transform:translateX(-50%)!important;
+  z-index:1;
+}
+.timelineEventNode{
+  position:absolute;
+  inset-inline:0;
+  height:1px;
+  overflow:visible;
+  z-index:4;
+}
+.timelineEventAnchor{
+  position:absolute;
+  top:0;
+  inset-inline-start:50%;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:var(--color-primary);
+  border:2px solid var(--panel-bg);
+  box-shadow:0 0 0 1px var(--color-outline-variant);
+  transform:translate(-50%,-50%);
+  z-index:12;
+  pointer-events:none;
+}
+.timelineEventCard{
+  position:absolute;
+  top:var(--card-shift,0px);
+  width:calc(50% - 46px);
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 10px;
+  border:0;
+  border-radius:var(--otz-radius);
+  background:var(--card-bg);
+  color:var(--color-on-surface);
+  text-align:start;
+  box-shadow:0 1px 2px color-mix(in srgb,var(--color-shadow) 8%,transparent);
+  z-index:9;
+}
+.timelineEventNode.right .timelineEventCard{
+  inset-inline-start:calc(50% + 38px);
+}
+.timelineEventNode.left .timelineEventCard{
+  inset-inline-end:calc(50% + 38px);
+}
+.timelineEventCard:hover{
+  background:color-mix(in srgb,var(--color-on-surface) 5%,var(--card-bg));
+}
+.timelineEventCard:focus-visible{
+  outline:2px solid var(--color-primary);
+  outline-offset:2px;
+}
+.timelineEventIcon{
+  width:22px;
+  height:22px;
+  flex:0 0 22px;
+  display:grid;
+  place-items:center;
+  color:var(--color-on-surface-variant);
+}
+.timelineEventIcon svg{
+  width:20px;
+  height:20px;
+  display:block;
+  fill:currentColor;
+}
+.timelineEventContent{
+  min-width:0;
+  flex:1;
+}
+.timelineEventContent b,
+.timelineEventContent small{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.timelineEventContent b{
+  font-size:var(--otz-font-md);
+  font-weight:500;
+}
+.timelineEventContent small{
+  margin-top:1px;
+  color:var(--color-on-surface-variant);
+  font-size:11px;
+}
+.timelineEventCard time{
+  flex:0 0 auto;
+  font-size:11px;
+  color:var(--color-on-surface-variant);
+  direction:ltr;
+}
+.timelineEventConnectorV{
+  position:absolute;
+  inset-inline-start:50%;
+  width:1px;
+  background:var(--color-outline-variant);
+  transform:translateX(-50%);
+  z-index:6;
+  pointer-events:none;
+}
+.timelineEventConnectorH{
+  position:absolute;
+  width:38px;
+  height:1px;
+  background:var(--color-outline-variant);
+  z-index:6;
+  pointer-events:none;
+}
+.timelineEventNode.right .timelineEventConnectorH{
+  inset-inline-start:50%;
+}
+.timelineEventNode.left .timelineEventConnectorH{
+  inset-inline-end:50%;
+}
+.timelineEventDuration{
+  position:absolute;
+  top:0;
+  inset-inline-start:50%;
+  width:3px;
+  min-height:4px;
+  border-radius:2px;
+  background:color-mix(in srgb,var(--color-primary) 38%,transparent);
+  transform:translateX(-50%);
+  z-index:5;
+  pointer-events:none;
+}
+.timelineEventNode:hover .timelineEventAnchor,
+.timelineEventNode:focus-within .timelineEventAnchor{
+  width:13px;
+  height:13px;
+  background:var(--color-primary);
+}
+.timelineEventNode .timelineTooltip{
+  top:-34px;
+}
+.dayNowLine{
+  z-index:15!important;
+}
+.dayNowLine::before{
+  z-index:16;
+}
+@media(max-width:800px){
+  .trueDayRail::before{
+    inset-inline-start:20px;
+    transform:translateX(-50%)!important;
+  }
+  .timelineEventAnchor,
+  .timelineEventConnectorV,
+  .timelineEventDuration{
+    inset-inline-start:20px;
+  }
+  .timelineEventNode.right .timelineEventConnectorH,
+  .timelineEventNode.left .timelineEventConnectorH{
+    inset-inline-start:20px;
+    inset-inline-end:auto;
+    width:26px;
+  }
+  .timelineEventNode.left .timelineEventCard,
+  .timelineEventNode.right .timelineEventCard{
+    inset-inline-start:46px;
+    inset-inline-end:8px;
+    width:auto;
+  }
+  .dayNowLine::before{
+    inset-inline-start:20px;
+  }
+}
+
 </style>
 </head>
 <body>
