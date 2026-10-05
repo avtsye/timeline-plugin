@@ -905,6 +905,49 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .nav-bottom{position:sticky;bottom:0;background:var(--color-surface-container-low)}
 }
 
+
+/* UX audit 2: consolidate quick navigation into filters */
+.toolbarPopover{
+  grid-template-columns:1fr 1fr;
+}
+.filterQuickRow,
+.filterSavedRow{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.filterQuickRow button,
+.filterSavedRow button{
+  min-height:30px;
+  border:0;
+  border-radius:var(--radius-pill);
+  padding:4px 10px;
+  background:var(--color-surface-container-low);
+  color:var(--color-on-surface);
+}
+.filterQuickRow button.active,
+.filterQuickRow button[aria-pressed="true"]{
+  background:var(--color-secondary-container);
+  color:var(--color-on-secondary-container);
+}
+.filterSavedRow .appDropdown{
+  min-width:160px;
+  flex:1 1 160px;
+}
+.filterSavedRow button{
+  flex:0 0 auto;
+}
+.empty.nativeEmpty{
+  min-height:140px!important;
+  padding-block:18px!important;
+}
+@media(max-width:600px){
+  .toolbarPopover{grid-template-columns:1fr}
+  .filterQuickRow,.filterSavedRow{grid-column:1}
+}
+
 </style>
 </head>
 <body>
@@ -946,6 +989,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
               <label><span data-i18n="plugins">תוסף</span><select id="pluginFilter"><option value="" data-i18n="all_plugins">כל התוספים</option></select></label>
               <label><span data-i18n="days">טווח</span><select id="range"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select></label>
               <label><span data-i18n="sort">מיון</span><select id="sort"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select></label>
+              <div class="filterQuickRow" role="group" aria-label="טווחים מהירים">
+                <button data-preset="today" data-i18n="today">היום</button>
+                <button data-preset="yesterday" data-i18n="yesterday">אתמול</button>
+                <button data-preset="week" data-i18n="this_week">השבוע</button>
+                <button data-preset="all" data-i18n="all">הכול</button>
+                <button id="favoritesOnly" data-i18n="favorites">מועדפים</button>
+              </div>
+              <div class="filterSavedRow">
+                <select id="savedFilterSelect" aria-label="מסננים שמורים"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
+                <button id="saveFilterBtn" data-i18n="save_filter">שמור מסנן</button>
+              </div>
             </div>
           </div>
           <div class="timeline-scroll"><div id="content"></div></div>
@@ -976,14 +1030,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         </section>
         <div class="card"><div class="page-head"><h2 data-i18n="last_35_days">35 הימים האחרונים</h2><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div><div id="heatmap" class="heatmap"></div></div>
         <div class="card"><div class="page-head"><h2 data-i18n="recent_searches">חיפושים אחרונים</h2></div><div id="recentSearches" class="searches"></div></div>
-        <div class="card">
-          <div class="page-head"><h2 data-i18n="quick_navigation">ניווט מהיר</h2></div>
-          <div class="actions">
-            <button id="saveFilterBtn" class="btn" data-i18n="save_filter">שמור מסנן</button>
-            <select id="savedFilterSelect" aria-label="מסננים שמורים"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
-            <button class="btn" data-preset="today" data-i18n="today">היום</button><button class="btn" data-preset="yesterday" data-i18n="yesterday">אתמול</button><button class="btn" data-preset="week" data-i18n="this_week">השבוע</button><button class="btn" data-preset="all" data-i18n="all">הכול</button><button id="favoritesOnly" class="btn" data-i18n="favorites">מועדפים</button>
-          </div>
-        </div>
       </section>
 
       <section class="screen native-page" data-screen-panel="restore">
