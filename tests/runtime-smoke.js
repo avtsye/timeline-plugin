@@ -141,3 +141,16 @@ for(const legacy of ['data-settings-tab="backup"','data-settings-tab="integratio
 if(html.includes('id="trackingStatus"')||html.includes('id="trackingDetail"')) throw new Error('Duplicated diagnostics tracking summary returned');
 if(!html.includes('feedbackCompact')||!html.includes('height:96px')) throw new Error('Compact feedback layout missing');
 console.log('Simplified settings and secondary-screen UX audit OK');
+
+
+// 0.15.8 settings navigation/polish audit
+const settingsNavCount=(html.match(/data-screen="settings"/g)||[]).length;
+if(settingsNavCount!==1) throw new Error('Settings navigation must exist exactly once');
+if(!html.includes('class="nav-bottom"')) throw new Error('Settings must live in the bottom navigation area');
+const mainNavStart=html.indexOf('<nav class="nav-group">');
+const mainNavEnd=html.indexOf('</nav>',mainNavStart);
+if(mainNavStart>=0&&mainNavEnd>mainNavStart&&html.slice(mainNavStart,mainNavEnd).includes('data-screen="settings"')) throw new Error('Settings returned to the primary nav group');
+for(const required of ['.dangerGroup .danger{','.settingsSaveBar .btn{','border-radius:var(--radius-pill)!important']){
+  if(!html.includes(required)) throw new Error('Settings polish missing: '+required);
+}
+console.log('Bottom settings navigation and settings polish audit OK');
