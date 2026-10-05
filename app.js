@@ -364,9 +364,10 @@ function renderSnapshots(){
     const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId);
     const tools=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
     const el=document.createElement('button');el.className='snapshotCard';
-    el.innerHTML='<b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' '+esc(tr('books'))+' · '+tools.length+' '+esc(tr('plugins'))+'/'+esc(tr('built_in_tool'))+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small>';
+    el.innerHTML='<span class="snapshotLeading" data-icon="history_24_regular"></span><span class="snapshotText"><b>'+fmtDate(s.time)+' · '+fmt(s.time)+'</b><small>'+books.length+' '+esc(tr('books'))+' · '+tools.length+' '+esc(tr('plugins'))+'/'+esc(tr('built_in_tool'))+(s.workspace&&s.workspace.name?' · '+esc(s.workspace.name):'')+'</small></span>';
     el.onclick=()=>restoreSnapshot(s);box.appendChild(el);
   }
+  applyShellIcons();
 }
 function smartTitle(s){
   if(names[s.id])return names[s.id];
@@ -468,6 +469,16 @@ async function exportPayload(payload,suggested){
 function exportSession(s){
   exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'session',exportedAt:new Date().toISOString(),events:s.events,snapshots:snapshotsForSession(s),name:names[s.id]||null,note:sessionNotes[s.id]||null},'timeline-session-'+dk(s.start));
 }
+function eventIconName(type){
+  return {
+    book:'book_open_24_regular',
+    ref:'location_24_regular',
+    plugin:'puzzle_piece_24_regular',
+    tool:'wrench_24_regular',
+    workspace:'window_multiple_24_regular',
+    navigation:'arrow_routing_24_regular'
+  }[type]||'history_24_regular';
+}
 function createSessionCard(s){
   const ssnaps=snapshotsForSession(s),nearest=nearestSnap(s.end);
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
@@ -492,6 +503,7 @@ function createSessionCard(s){
   const eb=card.querySelector('.events');
   for(const ev of s.events.slice().reverse()){
     const d=ev.data||{},row=document.createElement('div');row.className='event';
+    const lead=document.createElement('span');lead.className='eventLeading';lead.dataset.icon=eventIconName(ev.type);lead.textContent='•';
     const main=document.createElement('div');main.style.flex='1';
     main.innerHTML='<b>'+esc(ev.type==='plugin'?pluginName(d.toolId):ev.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'')+'</small>';
     main.onclick=()=>openEvent(ev);
@@ -499,7 +511,7 @@ function createSessionCard(s){
     fav.onclick=async e=>{e.stopPropagation();favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()};
     const time=document.createElement('time');time.textContent=fmt(ev.time);
     row.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();showContextMenu(e.clientX,e.clientY,eventContextItems(ev))};
-    row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
+    row.appendChild(lead);row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
   }
   card.querySelector('.renameBtn').onclick=()=>renameSession(s);
   card.querySelector('.noteBtn').onclick=()=>editSessionNote(s);
@@ -683,7 +695,7 @@ function render(){
   const list=filtered(),allSessions=sessions(list),ss=allSessions.slice(0,virtualLimit);
   renderStats(list,allSessions);renderHeatmap();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
-  if(!allSessions.length){cont.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';updateContinue();return}
+  if(!allSessions.length){cont.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="history_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();updateContinue();return}
   const buckets=new Map();
   for(const s of ss){const key=bucketKey(s.start);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(s)}
   for(const[key,items]of buckets){
@@ -719,6 +731,7 @@ function render(){
     cont.appendChild(wrap);
   }
   armVirtualSentinel(allSessions.length);
+  applyShellIcons();
   updateContinue();
 }
 function updateContinue(){
