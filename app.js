@@ -123,13 +123,52 @@ const tr=(key,vars={})=>{
   return s;
 };
 const locale=()=>currentLang==='en'?'en-US':'he-IL';
-const dateLocale=()=>{
+const usingHebrewCalendar=()=>{
   const mode=settings.dateCalendar||'auto';
-  if(mode==='hebrew')return currentLang==='en'?'en-US-u-ca-hebrew':'he-IL-u-ca-hebrew';
-  if(mode==='gregory')return currentLang==='en'?'en-US-u-ca-gregory':'he-IL-u-ca-gregory';
-  return currentLang==='he'?'he-IL-u-ca-hebrew':'en-US-u-ca-gregory';
+  return mode==='hebrew'||(mode==='auto'&&currentLang==='he');
 };
-const formatDate=(value,options)=>new Intl.DateTimeFormat(dateLocale(),options).format(new Date(value));
+const dateLocale=()=>{
+  if(usingHebrewCalendar())return 'he-IL-u-ca-hebrew';
+  return currentLang==='en'?'en-US-u-ca-gregory':'he-IL-u-ca-gregory';
+};
+function hebrewNumber(value,{omitThousands=false}={}){
+  let n=Math.max(0,Math.floor(Number(value)||0));
+  if(omitThousands&&n>=1000)n%=1000;
+  if(n===0)return '';
+  const parts=[];
+  const push=v=>{
+    if(v===15){parts.push('טו');return}
+    if(v===16){parts.push('טז');return}
+    const table=[[400,'ת'],[300,'ש'],[200,'ר'],[100,'ק'],[90,'צ'],[80,'פ'],[70,'ע'],[60,'ס'],[50,'נ'],[40,'מ'],[30,'ל'],[20,'כ'],[10,'י'],[9,'ט'],[8,'ח'],[7,'ז'],[6,'ו'],[5,'ה'],[4,'ד'],[3,'ג'],[2,'ב'],[1,'א']];
+    for(const [num,letter] of table){while(v>=num){parts.push(letter);v-=num}}
+  };
+  if(n>=1000&&!omitThousands){
+    const thousands=Math.floor(n/1000);
+    push(thousands);
+    n%=1000;
+  }
+  push(n);
+  return parts.join('');
+}
+function hebrewDateParts(value){
+  const d=new Date(value);
+  const parts=new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).formatToParts(d);
+  const out={};
+  for(const p of parts)if(p.type!=='literal')out[p.type]=p.value;
+  return out;
+}
+function formatHebrewDate(value,options={}){
+  const p=hebrewDateParts(value),out=[];
+  if(options.weekday&&p.weekday)out.push(p.weekday);
+  if(options.day&&p.day)out.push(hebrewNumber(Number(p.day)));
+  if(options.month&&p.month)out.push(p.month);
+  if(options.year&&p.year)out.push(hebrewNumber(Number(p.year),{omitThousands:true}));
+  return out.join(' ');
+}
+const formatDate=(value,options={})=>{
+  if(usingHebrewCalendar())return formatHebrewDate(value,options);
+  return new Intl.DateTimeFormat(dateLocale(),options).format(new Date(value));
+};
 async function resolveLanguage(){
   if(settings.language&&settings.language!=='auto')currentLang=settings.language;
   else{
@@ -860,7 +899,7 @@ function renderAnalyticsScreen(){
   const heatSection=document.createElement('section');heatSection.className='native-section';
   const hh=document.createElement('div');hh.className='native-section-title';hh.textContent=tr('year_heatmap');
   const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
-  for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(tm)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
+  for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=formatDate(tm,{day:'numeric',month:'long',year:'numeric'})+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
   heatSection.append(hh,year);host.appendChild(heatSection);
 
   const tops=document.createElement('div');tops.className='topLists';
@@ -883,8 +922,8 @@ async function renderDiagnosticsScreen(){
   healthSec.list.appendChild(makeNativeRow({icon:missing.length?'warning_24_regular':'checkmark_circle_24_regular',title:missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'),subtitle:missing.join(', '),trailing:missing.length?'!':'✓'}));
   healthSec.list.appendChild(makeNativeRow({icon:'database_24_regular',title:tr('storage'),subtitle:events.length+' '+tr('events')+' · '+snaps.length+' '+tr('recent_snapshots'),trailing:'~'+Math.round(bytes/1024)+' KB'}));
   healthSec.list.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('last_snapshot'),subtitle:lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):tr('no_data'),trailing:lastSnap&&now-lastSnap<35*60000?'✓':'!'}));
-  healthSec.list.appendChild(makeNativeRow({icon:'archive_24_regular',title:tr('internal_backups'),subtitle:backupEntries.length+' '+tr('versions'),trailing:health.lastBackupAt?fmt(health.lastBackupAt):''}));
-  healthSec.list.appendChild(makeNativeRow({icon:'pulse_24_regular',title:tr('tracking'),subtitle:health.lastEventAt?tr('last')+' '+fmt(health.lastEventAt):tr('no_event'),trailing:health.lastEventType||'—'}));
+  healthSec.list.appendChild(makeNativeRow({icon:'archive_24_regular',title:tr('internal_backups'),subtitle:backupEntries.length+' '+tr('versions'),trailing:health.lastBackupAt?fmtDate(health.lastBackupAt)+' · '+fmt(health.lastBackupAt):''}));
+  healthSec.list.appendChild(makeNativeRow({icon:'pulse_24_regular',title:tr('tracking'),subtitle:health.lastEventAt?tr('last')+' '+fmtDate(health.lastEventAt)+' · '+fmt(health.lastEventAt):tr('no_event'),trailing:health.lastEventType||'—'}));
   healthSec.list.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:tr('missing_plugins'),subtitle:missingPluginIds().join(', '),trailing:String(missingPluginIds().length),action:missingPluginIds().length?showMigrationManager:null,buttonLabel:tr('missing_plugin_mapping')}));
   host.appendChild(healthSec.section);
 
@@ -1497,7 +1536,10 @@ async function load(){
     get(SNAPS,[]),get(SETTINGS,{}),get(PINS,[]),get(COLLAPSED,[]),get(FAVORITES,[]),get(NAMES,{}),
     get(SAVED_FILTERS,[]),get(MIGRATIONS,{}),get(NOTES,{}),get(HEALTH,{})
   ]);
-  snaps=values[0];settings=Object.assign(settings,values[1]);pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
+  snaps=values[0];settings=Object.assign(settings,values[1]);
+  settings.maxEvents=Math.max(500,Math.min(50000,Number(settings.maxEvents)||5000));
+  settings.retentionDays=Number.isFinite(Number(settings.retentionDays))?Math.max(0,Number(settings.retentionDays)):180;
+  pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
   savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
   await resolveLanguage();
   await registerLocalizedShortcuts();
@@ -1708,7 +1750,7 @@ $('saveSettings').onclick=async()=>{
 
     await resolveLanguage();applyTranslations();sync();
     await applyNewTabIntegration();await publishHomepageState();
-    render();renderSnapshots();updateContinue();
+    render();renderSnapshots();updateContinue();renderOverview();
     if(document.querySelector('[data-screen-panel="analytics"].active'))renderAnalyticsScreen();
     if(document.querySelector('[data-screen-panel="diagnostics"].active'))await renderDiagnosticsScreen();
     await updateTrackingStatus();
