@@ -127,3 +127,17 @@ for(const obsolete of ['trueTimeNode','timelineAnchor','timelineConnector','time
   if(html.includes(obsolete)) throw new Error('Obsolete pre-event Timeline CSS remains: '+obsolete);
 }
 console.log('Dead-control and obsolete-CSS audit OK');
+
+
+// Simplified settings UX audit
+const simplifiedTabs=[...html.matchAll(/data-settings-tab="([^"]+)"/g)].map(m=>m[1]);
+const simplifiedPanes=[...html.matchAll(/data-settings-pane="([^"]+)"/g)].map(m=>m[1]);
+const expectedSettings=['general','tracking','advanced'];
+if(JSON.stringify(simplifiedTabs)!==JSON.stringify(expectedSettings)) throw new Error('Settings must stay simplified to general/tracking/advanced');
+if(JSON.stringify(simplifiedPanes)!==JSON.stringify(expectedSettings)) throw new Error('Settings panes must stay simplified to general/tracking/advanced');
+for(const legacy of ['data-settings-tab="backup"','data-settings-tab="integrations"','data-settings-tab="maintenance"']){
+  if(html.includes(legacy)) throw new Error('Legacy sparse settings tab returned: '+legacy);
+}
+if(html.includes('id="trackingStatus"')||html.includes('id="trackingDetail"')) throw new Error('Duplicated diagnostics tracking summary returned');
+if(!html.includes('feedbackCompact')||!html.includes('height:96px')) throw new Error('Compact feedback layout missing');
+console.log('Simplified settings and secondary-screen UX audit OK');
