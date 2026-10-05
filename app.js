@@ -1518,7 +1518,7 @@ const SETTINGS_ICON_MAP={
   homepageIntegration:'home_24_regular'
 };
 function enhanceSettingsRows(){
-  document.querySelectorAll('.settingsSection .checkRow').forEach(row=>{
+  document.querySelectorAll('.settingsGroup .checkRow').forEach(row=>{
     if(row.dataset.nativeEnhanced)return;row.dataset.nativeEnhanced='1';
     const input=row.querySelector('input'),label=row.querySelector('span');
     if(!input||!label)return;
