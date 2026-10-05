@@ -328,6 +328,137 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .dialogSummary{font-size:13px;color:var(--color-on-surface-variant);margin:0 0 12px}.restoreChoice{cursor:pointer}.restoreCheck{appearance:none;-webkit-appearance:none;width:20px;height:20px;border:2px solid var(--color-outline);border-radius:4px;background:transparent;position:relative;flex:0 0 20px}.restoreCheck:checked{background:var(--color-primary);border-color:var(--color-primary)}.restoreCheck:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:var(--color-on-primary);font-size:13px;font-weight:700}.pluginMapRow{flex-wrap:wrap}.nativeInlineSelect{min-width:180px;max-width:280px;height:36px;border:0;border-radius:20px;background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);color:var(--color-on-surface);padding-inline:12px}.pluginMapRow button:disabled{opacity:.45}.archiveTotals{margin-bottom:16px}.dialogToolbar{display:flex;justify-content:flex-end;margin-bottom:12px}
 .trueDayRail{position:relative;padding:0!important;margin-top:8px}.trueDayRail::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--color-outline-variant);transform:translateX(50%)}.dayHourLine{position:absolute;inset-inline:0;height:1px;background:color-mix(in srgb,var(--color-outline-variant) 45%,transparent);pointer-events:none}.dayHourLine>span{position:absolute;inset-inline-start:calc(50% + 12px);top:-9px;background:var(--panel-bg);padding:0 4px;color:var(--color-on-surface-variant);font-size:10px}.dayNowLine{position:absolute;inset-inline:0;height:2px;background:var(--color-error);z-index:3;pointer-events:none}.dayNowLine>span{position:absolute;inset-inline-start:calc(50% + 12px);top:-10px;background:var(--color-error);color:var(--color-on-error);padding:1px 5px;border-radius:var(--otz-radius);font-size:10px}.trueTimeNode{position:absolute!important;inset-inline:0;margin:0!important;grid-template-columns:1fr 74px 1fr}.trueTimeNode.left .timelineCard{grid-column:1}.trueTimeNode.right .timelineCard{grid-column:3}.trueTimeNode .timelineDot{margin-top:18px}.trueTimeNode .timelineStamp{margin-top:33px}@media(max-width:800px){.trueDayRail::before{inset-inline-start:20px;transform:none}.dayHourLine>span,.dayNowLine>span{inset-inline-start:30px}.trueTimeNode{grid-template-columns:42px 1fr}.trueTimeNode.left .timelineCard,.trueTimeNode.right .timelineCard{grid-column:2}}
 .loadMoreRows{display:block;margin:8px auto 0;min-height:36px;border:0;border-radius:20px;padding:0 16px;background:var(--color-secondary-container);color:var(--color-on-secondary-container);font:inherit}.loadMoreRows:hover{background:color-mix(in srgb,var(--color-secondary-container) 88%,var(--color-on-secondary-container))}
+
+/* 0.15.1 precision fixes */
+.searchBox{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:color-mix(in srgb,var(--color-on-surface) 7%,transparent)!important;
+}
+.searchBox:focus-within{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:color-mix(in srgb,var(--color-on-surface) 10%,transparent)!important;
+}
+.timeline-search,
+.timeline-search:focus,
+.timeline-search:focus-visible{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+#search{border:0!important;outline:0!important;box-shadow:none!important}
+
+.trueTimeNode{
+  position:absolute!important;
+  inset-inline:0;
+  margin:0!important;
+  grid-template-columns:1fr 74px 1fr;
+  min-height:1px;
+  overflow:visible;
+}
+.trueTimeNode .timelineCard{
+  transform:translateY(var(--card-shift,0px));
+  z-index:4;
+}
+.timelineAnchor{
+  grid-column:2;
+  position:absolute;
+  inset-inline-start:50%;
+  top:0;
+  width:14px;
+  height:14px;
+  transform:translate(50%,-50%);
+  z-index:8;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+}
+.timelineAnchor .timelineDot{
+  margin:0!important;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--color-primary);
+  border:2px solid var(--panel-bg);
+  box-shadow:0 0 0 1px var(--color-outline-variant);
+}
+.timelineDuration{
+  position:absolute;
+  top:0;
+  inset-inline-start:calc(50% - 2px);
+  width:4px;
+  min-height:6px;
+  border-radius:2px;
+  background:color-mix(in srgb,var(--color-primary) 45%,transparent);
+  z-index:5;
+  pointer-events:none;
+}
+.timelineConnector{
+  position:absolute;
+  top:0;
+  inset-inline-start:50%;
+  width:24px;
+  height:max(2px,var(--connector-drop,2px));
+  z-index:3;
+  pointer-events:none;
+  border-bottom:1px solid var(--color-outline-variant);
+}
+.trueTimeNode.right .timelineConnector{
+  border-inline-end:1px solid var(--color-outline-variant);
+}
+.trueTimeNode.left .timelineConnector{
+  transform:translateX(-24px);
+  border-inline-start:1px solid var(--color-outline-variant);
+}
+.trueTimeNode .timelineStamp{
+  position:absolute;
+  top:7px;
+  inset-inline-start:calc(50% + 10px);
+  margin:0!important;
+  background:var(--panel-bg);
+  padding:0 3px;
+  z-index:7;
+}
+.trueTimeNode .snapshotMarks{
+  position:absolute;
+  top:18px;
+  inset-inline-start:calc(50% - 12px);
+  margin:0!important;
+  z-index:8;
+}
+.dayNowLine{
+  z-index:9!important;
+}
+.dayNowLine::before{
+  content:"";
+  position:absolute;
+  inset-inline-start:50%;
+  top:-4px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--color-error);
+  transform:translateX(50%);
+}
+@media(max-width:800px){
+  .timelineAnchor{inset-inline-start:20px;transform:translate(-50%,-50%)}
+  .timelineDuration{inset-inline-start:18px}
+  .trueTimeNode .timelineStamp{inset-inline-start:30px}
+  .trueTimeNode .snapshotMarks{inset-inline-start:8px}
+  .trueTimeNode.right .timelineConnector,
+  .trueTimeNode.left .timelineConnector{
+    inset-inline-start:20px;
+    transform:none;
+    width:22px;
+    border-inline-start:0;
+    border-inline-end:1px solid var(--color-outline-variant);
+  }
+}
+
 </style>
 </head>
 <body>
