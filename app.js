@@ -630,27 +630,102 @@ function renderStats(list,ss){
   $('pluginCount').textContent=new Set(list.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean)).size;
   $('bookTime').textContent=times.books+' '+(currentLang==='he'?'דק׳':'min');$('toolTime').textContent=times.tools+' '+(currentLang==='he'?'דק׳':'min');
 }
+function estimateListMinutes(list){
+  if(!list.length)return 0;
+  const groups=new Map();
+  for(const e of list){const k=e.sessionId||'__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(e)}
+  let ms=0;
+  for(const arr of groups.values()){
+    arr.sort((a,b)=>a.time-b.time);
+    for(let i=0;i<arr.length;i++){
+      const e=arr[i],next=arr[i+1];
+      const own=Math.max(0,Number(e.endTime||e.time)-Number(e.time||0));
+      const gap=next?Math.max(0,next.time-e.time):0;
+      ms+=Math.min(15*60000,Math.max(own,gap,60000));
+    }
+  }
+  return Math.round(ms/60000);
+}
+function entityStats(list){
+  if(!list.length)return{events:0,sessions:0,days:0,minutes:0,first:0,last:0};
+  const times=list.map(e=>Number(e.time||0)).filter(Boolean);
+  return{
+    events:list.length,
+    sessions:new Set(list.map(e=>e.sessionId).filter(Boolean)).size,
+    days:new Set(list.map(e=>dk(e.time))).size,
+    minutes:estimateListMinutes(list),
+    first:Math.min(...times),
+    last:Math.max(...times)
+  };
+}
+function appendStatsRows(body,stats){
+  const sec=makeNativeSection('');
+  sec.section.classList.add('entityStatsSection');
+  sec.list.appendChild(makeNativeRow({icon:'window_multiple_24_regular',title:tr('visit_sessions'),trailing:String(stats.sessions)}));
+  sec.list.appendChild(makeNativeRow({icon:'calendar_24_regular',title:tr('activity_days'),trailing:String(stats.days)}));
+  sec.list.appendChild(makeNativeRow({icon:'timer_24_regular',title:tr('estimated_time'),trailing:stats.minutes+' '+tr('minutes')}));
+  sec.list.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('first_visit'),trailing:stats.first?fmtDate(stats.first):'—'}));
+  sec.list.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('last_visit'),trailing:stats.last?fmtDate(stats.last)+' '+fmt(stats.last):'—'}));
+  body.appendChild(sec.list);
+}
+function sessionGroupsForEvents(list){
+  const m=new Map();
+  for(const e of list){const k=e.sessionId||'unknown';if(!m.has(k))m.set(k,[]);m.get(k).push(e)}
+  return[...m.entries()].map(([id,arr])=>{arr.sort((a,b)=>a.time-b.time);return{id,events:arr,start:arr[0].time,end:Math.max(...arr.map(e=>e.endTime||e.time))}}).sort((a,b)=>b.start-a.start);
+}
 function showBookHistory(bookKey){
   const visits=eventsForBook(bookKey),title=visits.length?bookTitleFromEvent(visits[0]):String(bookKey);
   showModal(tr('book_visits')+' — '+title,body=>{
     if(!visits.length){body.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="book_open_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();return}
-    const places=[],seen=new Set();
-    for(const ev of visits){const d=ev.data||{},ref=d.currentRef||d.ref||'',key=ref+'|'+(d.currentIndex??d.index??'');if(!seen.has(key)){seen.add(key);places.push(ev)}}
-    const summary=document.createElement('div');summary.className='dialogSummary';summary.textContent=visits.length+' '+tr('visits')+' · '+new Set(visits.map(ev=>dk(ev.time))).size+' '+tr('days')+' · '+places.length+' '+tr('places');body.appendChild(summary);
-    const list=document.createElement('div');list.className='native-list';
-    visits.slice(0,100).forEach(ev=>{const d=ev.data||{};list.appendChild(makeNativeRow({icon:'book_open_24_regular',title:d.currentRef||d.ref||title,subtitle:fmtDate(ev.time)+' · '+fmt(ev.time),trailing:String(d.currentIndex??d.index??''),action:()=>openEvent(ev)}))});
-    body.appendChild(list);applyShellIcons();
+    const stats=entityStats(visits);appendStatsRows(body,stats);
+
+    const placeCounts=new Map();
+    for(const ev of visits){
+      const d=ev.data||{},ref=d.currentRef||d.ref||'',index=d.currentIndex??d.index??'';
+      const key=ref||String(index||'');if(!key)continue;
+      const x=placeCounts.get(key)||{ref,index,count:0,last:0,event:ev};x.count++;x.last=Math.max(x.last,ev.time);if(ev.time>=x.event.time)x.event=ev;placeCounts.set(key,x);
+    }
+    const places=makeNativeSection(tr('most_visited_places'));
+    [...placeCounts.values()].sort((a,b)=>b.count-a.count||b.last-a.last).slice(0,20).forEach(x=>{
+      places.list.appendChild(makeNativeRow({icon:'location_24_regular',title:x.ref||String(x.index),subtitle:fmtDate(x.last)+' · '+fmt(x.last),trailing:String(x.count),action:()=>openEvent(x.event)}));
+    });
+    if(placeCounts.size)body.appendChild(places.section);
+
+    const visitsSec=makeNativeSection(tr('visit_sessions'));
+    sessionGroupsForEvents(visits).slice(0,100).forEach(group=>{
+      const last=group.events[group.events.length-1],d=last.data||{};
+      visitsSec.list.appendChild(makeNativeRow({
+        icon:'book_open_24_regular',
+        title:d.currentRef||d.ref||title,
+        subtitle:fmtDate(group.start)+' · '+fmt(group.start)+'–'+fmt(group.end),
+        trailing:Math.max(1,Math.round((group.end-group.start)/60000))+' '+tr('minutes'),
+        action:()=>openEvent(last)
+      }));
+    });
+    body.appendChild(visitsSec.section);applyShellIcons();
   });
 }
 function showPluginHistory(pluginId){
   const list=eventsForPlugin(pluginId),name=pluginName(pluginId);
   showModal(tr('plugin_timeline')+' — '+name,body=>{
-    const actions=document.createElement('div');actions.className='dialogToolbar';
-    const open=document.createElement('button');open.className='actionRecommended';open.textContent=tr('open')+' '+tr('plugin');open.onclick=()=>openPlugin(pluginId);actions.appendChild(open);body.appendChild(actions);
-    const rows=document.createElement('div');rows.className='native-list';
-    if(!list.length){rows.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="puzzle_piece_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>'}
-    else list.slice(0,120).forEach(ev=>rows.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:name,subtitle:fmtDate(ev.time)+' · '+fmt(ev.time),trailing:(ev.data||{}).toolId||'',action:()=>openPlugin(pluginId)})));
-    body.appendChild(rows);applyShellIcons();
+    const toolbar=document.createElement('div');toolbar.className='dialogToolbar';
+    const open=document.createElement('button');open.className='actionRecommended';open.textContent=tr('open')+' '+tr('plugin');open.onclick=()=>openPlugin(pluginId);toolbar.appendChild(open);body.appendChild(toolbar);
+    if(!list.length){body.innerHTML+='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="puzzle_piece_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();return}
+    const stats=entityStats(list);appendStatsRows(body,stats);
+
+    const groups=makeNativeSection(tr('visit_sessions'));
+    sessionGroupsForEvents(list).slice(0,100).forEach(group=>{
+      const sessionAll=events.filter(e=>e.sessionId===group.id);
+      const books=[...new Set(sessionAll.filter(e=>['book','ref'].includes(e.type)).map(e=>bookTitleFromEvent(e)).filter(Boolean))];
+      groups.list.appendChild(makeNativeRow({
+        icon:'puzzle_piece_24_regular',
+        title:fmtDate(group.start)+' · '+fmt(group.start)+'–'+fmt(group.end),
+        subtitle:books.slice(0,3).join(' · ')||name,
+        trailing:Math.max(1,Math.round((group.end-group.start)/60000))+' '+tr('minutes'),
+        action:()=>openPlugin(pluginId)
+      }));
+    });
+    body.appendChild(groups.section);applyShellIcons();
   });
 }
 function aggregateDaily(days=30){
