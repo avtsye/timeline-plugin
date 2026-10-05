@@ -75,3 +75,9 @@ for(const required of [
 }
 if(app.includes('function createTimelineNode(')) throw new Error('Legacy session-only Timeline node renderer still present');
 console.log('Exact per-event Timeline audit OK');
+
+for(const required of ['function adaptiveGapPx','function buildAdaptiveTimelinePositions','adaptiveTimelineRail','adaptiveGapMarker']){
+  if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing adaptive Timeline capability: '+required);
+}
+if(app.includes('1440*pxPerMinute')) throw new Error('Fixed 24-hour Timeline height returned');
+console.log('Adaptive content-driven Timeline audit OK');
