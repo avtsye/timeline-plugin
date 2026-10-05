@@ -985,10 +985,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
               <button id="focusModeBtn" class="icon-btn toolbarIcon" data-i18n-title="focus_mode" title="מצב פוקוס"><span data-icon="full_screen_maximize_24_regular"></span></button>
             </div>
             <div id="filtersPopover" class="toolbarPopover" hidden>
-              <label><span data-i18n="all_types">סוג פעילות</span><select id="type"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select></label>
-              <label><span data-i18n="plugins">תוסף</span><select id="pluginFilter"><option value="" data-i18n="all_plugins">כל התוספים</option></select></label>
-              <label><span data-i18n="days">טווח</span><select id="range"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select></label>
-              <label><span data-i18n="sort">מיון</span><select id="sort"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select></label>
+              <label><span data-i18n="all_types">סוג פעילות</span><select id="type" aria-label="סוג פעילות"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select></label>
+              <label><span data-i18n="plugins">תוסף</span><select id="pluginFilter" aria-label="תוסף"><option value="" data-i18n="all_plugins">כל התוספים</option></select></label>
+              <label><span data-i18n="days">טווח</span><select id="range" aria-label="טווח"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select></label>
+              <label><span data-i18n="sort">מיון</span><select id="sort" aria-label="מיון"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select></label>
               <div class="filterQuickRow" role="group" aria-label="טווחים מהירים">
                 <button data-preset="today" data-i18n="today">היום</button>
                 <button data-preset="yesterday" data-i18n="yesterday">אתמול</button>
@@ -1088,7 +1088,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           <section class="settingsGroup">
             <div class="settingsGroupHead">
               <h3 data-i18n="tracking">מעקב</h3>
-              <button id="pauseBtn" class="settingsInlineAction"></button>
+              <button id="pauseBtn" class="settingsInlineAction" data-i18n="pause_tracking" aria-label="השהה מעקב">השהה מעקב</button>
             </div>
             <div id="privacyStatus" class="settingsHint"></div>
             <div class="settingsCompactActions">
