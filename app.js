@@ -1008,32 +1008,58 @@ function createTimelineEventNode(ev,index,pxPerMinute=1,cardShift=0){
   node.append(card,connectorV,connectorH,anchor,tip);
   return node;
 }
+function formatGap(ms){
+  const mins=Math.max(1,Math.round(ms/60000));
+  if(mins<60)return mins+' '+tr('minutes');
+  const h=Math.floor(mins/60),m=mins%60;
+  return h+' '+tr('hour')+(m?' '+m+' '+tr('minutes'):'');
+}
+function adaptiveGapPx(deltaMs,zoom){
+  const mins=Math.max(0,deltaMs/60000);
+  // Preserve chronology, but heavily compress long idle periods.
+  // Dense events still receive a readable minimum separation.
+  const base=52*zoom;
+  if(mins<=5)return base;
+  if(mins<=30)return base+Math.min(28,(mins-5)*1.1)*zoom;
+  if(mins<=120)return base+(28+Math.log2(1+(mins-30)/15)*18)*zoom;
+  return Math.min(150*zoom,base+68*zoom+Math.log2(1+(mins-120)/60)*18*zoom);
+}
+function buildAdaptiveTimelinePositions(events,zoom){
+  const positions=new Map();
+  if(!events.length)return{positions,height:180};
+  let y=34;
+  positions.set(events[0],y);
+  for(let i=1;i<events.length;i++){
+    const prev=events[i-1],cur=events[i];
+    y+=adaptiveGapPx(Math.max(0,cur.time-prev.time),zoom);
+    positions.set(cur,y);
+  }
+  return{positions,height:y+92*zoom};
+}
+function positionForTimeAdaptive(ts,events,positions,zoom){
+  if(!events.length)return 34;
+  if(ts<=events[0].time){
+    const d=events[0].time-ts;
+    return Math.max(18,positions.get(events[0])-Math.min(80*zoom,adaptiveGapPx(d,zoom)));
+  }
+  const last=events[events.length-1];
+  if(ts>=last.time){
+    const d=ts-last.time;
+    return positions.get(last)+Math.min(120*zoom,adaptiveGapPx(d,zoom));
+  }
+  for(let i=1;i<events.length;i++){
+    const a=events[i-1],b=events[i];
+    if(ts<=b.time){
+      const ya=positions.get(a),yb=positions.get(b);
+      const ratio=(ts-a.time)/Math.max(1,b.time-a.time);
+      return ya+(yb-ya)*ratio;
+    }
+  }
+  return positions.get(last);
+}
 function renderTrueDayRail(rail,sessionItems,dayTs){
-  rail.classList.add('trueDayRail');
-  const zoom=Math.max(.4,Math.min(3,Number(settings.timelineZoom||1)));
-  const pxPerMinute=.82*zoom;
-  const canvasHeight=Math.max(760,1440*pxPerMinute);
-  rail.style.height=canvasHeight+'px';
-
-  for(let hour=0;hour<=24;hour++){
-    const line=document.createElement('div');
-    line.className='dayHourLine';
-    line.style.top=(hour*60*pxPerMinute)+'px';
-    const label=document.createElement('span');
-    label.textContent=String(hour%24).padStart(2,'0')+':00';
-    line.appendChild(label);
-    rail.appendChild(line);
-  }
-
-  if(dk(dayTs)===dk(Date.now())){
-    const nowLine=document.createElement('div');
-    nowLine.className='dayNowLine';
-    nowLine.style.top=(minuteOfDay(Date.now())*pxPerMinute)+'px';
-    const label=document.createElement('span');
-    label.textContent=tr('now');
-    nowLine.appendChild(label);
-    rail.appendChild(nowLine);
-  }
+  rail.classList.add('trueDayRail','adaptiveTimelineRail');
+  const zoom=Math.max(.5,Math.min(2.4,Number(settings.timelineZoom||1)));
 
   const unique=new Map();
   for(const session of sessionItems){
@@ -1043,25 +1069,71 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
     }
   }
   const eventsForDay=[...unique.values()].sort((a,b)=>a.time-b.time);
+  const layout=buildAdaptiveTimelinePositions(eventsForDay,zoom);
+  const positions=layout.positions;
+  rail.style.height=Math.max(180,layout.height)+'px';
 
-  // Every event anchor stays on its exact time. Only the card is shifted.
-  const lastCardTop={left:-Infinity,right:-Infinity};
-  const minCardGap=54;
-
+  // Context markers are based on actual content, not a fixed 24-hour ruler.
+  let previous=null;
   eventsForDay.forEach((ev,index)=>{
+    const y=positions.get(ev);
+    if(previous){
+      const gap=ev.time-previous.time;
+      if(gap>=45*60000){
+        const marker=document.createElement('div');
+        marker.className='adaptiveGapMarker';
+        marker.style.top=((positions.get(previous)+y)/2)+'px';
+        const label=document.createElement('span');
+        label.textContent=formatGap(gap);
+        marker.appendChild(label);
+        rail.appendChild(marker);
+      }
+    }
+
     const side=index%2===0?'right':'left';
-    const exactY=Math.max(0,Math.min(canvasHeight-2,minuteOfDay(ev.time)*pxPerMinute));
+    const exactY=y;
 
-    let visualCardY=exactY-20;
-    if(visualCardY-lastCardTop[side]<minCardGap)visualCardY=lastCardTop[side]+minCardGap;
-    visualCardY=Math.max(0,Math.min(canvasHeight-48,visualCardY));
-    lastCardTop[side]=visualCardY;
-
-    const cardShift=visualCardY-exactY;
-    const node=createTimelineEventNode(ev,index,pxPerMinute,cardShift);
+    // Only cards move to avoid collisions. Points remain on the adaptive time axis.
+    const node=createTimelineEventNode(ev,index,1,0);
     node.style.top=exactY+'px';
+    node.dataset.side=side;
     rail.appendChild(node);
+    previous=ev;
   });
+
+  // Shift overlapping cards after they exist in the DOM, without changing their anchors.
+  const lastBottom={left:-Infinity,right:-Infinity};
+  [...rail.querySelectorAll('.timelineEventNode')].forEach(node=>{
+    const side=node.dataset.side||'right';
+    const card=node.querySelector('.timelineEventCard');
+    if(!card)return;
+    const anchorY=parseFloat(node.style.top)||0;
+    const h=Math.max(40,card.offsetHeight||40);
+    let desired=anchorY-h/2;
+    if(desired<lastBottom[side]+8)desired=lastBottom[side]+8;
+    const maxTop=Math.max(8,(parseFloat(rail.style.height)||180)-h-8);
+    desired=Math.max(8,Math.min(maxTop,desired));
+    const shift=desired-anchorY;
+    node.style.setProperty('--card-shift',shift+'px');
+
+    const v=node.querySelector('.timelineEventConnectorV');
+    const hline=node.querySelector('.timelineEventConnectorH');
+    const elbow=shift+h/2;
+    if(v){v.style.top=Math.min(0,elbow)+'px';v.style.height=Math.max(1,Math.abs(elbow))+'px'}
+    if(hline)hline.style.top=elbow+'px';
+    lastBottom[side]=desired+h;
+  });
+
+  if(dk(dayTs)===dk(Date.now())&&eventsForDay.length){
+    const nowY=positionForTimeAdaptive(Date.now(),eventsForDay,positions,zoom);
+    const maxHeight=parseFloat(rail.style.height)||180;
+    if(nowY>maxHeight-24)rail.style.height=(nowY+54)+'px';
+    const nowLine=document.createElement('div');
+    nowLine.className='dayNowLine adaptiveNowLine';
+    nowLine.style.top=nowY+'px';
+    const label=document.createElement('span');label.textContent=tr('now');
+    nowLine.appendChild(label);rail.appendChild(nowLine);
+  }
 
   rail.dataset.eventCount=String(eventsForDay.length);
 }
