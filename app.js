@@ -957,8 +957,11 @@ function theme(payload){
 }
 function applyShellIcons(){
   const map=window.OFFICIAL_FLUENT_ICONS||{};
-  document.querySelectorAll('[data-icon]').forEach(el=>{
-    const svg=map[el.dataset.icon];
+  document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>{
+    const el=btn.querySelector('[data-icon]');
+    if(!el)return;
+    const name=btn.classList.contains('active')&&(el.dataset.iconActive||'')?el.dataset.iconActive:el.dataset.icon;
+    const svg=map[name]||map[el.dataset.icon];
     if(svg)el.innerHTML=svg;
   });
 }
@@ -971,6 +974,7 @@ function switchScreen(name){
   if(!valid.includes(name))name='timeline';
   document.querySelectorAll('[data-screen-panel]').forEach(p=>p.classList.toggle('active',p.dataset.screenPanel===name));
   document.querySelectorAll('.nav-item[data-screen]').forEach(b=>b.classList.toggle('active',b.dataset.screen===name));
+  applyShellIcons();
   const titleKeys={timeline:'screen_timeline',overview:'screen_overview',restore:'screen_restore',analytics:'screen_analytics',diagnostics:'screen_diagnostics',settings:'settings'};
   const title=$('currentScreenTitle');if(title)title.textContent=tr(titleKeys[name]||'screen_timeline');
   settings.lastScreen=name;set(SETTINGS,settings);
