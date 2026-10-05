@@ -941,39 +941,77 @@ function scheduleLiveRefresh(){
 function minuteOfDay(ts){
   const d=new Date(ts);return d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
 }
-function createTimelineNode(s,index){
-  const node=document.createElement('div');node.className='timelineNode '+(index%2===0?'right':'left');node.tabIndex=0;node.dataset.sessionId=s.id;
+function createTimelineNode(s,index,pxPerMinute=1,cardShift=0){
+  const node=document.createElement('div');
+  node.className='timelineNode '+(index%2===0?'right':'left');
+  node.tabIndex=0;node.dataset.sessionId=s.id;
+  node.style.setProperty('--card-shift',cardShift+'px');
+
   const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
-  const dot=document.createElement('div');dot.className='timelineDot';
+
+  const anchor=document.createElement('div');anchor.className='timelineAnchor';
+  const dot=document.createElement('div');dot.className='timelineDot';anchor.appendChild(dot);
+
+  const connector=document.createElement('div');connector.className='timelineConnector';
+  connector.style.setProperty('--connector-drop',Math.max(0,cardShift+18)+'px');
+
+  const duration=document.createElement('div');duration.className='timelineDuration';
+  const durationMinutes=Math.max(3,(Number(s.end||s.start)-Number(s.start||0))/60000);
+  duration.style.height=Math.max(6,durationMinutes*pxPerMinute)+'px';
+  duration.title=fmt(s.start)+'–'+fmt(s.end||s.start);
+
   const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
+
   const marks=document.createElement('div');marks.className='snapshotMarks';
-  snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
-  const tip=document.createElement('div');tip.className='timelineTooltip';tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
-  node.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};
-  node.append(cw,dot,stamp,marks,tip);return node;
+  snapshotsForSession(s).slice(0,8).forEach(sn=>{
+    const m=document.createElement('button');m.className='snapshotMark';
+    m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m);
+  });
+
+  const tip=document.createElement('div');tip.className='timelineTooltip';
+  tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
+
+  node.oncontextmenu=ev=>{ev.preventDefault();showContextMenu(ev.clientX,ev.clientY,sessionContextItems(s))};
+  node.append(cw,anchor,connector,duration,stamp,marks,tip);
+  return node;
 }
 function renderTrueDayRail(rail,items,dayTs){
   rail.classList.add('trueDayRail');
   const zoom=Math.max(.4,Math.min(3,Number(settings.timelineZoom||1)));
   const pxPerMinute=.82*zoom,canvasHeight=Math.max(760,1440*pxPerMinute);
   rail.style.height=canvasHeight+'px';
+
   for(let hour=0;hour<=24;hour++){
-    const line=document.createElement('div');line.className='dayHourLine';line.style.top=(hour*60*pxPerMinute)+'px';
-    const label=document.createElement('span');label.textContent=String(hour%24).padStart(2,'0')+':00';line.appendChild(label);rail.appendChild(line);
+    const line=document.createElement('div');line.className='dayHourLine';
+    line.style.top=(hour*60*pxPerMinute)+'px';
+    const label=document.createElement('span');
+    label.textContent=String(hour%24).padStart(2,'0')+':00';
+    line.appendChild(label);rail.appendChild(line);
   }
+
   if(dk(dayTs)===dk(Date.now())){
-    const nowLine=document.createElement('div');nowLine.className='dayNowLine';nowLine.style.top=(minuteOfDay(Date.now())*pxPerMinute)+'px';
-    const label=document.createElement('span');label.textContent=tr('now');nowLine.appendChild(label);rail.appendChild(nowLine);
+    const nowLine=document.createElement('div');nowLine.className='dayNowLine';
+    nowLine.style.top=(minuteOfDay(Date.now())*pxPerMinute)+'px';
+    const label=document.createElement('span');label.textContent=tr('now');
+    nowLine.appendChild(label);rail.appendChild(nowLine);
   }
-  const sideLast={left:-Infinity,right:-Infinity},minGap=72;
+
+  // The timeline anchor always stays at the exact real time.
+  // Only the card is pushed down when cards on the same side would overlap.
+  const sideLastCardTop={left:-Infinity,right:-Infinity},minCardGap=82;
   const chronological=items.slice().sort((a,b)=>a.start-b.start);
-  chronological.forEach((s,i)=>{
-    const side=i%2===0?'right':'left',node=createTimelineNode(s,i);
+  chronological.forEach((session,index)=>{
+    const side=index%2===0?'right':'left';
+    const exactY=Math.max(0,Math.min(canvasHeight-4,minuteOfDay(session.start)*pxPerMinute));
+    let visualCardY=exactY-16;
+    if(visualCardY-sideLastCardTop[side]<minCardGap)visualCardY=sideLastCardTop[side]+minCardGap;
+    visualCardY=Math.min(canvasHeight-72,visualCardY);
+    sideLastCardTop[side]=visualCardY;
+
+    const cardShift=visualCardY-exactY;
+    const node=createTimelineNode(session,index,pxPerMinute,cardShift);
     node.classList.remove('left','right');node.classList.add(side,'trueTimeNode');
-    let y=minuteOfDay(s.start)*pxPerMinute;
-    if(y-sideLast[side]<minGap)y=sideLast[side]+minGap;
-    sideLast[side]=y;
-    node.style.top=Math.min(canvasHeight-60,y)+'px';
+    node.style.top=exactY+'px';
     rail.appendChild(node);
   });
 }
