@@ -91,3 +91,28 @@ for(const required of ['const base=34*zoom','idleBreakGlyph','min-height:32px','
   if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing 0.15.5 compact/pause-label polish: '+required);
 }
 console.log('Timeline 0.15.5 compact spacing + pause label audit OK');
+
+
+// Comprehensive UX structure audit
+const htmlIds=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+const duplicateIds=Object.entries(htmlIds.reduce((acc,id)=>(acc[id]=(acc[id]||0)+1,acc),{})).filter(([,n])=>n>1);
+if(duplicateIds.length) throw new Error('Duplicate DOM ids: '+duplicateIds.map(([id])=>id).join(', '));
+
+const screenNames=[...html.matchAll(/data-screen="([^"]+)"/g)].map(m=>m[1]);
+const panelNames=[...html.matchAll(/data-screen-panel="([^"]+)"/g)].map(m=>m[1]);
+for(const name of new Set(screenNames)) if(!panelNames.includes(name)) throw new Error('Navigation item without screen panel: '+name);
+for(const name of new Set(panelNames)) if(!screenNames.includes(name)) throw new Error('Screen panel without navigation item: '+name);
+
+const settingsTabs=[...html.matchAll(/data-settings-tab="([^"]+)"/g)].map(m=>m[1]);
+const settingsPanes=[...html.matchAll(/data-settings-pane="([^"]+)"/g)].map(m=>m[1]);
+for(const name of new Set(settingsTabs)) if(!settingsPanes.includes(name)) throw new Error('Settings tab without pane: '+name);
+for(const name of new Set(settingsPanes)) if(!settingsTabs.includes(name)) throw new Error('Settings pane without tab: '+name);
+
+if(html.includes('id="dialog"')) throw new Error('Legacy settings id="dialog" remains');
+if(!html.includes('id="settingsScreen"')) throw new Error('Settings screen semantic id missing');
+if(!html.includes('class="settingsSaveBar"')) throw new Error('Persistent settings save bar missing');
+if(!app.includes("querySelectorAll('.timelineEventNode,[data-session-id].session')")) throw new Error('J/K keyboard navigation is not wired to per-event Timeline nodes');
+if(!app.includes("box.setAttribute('role','dialog')")||!app.includes('ov.__requestClose')) throw new Error('Modal accessibility/close routing is incomplete');
+if(!app.includes("menu.setAttribute('role','menu')")||!app.includes("setAttribute('role','menuitem')")) throw new Error('Context menu accessibility roles missing');
+if(!html.includes('aria-controls="filtersPopover"')||!html.includes('aria-expanded="false"')) throw new Error('Filter popover accessibility state missing');
+console.log('Comprehensive UX structure audit OK');
