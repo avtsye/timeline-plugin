@@ -1197,6 +1197,225 @@ textarea:focus-visible{
   .dangerGroup .danger{width:100%}
 }
 
+
+/* ===== 0.15.10 settings overlap hardening ===== */
+.settings-pane.screen.active{
+  grid-template-columns:128px minmax(0,1fr)!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  overflow:hidden!important;
+}
+.settingsPane{
+  width:min(100%,780px)!important;
+  max-width:780px!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  padding:14px 18px 110px!important;
+  box-sizing:border-box!important;
+}
+.settings-tabs{
+  min-height:0!important;
+  overflow-y:auto!important;
+  padding:6px!important;
+}
+.settingsGroup{
+  padding:14px 0!important;
+  border-bottom:1px solid var(--color-outline-variant)!important;
+}
+.settingsGroup:last-child{border-bottom:0!important}
+.settingsGroup h3{
+  margin:0 0 8px!important;
+  line-height:1.35!important;
+}
+.settingsGroupHead{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.settingsCompactActions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  margin-top:8px!important;
+}
+.settingsCompactActions button,
+.settingsInlineAction{
+  max-width:100%!important;
+  white-space:nowrap!important;
+  flex:0 1 auto!important;
+}
+.settingsChecksGrid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;
+  gap:8px 18px!important;
+  align-items:start!important;
+}
+.settingsChecksGrid .checkRow,
+.settingsGroup .checkRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:14px!important;
+  row-gap:0!important;
+  min-height:46px!important;
+  margin:0!important;
+  padding:6px 4px!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  flex-direction:initial!important;
+  justify-content:initial!important;
+}
+.settingTileContent{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.settingTileText{
+  min-width:0!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  line-height:1.35!important;
+}
+.checkRow input[type="checkbox"]{
+  margin:0!important;
+  justify-self:end!important;
+  align-self:center!important;
+  flex:0 0 auto!important;
+}
+.settingsFieldsGrid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:8px!important;
+  width:100%!important;
+  max-width:680px!important;
+}
+.settingFieldRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(170px,240px)!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-height:44px!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.settingFieldRow>label{
+  min-width:0!important;
+  line-height:1.35!important;
+}
+.settingFieldRow .appDropdown{
+  width:100%!important;
+  min-width:0!important;
+  max-width:240px!important;
+  justify-self:start!important;
+}
+.feedbackCompact{max-width:680px!important}
+.feedbackToolbar{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin-bottom:8px!important;
+}
+.feedbackToolbar .appDropdown{
+  min-width:190px!important;
+  max-width:260px!important;
+  flex:0 1 260px!important;
+}
+.feedbackToolbar .btn{
+  flex:0 0 auto!important;
+  margin:0!important;
+}
+.feedbackBox{
+  width:100%!important;
+  min-height:88px!important;
+  max-height:180px!important;
+  height:96px!important;
+  box-sizing:border-box!important;
+}
+.dangerGroup{
+  padding:12px 14px!important;
+  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
+  border-radius:var(--otz-radius)!important;
+  background:color-mix(in srgb,var(--color-error-container) 20%,transparent)!important;
+}
+.settingsSaveBar{
+  grid-column:2!important;
+  grid-row:3!important;
+  position:relative!important;
+  bottom:auto!important;
+  z-index:15!important;
+  display:flex!important;
+  justify-content:flex-start!important;
+  width:min(100%,780px)!important;
+  max-width:780px!important;
+  padding:10px 18px!important;
+  background:color-mix(in srgb,var(--panel-bg) 96%,transparent)!important;
+  border-top:1px solid var(--color-outline-variant)!important;
+  backdrop-filter:blur(8px)!important;
+  box-sizing:border-box!important;
+}
+.settingsSaveBar .btn{min-width:88px!important}
+@media(max-width:980px){
+  .settingsChecksGrid{grid-template-columns:1fr!important}
+  .settingFieldRow{
+    grid-template-columns:1fr!important;
+    align-items:start!important;
+  }
+  .settingFieldRow .appDropdown{
+    max-width:none!important;
+    width:100%!important;
+  }
+}
+@media(max-width:700px){
+  .settings-pane.screen.active{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto minmax(0,1fr) auto!important;
+  }
+  .settings-tabs{
+    grid-column:1!important;
+    grid-row:2!important;
+    display:flex!important;
+    flex-direction:row!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    border-inline-end:0!important;
+    border-bottom:1px solid var(--color-outline-variant)!important;
+  }
+  .settingsPane{
+    grid-column:1!important;
+    grid-row:3!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:12px 14px 104px!important;
+  }
+  .settingsSaveBar{
+    grid-column:1!important;
+    grid-row:4!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:8px 14px!important;
+  }
+  .feedbackToolbar{
+    flex-direction:column!important;
+    align-items:stretch!important;
+  }
+  .feedbackToolbar .appDropdown,
+  .feedbackToolbar .btn{
+    width:100%!important;
+    max-width:none!important;
+  }
+}
+@media(max-width:480px){
+  .settingsGroupHead{align-items:flex-start!important}
+  .dangerGroup .danger{width:100%!important}
+}
+
 </style>
 </head>
 <body>
