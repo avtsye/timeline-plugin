@@ -254,7 +254,7 @@ function dominantType(s){
 }
 function recentPlaces(limit=12){
   const out=[],seen=new Set();
-  for(const e of events.slice().sort((a,b)=>b.time-a.time)){
+  for(const e of eventIndex.sortedDesc){
     if(!['book','ref'].includes(e.type))continue;
     const d=e.data||{},k=bookKeyFromEvent(e),ref=d.currentRef||d.ref||'';
     const key=k+'|'+ref;
@@ -396,9 +396,8 @@ function estimateTimes(list){
 }
 function renderHeatmap(){
   const box=$('heatmap');box.innerHTML='';
-  const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
   for(let i=34;i>=0;i--){
-    const t=Date.now()-i*86400000,k=dk(t),n=counts[k]||0,b=document.createElement('button');
+    const t=Date.now()-i*86400000,k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
     b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
     b.title=k+' · '+n+' '+tr('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();render()};
@@ -656,18 +655,24 @@ function showPluginHistory(pluginId){
 }
 function aggregateDaily(days=30){
   const start=startOfDay(Date.now())-(days-1)*86400000,arr=[];
-  for(let i=0;i<days;i++){const t=start+i*86400000,key=dk(t);arr.push({key,time:t,count:events.filter(e=>dk(e.time)===key).length})}
+  for(let i=0;i<days;i++){const t=start+i*86400000,key=dk(t);arr.push({key,time:t,count:(eventIndex.byDay.get(key)||[]).length})}
   return arr;
 }
 function topBooks(limit=10){
-  const m=new Map();
-  for(const e of events){if(!['book','ref'].includes(e.type))continue;const k=String(bookKeyFromEvent(e));if(!k)continue;const x=m.get(k)||{key:k,title:bookTitleFromEvent(e),count:0,last:0};x.count++;x.last=Math.max(x.last,e.time);m.set(k,x)}
-  return [...m.values()].sort((a,b)=>b.count-a.count).slice(0,limit);
+  const out=[];
+  for(const [k,list] of eventIndex.byBook.entries()){
+    const last=list[0];if(!last)continue;
+    out.push({key:k,title:bookTitleFromEvent(last),count:list.length,last:last.time});
+  }
+  return out.sort((a,b)=>b.count-a.count).slice(0,limit);
 }
 function topPlugins(limit=10){
-  const m=new Map();
-  for(const e of events){if(e.type!=='plugin'||!(e.data||{}).toolId)continue;const original=e.data.toolId,k=resolvedPluginId(original);const x=m.get(k)||{key:k,title:pluginName(k),count:0,last:0,missing:!pluginMap.has(k)};x.count++;x.last=Math.max(x.last,e.time);m.set(k,x)}
-  return [...m.values()].sort((a,b)=>b.count-a.count).slice(0,limit);
+  const out=[];
+  for(const [k,list] of eventIndex.byPlugin.entries()){
+    const last=list[0];if(!last)continue;
+    out.push({key:k,title:pluginName(k),count:list.length,last:last.time,missing:!pluginMap.has(k)});
+  }
+  return out.sort((a,b)=>b.count-a.count).slice(0,limit);
 }
 function buildBarChart(data,labelFn){
   const chart=document.createElement('div');chart.className='chart';
@@ -682,15 +687,21 @@ function buildBarChart(data,labelFn){
   return chart;
 }
 function aggregateWeeks(count=12){
-  const out=[];const now=Date.now(),current=startOfWeek(now);
-  for(let i=count-1;i>=0;i--){const start=current-i*7*86400000,end=start+7*86400000;out.push({time:start,label:fmtDate(start),count:events.filter(e=>e.time>=start&&e.time<end).length})}
+  const out=[],now=Date.now(),current=startOfWeek(now);
+  for(let i=count-1;i>=0;i--){
+    const start=current-i*7*86400000,end=start+7*86400000;
+    let total=0;for(let d=0;d<7;d++)total+=(eventIndex.byDay.get(dk(start+d*86400000))||[]).length;
+    out.push({time:start,label:fmtDate(start),count:total});
+  }
   return out;
 }
 function aggregateMonths(count=12){
   const out=[],now=new Date();
   for(let i=count-1;i>=0;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1),next=new Date(d.getFullYear(),d.getMonth()+1,1);
-    out.push({time:d.getTime(),label:new Intl.DateTimeFormat(locale(),{month:'short'}).format(d),count:events.filter(e=>e.time>=d.getTime()&&e.time<next.getTime()).length});
+    let total=0;
+    for(const [day,list] of eventIndex.byDay.entries()){const ts=new Date(day+'T00:00:00').getTime();if(ts>=d.getTime()&&ts<next.getTime())total+=list.length}
+    out.push({time:d.getTime(),label:new Intl.DateTimeFormat(locale(),{month:'short'}).format(d),count:total});
   }
   return out;
 }
@@ -829,7 +840,7 @@ function sessionContextItems(s){
 async function refreshTimelineData(){
   const [ev,sn]=await Promise.all([get(EVENTS,[]),get(SNAPS,[])]);
   if(Array.isArray(ev))events=ev;if(Array.isArray(sn))snaps=sn;
-  render();
+  rebuildEventIndex();render();
 }
 function scheduleLiveRefresh(){
   clearTimeout(liveRefreshTimer);
@@ -1113,6 +1124,7 @@ async function updateTrackingStatus(){
 function sync(){
   $('pauseBtn').textContent=settings.paused?tr('resume_tracking'):tr('pause_tracking');
   $('maxEvents').value=String(settings.maxEvents||5000);
+  $('retentionDays').value=String(settings.retentionDays??180);
   $('notificationsEnabled').checked=settings.inAppNotifications!==false;
   $('compactMode').checked=!!settings.compactMode;
   $('newTabIntegration').checked=!!settings.newTabIntegration;
@@ -1145,6 +1157,7 @@ async function load(){
   await registerLocalizedShortcuts();
   const[sr,pr]=await Promise.all([call('history.listSearches',{limit:20}),call('plugin.listInstalled')]);
   searches=sr.success&&Array.isArray(sr.data)?sr.data:[];installed=pr.success&&Array.isArray(pr.data)?pr.data:[];pluginMap=new Map(installed.map(p=>[p.pluginId,p]));
+  rebuildEventIndex();
   const pf=$('pluginFilter');
   pf.innerHTML='<option value="">'+esc(tr('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
   enhanceSettingsRows();enhanceSelects();applyShellIcons();sync();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
@@ -1265,6 +1278,7 @@ $('importBtn').onclick=importData;
 $('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
 $('saveSettings').onclick=async()=>{
   settings.maxEvents=+$('maxEvents').value||5000;
+  settings.retentionDays=+$('retentionDays').value;
   settings.inAppNotifications=$('notificationsEnabled').checked;
   settings.compactMode=$('compactMode').checked;
   settings.newTabIntegration=$('newTabIntegration').checked;
