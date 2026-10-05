@@ -2368,6 +2368,138 @@ html[dir="ltr"] #settingsScreen>.settingsSaveBar{
   }
 }
 
+
+/* ===== 0.15.17 truly compact settings controls ===== */
+/* Previous compact patch still allowed each item to stretch with the grid track.
+   Lock each option to a compact control width instead of filling half the pane. */
+#settingsScreen .settingsChecksGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,260px)!important;
+  grid-auto-rows:min-content!important;
+  justify-content:start!important;
+  align-items:start!important;
+  gap:6px 16px!important;
+  width:max-content!important;
+  max-width:100%!important;
+}
+#settingsScreen .settingsChecksGrid .checkRow{
+  width:260px!important;
+  max-width:260px!important;
+  min-width:0!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:2px 6px!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:7px!important;
+  box-sizing:border-box!important;
+}
+#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
+  grid-column:1!important;
+  min-width:0!important;
+  width:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  overflow:hidden!important;
+}
+#settingsScreen .settingsChecksGrid .checkRow input[type="checkbox"]{
+  grid-column:2!important;
+  justify-self:end!important;
+  margin:0!important;
+  transform:scale(.86)!important;
+  transform-origin:center!important;
+}
+#settingsScreen .settingsChecksGrid .settingTileIcon{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+}
+#settingsScreen .settingsChecksGrid .settingTileIcon svg{
+  width:17px!important;
+  height:17px!important;
+}
+#settingsScreen .settingsChecksGrid .settingTileText{
+  font-size:12.5px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Single toggle rows in General/Advanced should also stay compact. */
+#settingsScreen .settingsGroup>.checkRow{
+  width:min(100%,520px)!important;
+  max-width:520px!important;
+  min-height:40px!important;
+  height:auto!important;
+  padding:3px 6px!important;
+  margin:2px 0!important;
+}
+
+/* Make the storage rows compact and visually aligned. */
+#settingsScreen .settingsFieldsGrid{
+  width:max-content!important;
+  max-width:100%!important;
+}
+#settingsScreen .settingFieldRow{
+  width:430px!important;
+  max-width:430px!important;
+  min-height:42px!important;
+  height:42px!important;
+  padding:2px 4px!important;
+  grid-template-columns:150px 220px!important;
+  gap:12px!important;
+}
+#settingsScreen .settingFieldRow .appDropdown{
+  width:220px!important;
+  height:36px!important;
+}
+#settingsScreen .settingFieldRow .appDropdown select{
+  height:36px!important;
+  min-height:36px!important;
+}
+
+/* Keep section spacing tight. */
+#settingsScreen .settingsGroup{
+  padding:9px 0!important;
+}
+#settingsScreen .settingsGroup h3{
+  margin-bottom:7px!important;
+}
+#settingsScreen .settingsPane{
+  padding-top:8px!important;
+}
+
+@media(max-width:700px){
+  #settingsScreen .settingsChecksGrid{
+    grid-template-columns:1fr!important;
+    width:100%!important;
+  }
+  #settingsScreen .settingsChecksGrid .checkRow{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingsFieldsGrid,
+  #settingsScreen .settingFieldRow{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingFieldRow{
+    height:auto!important;
+    grid-template-columns:1fr!important;
+    gap:4px!important;
+  }
+  #settingsScreen .settingFieldRow .appDropdown{
+    width:100%!important;
+  }
+}
+
 </style>
 </head>
 <body>
