@@ -223,10 +223,12 @@ function bookTitleFromEvent(e){
   return d.currentBook||d.book||d.currentBookId||d.bookId||e.label||tr('book');
 }
 function eventsForBook(key){
-  return events.filter(e=>['book','ref'].includes(e.type)&&String(bookKeyFromEvent(e))===String(key)).sort((a,b)=>b.time-a.time);
+  const k=String(key||'');
+  return (eventIndex.byBook.get(k)||[]).slice();
 }
 function eventsForPlugin(id){
-  return events.filter(e=>e.type==='plugin'&&resolvedPluginId((e.data||{}).toolId)===resolvedPluginId(id)).sort((a,b)=>b.time-a.time);
+  const k=resolvedPluginId(id);
+  return (eventIndex.byPlugin.get(k)||[]).slice();
 }
 function sessionSummary(s){
   const books=new Set(),plugins=new Set(),searchCount=0;
@@ -308,8 +310,26 @@ function eventSearchText(e){
     d.toolId,d.workspaceId,pluginName(d.toolId||''),names[e.sessionId],sessionNotes[e.sessionId]
   ].filter(Boolean).join(' ').toLowerCase();
 }
+function rebuildEventIndex(){
+  const byBook=new Map(),byPlugin=new Map(),byDay=new Map(),search=new Map();
+  const sortedDesc=events.slice().sort((a,b)=>b.time-a.time);
+  for(const e of sortedDesc){
+    const day=dk(e.time);if(!byDay.has(day))byDay.set(day,[]);byDay.get(day).push(e);
+    if(['book','ref'].includes(e.type)){
+      const key=String(bookKeyFromEvent(e)||'');
+      if(key){if(!byBook.has(key))byBook.set(key,[]);byBook.get(key).push(e)}
+    }
+    if(e.type==='plugin'&&(e.data||{}).toolId){
+      const id=resolvedPluginId(e.data.toolId);
+      if(!byPlugin.has(id))byPlugin.set(id,[]);byPlugin.get(id).push(e);
+    }
+    search.set(e.id,eventSearchText(e));
+  }
+  eventIndex={byBook,byPlugin,byDay,search,sortedDesc};
+}
+function indexedSearchText(e){return eventIndex.search.get(e.id)||eventSearchText(e)}
 function matchesAdvancedQuery(e,parsed){
-  const text=eventSearchText(e),d=e.data||{};
+  const text=indexedSearchText(e),d=e.data||{};
   if(parsed.text.some(x=>!text.includes(x)))return false;
   if(parsed.book.length&&!parsed.book.some(x=>[d.currentBook,d.book,d.currentBookId,d.bookId,e.label].filter(Boolean).join(' ').toLowerCase().includes(x)))return false;
   if(parsed.plugin.length&&!parsed.plugin.some(x=>(pluginName(d.toolId||'')+' '+String(d.toolId||'')).toLowerCase().includes(x)))return false;
