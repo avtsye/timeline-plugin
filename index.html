@@ -1416,6 +1416,83 @@ textarea:focus-visible{
   .dangerGroup .danger{width:100%!important}
 }
 
+
+/* ===== 0.15.11 settings alignment + clipping fix ===== */
+/* Keep the settings content anchored to the physical right edge in RTL. */
+.settingsPane{
+  align-self:stretch!important;
+  height:100%!important;
+  max-height:100%!important;
+  justify-self:stretch!important;
+  margin-right:0!important;
+  margin-left:auto!important;
+  padding-bottom:24px!important;
+}
+.settingsPane>*{
+  margin-right:0;
+  margin-left:auto;
+}
+.settingsSaveBar{
+  align-self:stretch!important;
+  justify-self:stretch!important;
+  margin-right:0!important;
+  margin-left:auto!important;
+}
+
+/* The scrolling pane owns row 2; it may never paint under the save bar in row 3. */
+.settings-pane.screen.active{
+  min-height:0!important;
+}
+.settings-pane.screen.active>.settingsPane{
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+.settingsFieldsGrid,
+.settingsChecksGrid,
+.settingsGroup,
+.feedbackCompact,
+.dangerGroup{
+  box-sizing:border-box!important;
+}
+
+/* Explicit physical-right alignment for labels/content in Hebrew. */
+html[dir="rtl"] .settingsPane,
+html[dir="rtl"] .settingsGroup,
+html[dir="rtl"] .settingFieldRow,
+html[dir="rtl"] .settingsGroupHead{
+  text-align:right!important;
+}
+html[dir="rtl"] .settingFieldRow .appDropdown{
+  justify-self:end!important;
+}
+html[dir="rtl"] .settingsSaveBar{
+  justify-content:flex-start!important;
+}
+
+/* On LTR interfaces the same layout naturally mirrors. */
+html[dir="ltr"] .settingsPane,
+html[dir="ltr"] .settingsGroup,
+html[dir="ltr"] .settingFieldRow,
+html[dir="ltr"] .settingsGroupHead{
+  text-align:left!important;
+}
+
+/* No active settings panel can extend into the footer row. */
+.settingsPane.active{
+  display:block!important;
+  position:relative!important;
+  inset:auto!important;
+}
+@media(max-width:700px){
+  .settingsPane{
+    height:100%!important;
+    max-height:100%!important;
+    padding-bottom:20px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1546,6 +1623,14 @@ textarea:focus-visible{
             <div class="settingFieldRow">
               <label for="languageSelect" data-i18n="language">שפה</label>
               <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
+            </div>
+            <div class="settingFieldRow">
+              <label for="dateCalendar" data-i18n="date_calendar">תצוגת תאריכים</label>
+              <select id="dateCalendar">
+                <option value="auto" data-i18n="date_calendar_auto">אוטומטי לפי השפה</option>
+                <option value="hebrew" data-i18n="date_calendar_hebrew">עברי</option>
+                <option value="gregory" data-i18n="date_calendar_gregorian">לועזי</option>
+              </select>
             </div>
             <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
             <label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label>
