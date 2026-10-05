@@ -847,7 +847,7 @@ function renderAnalyticsScreen(){
   }
   const charts=document.createElement('div');charts.className='analyticsCharts';
   const chartDefs=[
-    [tr('day_activity'),aggregateDaily(30),x=>String(new Date(x.time).getDate())],
+    [tr('day_activity'),aggregateDaily(30),x=>formatDate(x.time,{day:'numeric'})],
     [tr('weeks_activity'),aggregateWeeks(12),x=>formatDate(x.time,{day:'numeric',month:'numeric'})],
     [tr('months_activity'),aggregateMonths(12),x=>x.label]
   ];
