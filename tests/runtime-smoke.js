@@ -82,7 +82,7 @@ for(const required of ['function adaptiveGapPx','function buildAdaptiveTimelineP
 if(app.includes('1440*pxPerMinute')) throw new Error('Fixed 24-hour Timeline height returned');
 console.log('Adaptive content-driven Timeline audit OK');
 
-for(const required of ['idleBreak','idleBreakLabel','35*60000','const base=42*zoom']){
+for(const required of ['idleBreak','idleBreakLabel','35*60000','const base=34*zoom']){
   if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing compact/idle-break Timeline capability: '+required);
 }
 console.log('Compact Timeline spacing and idle-break audit OK');
