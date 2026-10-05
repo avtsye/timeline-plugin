@@ -1077,7 +1077,8 @@ function render(){
   for(const[key,items]of buckets){
     const wrap=document.createElement('section');wrap.className='bucket';
     if(viewMode==='day'){
-      const dayEventCount=new Set(items.flatMap(s=>(s.events||[]).map(e=>e.id||[e.time,e.type,timelineEventTitle(e)].join('|')))).size;\n      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+dayEventCount+' '+esc(tr('events'))+'</span></div><div class="timelineRail"></div>';
+      const dayEventCount=new Set(items.flatMap(s=>(s.events||[]).map(e=>e.id||[e.time,e.type,timelineEventTitle(e)].join('|')))).size;
+      wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+dayEventCount+' '+esc(tr('events'))+'</span></div><div class="timelineRail"></div>';
       renderTrueDayRail(wrap.querySelector('.timelineRail'),items,items[0].start);
     }else{
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="sessionGrid"></div>';
