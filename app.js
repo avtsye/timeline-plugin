@@ -1363,7 +1363,7 @@ function showMigrationManager(){
       const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='puzzle_piece_24_regular';
       const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');sub.textContent=tr('choose_replacement');main.append(b,sub);
       const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
-      const btn=document.createElement('button');btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
+      const btn=document.createElement('button');btn.className='actionRecommended';btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
       btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);close();render();await notify(tr('mapping_saved'),'success')};
       row.append(icon,main,sel,btn);list.appendChild(row);
     }
