@@ -2500,6 +2500,168 @@ html[dir="ltr"] #settingsScreen>.settingsSaveBar{
   }
 }
 
+
+/* ===== 0.15.18 compact inline toggle rows ===== */
+/* Keep each toggle visually attached to its label. */
+#settingsScreen .settingsChecksGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2, minmax(0, 300px))!important;
+  grid-auto-rows:42px!important;
+  justify-content:start!important;
+  align-items:start!important;
+  gap:8px 18px!important;
+  width:auto!important;
+  max-width:630px!important;
+  margin:0!important;
+}
+
+#settingsScreen .settingsChecksGrid .checkRow{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  width:300px!important;
+  max-width:300px!important;
+  min-width:0!important;
+  height:42px!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:4px 8px!important;
+  box-sizing:border-box!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:8px!important;
+}
+
+html[dir="rtl"] #settingsScreen .settingsChecksGrid .checkRow{
+  flex-direction:row-reverse!important;
+}
+
+#settingsScreen .settingsChecksGrid .checkRow:hover{
+  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
+}
+
+#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  width:auto!important;
+  overflow:hidden!important;
+}
+
+#settingsScreen .settingsChecksGrid .checkRow input[type="checkbox"]{
+  flex:0 0 auto!important;
+  margin:0!important;
+  transform:scale(.84)!important;
+  transform-origin:center!important;
+}
+
+#settingsScreen .settingsChecksGrid .settingTileIcon{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+}
+#settingsScreen .settingsChecksGrid .settingTileIcon svg{
+  width:17px!important;
+  height:17px!important;
+}
+#settingsScreen .settingsChecksGrid .settingTileText{
+  min-width:0!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* General / Advanced single toggle rows: same compact visual language. */
+#settingsScreen .settingsGroup > .checkRow{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  width:360px!important;
+  max-width:100%!important;
+  min-height:42px!important;
+  height:42px!important;
+  margin:4px 0!important;
+  padding:4px 8px!important;
+  box-sizing:border-box!important;
+  border:0!important;
+  border-radius:8px!important;
+  background:transparent!important;
+}
+html[dir="rtl"] #settingsScreen .settingsGroup > .checkRow{
+  flex-direction:row-reverse!important;
+}
+#settingsScreen .settingsGroup > .checkRow .settingTileContent{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  width:auto!important;
+}
+#settingsScreen .settingsGroup > .checkRow input[type="checkbox"]{
+  flex:0 0 auto!important;
+  margin:0!important;
+  transform:scale(.84)!important;
+}
+
+/* Keep the form cluster compact on the right. */
+#settingsScreen .settingsGroup{
+  width:min(100%,650px)!important;
+  max-width:650px!important;
+}
+#settingsScreen .settingsFieldsGrid{
+  width:440px!important;
+  max-width:100%!important;
+}
+#settingsScreen .settingFieldRow{
+  width:440px!important;
+  max-width:100%!important;
+  grid-template-columns:150px 230px!important;
+  min-height:44px!important;
+  height:44px!important;
+  padding:3px 6px!important;
+}
+#settingsScreen .settingFieldRow .appDropdown{
+  width:230px!important;
+}
+
+/* Remove any inherited oversized background block on toggle rows. */
+#settingsScreen .checkRow[data-native-enhanced="1"]{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:760px){
+  #settingsScreen .settingsChecksGrid{
+    grid-template-columns:1fr!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingsChecksGrid .checkRow{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingsGroup > .checkRow,
+  #settingsScreen .settingsFieldsGrid,
+  #settingsScreen .settingFieldRow{
+    width:100%!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingFieldRow{
+    grid-template-columns:1fr!important;
+    height:auto!important;
+    min-height:0!important;
+    gap:4px!important;
+  }
+  #settingsScreen .settingFieldRow .appDropdown{
+    width:100%!important;
+  }
+}
+
 </style>
 </head>
 <body>
