@@ -13,6 +13,7 @@ const SNAP_GAP=15*60*1000;
 const TOOL_POLL_MS=5000;
 const BACKUP_GAP=30*60*1000;
 const STALE_SNAPSHOT=35*60*1000;
+const RETENTION_CHECK_GAP=60*60*1000;
 let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0,bootPrivacyCleared=false;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
@@ -115,10 +116,80 @@ function summarizeArchive(events,snaps){
     }]))
   };
 }
+async function readSummaryArchive(){
+  const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
+  if(!r.success||!r.data||typeof r.data.content!=='string')return{schemaVersion:2,days:{}};
+  try{return JSON.parse(r.data.content)||{schemaVersion:2,days:{}}}catch(_){return{schemaVersion:2,days:{}}}
+}
+function mergeArchiveDays(base,incoming,{add=false}={}){
+  const out=base&&typeof base==='object'?base:{schemaVersion:2,days:{}};
+  if(!out.days)out.days={};
+  for(const [day,x] of Object.entries((incoming&&incoming.days)||{})){
+    if(!add||!out.days[day]){out.days[day]=x;continue}
+    const prev=out.days[day],types={...(prev.types||{})};
+    for(const [k,v] of Object.entries(x.types||{}))types[k]=(types[k]||0)+Number(v||0);
+    const books=new Map([...(prev.topBooks||[]),...(x.topBooks||[])]); // replaced below with counted maps
+    const bookCounts={};for(const [k,v] of [...(prev.topBooks||[]),...(x.topBooks||[])])bookCounts[k]=(bookCounts[k]||0)+Number(v||0);
+    const pluginCounts={};for(const [k,v] of [...(prev.topPlugins||[]),...(x.topPlugins||[])])pluginCounts[k]=(pluginCounts[k]||0)+Number(v||0);
+    out.days[day]={
+      events:Number(prev.events||0)+Number(x.events||0),
+      sessions:Number(prev.sessions||0)+Number(x.sessions||0),
+      types,
+      topBooks:Object.entries(bookCounts).sort((a,b)=>b[1]-a[1]).slice(0,10),
+      topPlugins:Object.entries(pluginCounts).sort((a,b)=>b[1]-a[1]).slice(0,10),
+      archived:true
+    };
+  }
+  const vals=Object.values(out.days);
+  out.schemaVersion=2;out.updatedAt=new Date().toISOString();
+  out.totals={
+    events:vals.reduce((n,x)=>n+Number(x.events||0),0),
+    days:Object.keys(out.days).length,
+    snapshots:Number((incoming&&incoming.totals&&incoming.totals.snapshots)||out.totals&&out.totals.snapshots||0)
+  };
+  return out;
+}
+async function archiveExpired(expiredEvents,expiredSnaps=[]){
+  if(!expiredEvents.length&&!expiredSnaps.length)return;
+  const old=await readSummaryArchive();
+  const addSummary=summarizeArchive(expiredEvents,expiredSnaps);
+  const merged=mergeArchiveDays(old,addSummary,{add:true});
+  merged.archivedBefore=Date.now();
+  await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(merged)});
+}
+async function applyRetention(force=false){
+  const now=Date.now(),health=await get(HEALTH,{});
+  if(!force&&now-Number(health.lastRetentionAt||0)<RETENTION_CHECK_GAP)return;
+  const settings=Object.assign({retentionDays:180},await get(SETTINGS,{}));
+  const days=Number(settings.retentionDays||0);
+  if(days<=0){await set(HEALTH,{...health,lastRetentionAt:now});return}
+  const cutoff=now-days*86400000;
+  const [rawEvents,rawSnaps]=await Promise.all([get(EVENTS,[]),get(SNAPS,[])]);
+  const allEvents=Array.isArray(rawEvents)?rawEvents:[],allSnaps=Array.isArray(rawSnaps)?rawSnaps:[];
+  const expiredEvents=allEvents.filter(e=>Number(e.time||0)<cutoff);
+  const expiredSnaps=allSnaps.filter(s=>Number(s.time||0)<cutoff);
+  if(expiredEvents.length||expiredSnaps.length){
+    await archiveExpired(expiredEvents,expiredSnaps);
+    await Promise.all([
+      set(EVENTS,allEvents.filter(e=>Number(e.time||0)>=cutoff)),
+      set(SNAPS,allSnaps.filter(s=>Number(s.time||0)>=cutoff))
+    ]);
+  }
+  await set(HEALTH,{...(await get(HEALTH,{})),lastRetentionAt:now,lastRetentionRemovedEvents:expiredEvents.length,lastRetentionRemovedSnapshots:expiredSnaps.length,retentionDays:days});
+}
 async function writeSummaryArchive(events,snaps,settings){
   if(settings.summaryArchiveEnabled===false)return;
-  const summary=summarizeArchive(events,snaps);
-  await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(summary)});
+  const current=summarizeArchive(events,snaps),old=await readSummaryArchive();
+  const cutoffDays=Number(settings.retentionDays||0);
+  const cutoff=cutoffDays>0?Date.now()-cutoffDays*86400000:0;
+  const preserved={schemaVersion:2,days:{}};
+  for(const [day,x] of Object.entries(old.days||{})){
+    const ts=new Date(day+'T00:00:00').getTime();
+    if(cutoff&&ts<cutoff)preserved.days[day]=x;
+  }
+  const merged=mergeArchiveDays(preserved,current,{add:false});
+  merged.totals.snapshots=Array.isArray(snaps)?snaps.length:0;
+  await call('fs.writeFile',{path:'backups/archive-summary.json',content:JSON.stringify(merged)});
 }
 
 async function rotateBackups(force=false){
@@ -178,11 +249,12 @@ function record(type,p){
       const sid=prev&&now-(prev.endTime||prev.time)<SESSION_GAP?prev.sessionId:'s-'+now.toString(36);
       list.push({id:'e-'+now.toString(36)+'-'+Math.random().toString(36).slice(2,6),time:now,endTime:now,type,label:label(type,d),sessionId:sid,count:1,data:d});
     }
-    const max=Math.max(500,Math.min(20000,Number(settings.maxEvents)||5000));if(list.length>max)list.splice(0,list.length-max);
+    const max=Math.max(500,Math.min(50000,Number(settings.maxEvents)||5000));if(list.length>max)list.splice(0,list.length-max);
     await set(EVENTS,list);
     await set(HEALTH,{...(await get(HEALTH,{})),lastEventAt:now,lastEventType:type});
     await snapshot(type==='workspace');
     await rotateBackups(false);
+    await applyRetention(false);
   });
   return q;
 }
@@ -217,6 +289,7 @@ Otzaria.on('plugin.boot',async()=>{
   await registerLocalizedShortcuts();
   await snapshot(false);
   await rotateBackups(false);
+  await applyRetention(true);
   await checkHealth(true);
   await startPolling();
 });
