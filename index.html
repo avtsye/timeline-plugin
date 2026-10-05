@@ -991,6 +991,212 @@ textarea:focus-visible{
   }
 }
 
+
+/* ===== 0.15.9 comprehensive UX pass ===== */
+.settings-pane.screen.active{
+  grid-template-columns:124px minmax(0,1fr)!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  overflow:hidden!important;
+}
+.settings-pane.screen.active>.page-head{
+  padding:12px 18px!important;
+}
+.settings-tabs{
+  min-height:0!important;
+  overflow-y:auto!important;
+  padding:8px 6px!important;
+}
+.settingsPane{
+  width:min(100%,760px)!important;
+  max-width:760px!important;
+  min-height:0!important;
+  padding:14px 20px 18px!important;
+  justify-self:start!important;
+  align-self:start!important;
+  overflow-y:auto!important;
+}
+.settingsGroup{
+  padding:14px 0!important;
+}
+.settingsGroup:first-child{padding-top:4px!important}
+.settingsGroup h3{
+  margin:0 0 8px!important;
+  font-size:15px!important;
+  line-height:1.35!important;
+}
+.settingsGroup .checkRow{
+  width:100%;
+  max-width:680px;
+  min-height:44px!important;
+  margin:0!important;
+  padding:6px 2px!important;
+  gap:18px!important;
+}
+.settingTileContent{gap:12px!important}
+.settingTileText{line-height:1.35}
+.settingFieldRow{
+  width:100%;
+  max-width:680px;
+  min-height:44px!important;
+}
+.settingsChecksGrid{
+  width:100%;
+  max-width:680px;
+}
+.settingsGroupHead{
+  width:100%;
+  max-width:680px;
+  align-items:center!important;
+}
+.settingsCompactActions{
+  width:100%;
+  max-width:680px;
+}
+.feedbackCompact{
+  width:100%;
+  max-width:680px!important;
+}
+.feedbackToolbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:0 0 8px!important;
+}
+.feedbackToolbar .appDropdown{
+  min-width:190px!important;
+  max-width:280px!important;
+  flex:0 1 280px!important;
+}
+.feedbackToolbar .btn{
+  margin:0!important;
+  flex:0 0 auto!important;
+}
+.feedbackBox{
+  width:100%!important;
+  height:88px!important;
+  min-height:88px!important;
+  max-height:170px!important;
+  resize:vertical!important;
+  padding:10px 12px!important;
+  line-height:1.45!important;
+}
+.dangerGroup{
+  width:100%;
+  max-width:680px;
+  margin-top:6px;
+  padding:12px 14px!important;
+  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
+  border-radius:var(--otz-radius)!important;
+  background:color-mix(in srgb,var(--color-error-container) 24%,transparent)!important;
+}
+.dangerGroup .settingsGroupHead{max-width:none}
+.dangerGroup .settingsHint{max-width:520px}
+.settingsSaveBar{
+  grid-column:2!important;
+  grid-row:3!important;
+  width:min(100%,760px)!important;
+  max-width:760px!important;
+  justify-self:start!important;
+  justify-content:flex-start!important;
+  padding:9px 20px!important;
+  background:color-mix(in srgb,var(--panel-bg) 94%,transparent)!important;
+  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 75%,transparent)!important;
+  backdrop-filter:blur(8px)!important;
+}
+.settingsSaveBar .btn{min-width:88px!important}
+
+/* Sidebar: keep Settings at the bottom without the oversized block seen in compact heights. */
+.side-nav>.nav-group{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+}
+.side-nav>.nav-bottom{
+  flex:0 0 auto!important;
+  margin-top:0!important;
+  padding:4px 0 0!important;
+  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 55%,transparent)!important;
+  background:transparent!important;
+}
+.nav-bottom .nav-item{
+  min-height:54px!important;
+  margin:0!important;
+}
+
+/* Shared secondary-screen rhythm */
+.screen[data-screen-panel="overview"],
+.screen.native-page{
+  scroll-padding-block:12px;
+}
+.screen[data-screen-panel="overview"]>.page-head,
+.screen.native-page>.page-head{
+  padding-bottom:10px;
+  border-bottom:1px solid color-mix(in srgb,var(--color-outline-variant) 55%,transparent);
+}
+.native-row{min-height:48px}
+.native-row-main{min-width:0}
+.native-row-main b,.native-row-main small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.snapshotCard{min-height:52px}
+.searchChip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Prevent controls from feeling detached on wide screens. */
+@media(min-width:1100px){
+  .screen[data-screen-panel="overview"],
+  .screen.native-page{padding-inline:22px!important}
+}
+@media(max-width:700px){
+  .settings-pane.screen.active{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto minmax(0,1fr) auto!important;
+  }
+  .settings-tabs{
+    grid-column:1!important;
+    grid-row:2!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+  }
+  .settingsPane{
+    grid-column:1!important;
+    grid-row:3!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:12px 14px 16px!important;
+  }
+  .settingsSaveBar{
+    grid-column:1!important;
+    grid-row:4!important;
+    width:100%!important;
+    max-width:none!important;
+    padding:8px 14px!important;
+  }
+  .settingsGroup .checkRow,
+  .settingFieldRow,
+  .settingsChecksGrid,
+  .settingsGroupHead,
+  .settingsCompactActions,
+  .feedbackCompact,
+  .dangerGroup{max-width:none!important}
+  .feedbackToolbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+  .feedbackToolbar .appDropdown{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+@media(max-width:480px){
+  .feedbackToolbar{grid-template-columns:1fr!important}
+  .feedbackToolbar .btn{width:100%!important}
+  .settingsGroupHead{align-items:flex-start!important;flex-wrap:wrap}
+  .dangerGroup .danger{width:100%}
+}
+
 </style>
 </head>
 <body>
