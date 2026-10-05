@@ -180,8 +180,9 @@ function showModal(title,bodyBuilder){
     ov.remove();
     if(previousFocus&&typeof previousFocus.focus==='function'&&document.contains(previousFocus))setTimeout(()=>previousFocus.focus(),0);
   };
+  const requestClose=()=>{if(typeof ov.__requestClose==='function')ov.__requestClose();else dispose()};
   const onKey=e=>{
-    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();dispose();return}
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();requestClose();return}
     if(e.key==='Tab'){
       const focusable=[...box.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
       if(!focusable.length)return;
@@ -190,10 +191,10 @@ function showModal(title,bodyBuilder){
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
     }
   };
-  close.onclick=dispose;
+  close.onclick=requestClose;
   head.appendChild(h);head.appendChild(close);box.appendChild(head);
   const body=document.createElement('div');box.appendChild(body);ov.appendChild(box);document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)dispose()});
+  ov.addEventListener('click',e=>{if(e.target===ov)requestClose()});
   document.addEventListener('keydown',onKey,true);
   if(bodyBuilder)bodyBuilder(body,dispose);
   applyShellIcons();
@@ -211,11 +212,10 @@ function askText(title,initial=''){
       const cancel=document.createElement('button');cancel.className='actionGhost';cancel.textContent=tr('cancel');
       const ok=document.createElement('button');ok.className='actionRecommended';ok.textContent=tr('confirm');
       cancel.onclick=()=>finish(null);ok.onclick=()=>finish(input.value);
-      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish(input.value)}else if(e.key==='Escape'){e.preventDefault();finish(null)}};
+      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish(input.value)}};
       actions.append(cancel,ok);body.append(input,actions);setTimeout(()=>{input.focus();input.select()},0);
     });
-    const x=ov.querySelector('.modalHead button');if(x)x.onclick=()=>finish(null);
-    ov.addEventListener('click',e=>{if(e.target===ov)finish(null)});
+    ov.__requestClose=()=>finish(null);
   });
 }
 function askConfirm(message,{danger=false}={}){
@@ -230,10 +230,7 @@ function askConfirm(message,{danger=false}={}){
       cancel.onclick=()=>finish(false);ok.onclick=()=>finish(true);
       actions.append(cancel,ok);body.append(text,actions);setTimeout(()=>ok.focus(),0);
     });
-    const x=ov.querySelector('.modalHead button');if(x)x.onclick=()=>finish(false);
-    ov.addEventListener('click',e=>{if(e.target===ov)finish(false)});
-    const onKey=e=>{if(e.key==='Escape'){document.removeEventListener('keydown',onKey,true);finish(false)}};
-    document.addEventListener('keydown',onKey,true);
+    ov.__requestClose=()=>finish(false);
   });
 }
 function bookKeyFromEvent(e){
@@ -1550,7 +1547,7 @@ async function refreshThemeFromHost(){
 function switchScreen(name){
   const valid=['timeline','overview','restore','analytics','diagnostics','settings'];
   if(!valid.includes(name))name='timeline';
-  document.querySelectorAll('[data-screen-panel]').forEach(p=>p.classList.toggle('active',p.dataset.screenPanel===name));
+  document.querySelectorAll('[data-screen-panel]').forEach(p=>{const active=p.dataset.screenPanel===name;p.classList.toggle('active',active);p.setAttribute('aria-hidden',active?'false':'true')});
   document.querySelectorAll('.nav-item[data-screen]').forEach(b=>{
     const active=b.dataset.screen===name;
     b.classList.toggle('active',active);
