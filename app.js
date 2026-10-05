@@ -1388,6 +1388,12 @@ function setFocusMode(on){
   const b=$('focusModeBtn');if(b){b.title=settings.focusMode?tr('exit_focus'):tr('focus_mode');b.setAttribute('aria-label',b.title)}
   set(SETTINGS,settings);
 }
+function syncSettingsPaneBottomInset(){
+  const pane=document.querySelector('.settingsPane.active');
+  const saveBar=document.querySelector('.settingsSaveBar');
+  if(!pane||!saveBar)return;
+  pane.style.paddingBottom=(saveBar.offsetHeight+24)+'px';
+}
 function activateSettingsTab(name){
   document.querySelectorAll('.settingsTabBtn').forEach(b=>{
     const active=b.dataset.settingsTab===name;
@@ -1396,6 +1402,7 @@ function activateSettingsTab(name){
     b.tabIndex=active?0:-1;
   });
   document.querySelectorAll('.settingsPane').forEach(p=>p.classList.toggle('active',p.dataset.settingsPane===name));
+  requestAnimationFrame(syncSettingsPaneBottomInset);
 }
 function updateFeedbackButtonState(){
   const btn=$('sendFeedbackBtn'),box=$('feedbackText');
@@ -1491,7 +1498,7 @@ async function load(){
   rebuildEventIndex();
   const pf=$('pluginFilter');
   pf.innerHTML='<option value="">'+esc(tr('all_plugins'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name||p.pluginId)+'</option>').join('');
-  enhanceSettingsRows();enhanceSelects();applyShellIcons();sync();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
+  enhanceSettingsRows();enhanceSelects();applyShellIcons();sync();syncSettingsPaneBottomInset();render();switchScreen('timeline');await updateTrackingStatus();await applyNewTabIntegration();await publishHomepageState();
 }
 function theme(payload){
   if(!payload||!payload.colorScheme)return;
@@ -1589,6 +1596,7 @@ function closeFilterPopover({focus=false}={}){
   p.hidden=true;
   const toggle=$('filterToggleBtn');if(toggle){toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
 }
+window.addEventListener('resize',syncSettingsPaneBottomInset);
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
 $('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
