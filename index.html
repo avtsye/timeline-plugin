@@ -48,7 +48,7 @@ button{cursor:pointer}
 .timeline-controls{flex:0 0 auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;background:var(--color-surface-container-low);border-bottom:1px solid var(--color-outline-variant)}
 .timeline-controls input,.timeline-controls select,.settings-pane input,.settings-pane select,.settings-pane textarea{background:var(--color-surface-container-highest);color:var(--color-on-surface);border:0;border-radius:var(--radius-sm);padding:7px 10px;outline:none}
 .timeline-controls input:focus,.timeline-controls select:focus,.settings-pane input:focus,.settings-pane select:focus,.settings-pane textarea:focus{border-color:var(--color-primary)}
-.timeline-search{min-width:220px;flex:1}
+.searchBox{min-width:240px;flex:1;display:flex;align-items:center;gap:6px;background:var(--color-surface-container-highest);border-radius:var(--radius-sm);padding-inline:8px}.searchBox:focus-within{outline:1px solid var(--color-primary)}.searchBox svg{width:18px;height:18px;fill:currentColor;color:var(--color-on-surface-variant)}.timeline-search{min-width:0;flex:1;border:0!important;background:transparent!important;padding-inline:2px!important}.searchClear{display:none;width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:var(--color-on-surface-variant)}.searchBox.has-text .searchClear{display:grid;place-items:center}.searchClear:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
 .timeline-scroll{flex:1;min-height:0;overflow-y:auto;padding:8px 12px}
 .btn{border:1px solid var(--color-outline);background:var(--color-surface);color:var(--color-on-surface);border-radius:var(--radius-sm);padding:8px 14px}
 .btn:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
@@ -91,11 +91,11 @@ button{cursor:pointer}
 .checkRow{display:flex;align-items:center;gap:9px;margin:10px 0}.checkRow input{width:18px;height:18px}
 .settingsActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .feedbackBox{width:100%;min-height:120px;resize:vertical}
-.timelineRail{position:relative;padding:8px 0}
+.timelineRail{position:relative;padding:6px 0 24px}.hourMarker{position:relative;height:1px;background:var(--color-outline-variant);margin:28px 0 22px}.hourMarker span{position:absolute;inset-inline-start:calc(50% + 18px);top:-9px;background:var(--color-surface);padding:0 6px;color:var(--color-on-surface-variant);font-size:11px}
 .timelineRail::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--color-outline-variant);transform:translateX(50%)}
-.timelineNode{position:relative;display:grid;grid-template-columns:1fr 88px 1fr;gap:16px;align-items:start;margin:16px 0}
-.timelineDot{grid-column:2;justify-self:center;margin-top:24px;width:14px;height:14px;border-radius:50%;background:var(--color-primary);border:4px solid var(--color-surface);box-shadow:0 0 0 1px var(--color-outline-variant);z-index:2}
-.timelineStamp{grid-column:2;justify-self:center;margin-top:44px;color:var(--color-on-surface-variant);font-size:.72em;background:var(--color-surface);padding:2px 5px;border-radius:var(--radius-pill);z-index:2}
+.timelineNode{position:relative;display:grid;grid-template-columns:1fr 74px 1fr;gap:10px;align-items:start;margin:10px 0}
+.timelineDot{grid-column:2;justify-self:center;margin-top:18px;width:10px;height:10px;border-radius:50%;background:var(--color-primary);border:2px solid var(--color-surface);box-shadow:0 0 0 1px var(--color-outline-variant);z-index:2}
+.timelineStamp{grid-column:2;justify-self:center;margin-top:33px;color:var(--color-on-surface-variant);font-size:10px;background:var(--color-surface);padding:1px 4px;z-index:2}
 .timelineNode.left .timelineCard{grid-column:1}.timelineNode.right .timelineCard{grid-column:3}.timelineCard{position:relative}
 .snapshotMarks{grid-column:2;justify-self:center;display:flex;gap:3px;margin-top:68px;z-index:3}.snapshotMark{width:8px;height:8px;padding:0;border-radius:50%;border:2px solid var(--color-surface);background:var(--color-tertiary)}
 .bucket{margin:20px 0}.bucketTitle{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:12px}.bucketTitle h2{margin:0;font-size:1.05em}
@@ -120,7 +120,7 @@ button{cursor:pointer}
 .sessionMenuPanel button,.sessionMenuPanel select{width:100%;text-align:start;margin:2px 0;padding:8px;border:0;border-radius:var(--radius-sm);background:transparent}.sessionMenuPanel button:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
 .timelineTooltip{display:none;position:absolute;z-index:18;inset-inline-start:50%;transform:translateX(-50%);top:-8px;min-width:220px;max-width:320px;background:var(--color-inverse-surface);color:var(--color-on-inverse-surface);padding:9px 10px;border-radius:var(--radius-sm);font-size:.75em;box-shadow:0 4px 16px color-mix(in srgb,var(--color-shadow) 18%,transparent);pointer-events:none}
 .timelineNode:hover .timelineTooltip{display:block}
-.empty{text-align:center;padding:40px;color:var(--color-on-surface-variant)}
+.empty{text-align:center;padding:40px;color:var(--color-on-surface-variant)}.contextMenu{position:fixed;z-index:200;min-width:210px;background:var(--color-surface-container-highest);border:1px solid var(--color-outline-variant);border-radius:var(--radius-sm);padding:4px;box-shadow:0 6px 24px color-mix(in srgb,var(--color-shadow) 16%,transparent)}.contextMenu button{width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--color-on-surface);padding:8px 10px;border-radius:6px;text-align:start}.contextMenu button:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}.contextMenu .danger{color:var(--color-error)}.virtualSentinel{height:1px}.loadingMore{text-align:center;padding:12px;color:var(--color-on-surface-variant);font-size:12px}
 .modalOverlay{position:fixed;inset:0;background:color-mix(in srgb,var(--color-scrim) 32%,transparent);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .modalBox{background:var(--color-surface-container-highest);color:var(--color-on-surface);border-radius:var(--radius-lg);width:min(980px,96vw);max-height:90vh;overflow:auto;padding:18px;border:1px solid var(--color-outline-variant)}
 .modalHead{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-18px;background:var(--color-surface-container-highest);padding:8px 0;z-index:2}.modalHead h2{margin:0;font-size:1.1em}
@@ -164,7 +164,7 @@ body.focus-mode .shell-body{height:100%}.focus-exit{display:none;position:fixed;
       <section class="screen timeline-screen active" data-screen-panel="timeline">
         <div class="timeline-layout">
           <div class="timeline-controls">
-            <input id="search" class="timeline-search" autofocus data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…">
+            <div id="searchBox" class="searchBox"><span id="searchIcon" data-icon="search_24_regular">⌕</span><input id="search" class="timeline-search" autofocus data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…"><button id="searchClear" class="searchClear" aria-label="נקה">×</button></div>
             <select id="type"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select>
             <select id="pluginFilter"><option value="" data-i18n="all_plugins">כל התוספים</option></select>
             <select id="range"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select>
@@ -271,7 +271,7 @@ body.focus-mode .shell-body{height:100%}.focus-exit{display:none;position:fixed;
   </div>
 </div>
 <button id="settingsFab" hidden></button>
-<button id="focusExitBtn" class="focus-exit" data-i18n="exit_focus">צא ממצב פוקוס</button>
+<button id="focusExitBtn" class="focus-exit" data-i18n="exit_focus">צא ממצב פוקוס</button><div id="contextMenuHost"></div>
 <script src="official-fluent-icons.js"></script><script src="app.js"></script>
 </body>
 </html>
