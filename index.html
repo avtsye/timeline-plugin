@@ -324,6 +324,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .settingsNativeList{margin:0;background:var(--panel-bg)}.settingsNativeList .native-row{padding-inline:16px}.settingsNativeList button{color:var(--color-primary)}.settingsNativeList button.danger{color:var(--color-error)}.settingsSection.card>.native-list{background:var(--panel-bg)!important;padding:0!important}
 .toolbarActions{display:flex;align-items:center;gap:4px;margin-inline-start:auto}.toolbarIcon{color:var(--color-on-surface-variant)}.toolbarIcon span,.toolbarIcon svg{width:20px;height:20px;display:block;fill:currentColor}.toolbarPopover{position:absolute;z-index:80;top:48px;inset-inline-end:10px;width:min(340px,calc(100vw - 100px));background:var(--color-surface-container-highest);border-radius:var(--otz-radius);padding:8px;box-shadow:0 3px 8px color-mix(in srgb,var(--color-shadow) 18%,transparent);display:grid;grid-template-columns:1fr 1fr;gap:8px}.toolbarPopover[hidden]{display:none}.toolbarPopover label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--color-on-surface-variant)}.toolbarPopover select{width:100%;height:36px;border-radius:20px;background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);padding-inline:12px;border:0;color:var(--color-on-surface)}.timeline-controls{position:relative}.zoomCtl{background:transparent}.zoomCtl #zoomLabel{font-size:11px;min-width:34px;text-align:center;color:var(--color-on-surface-variant)}
 .sessionHeading{min-width:0;flex:1}.sessionSummary{font-size:12px;color:var(--color-on-surface-variant);margin-top:2px}.sessionStatusIcon{width:16px;height:16px;display:grid;place-items:center;color:var(--color-primary)}.sessionStatusIcon svg{width:16px;height:16px;fill:currentColor}.sessionQuickAction{width:36px;height:36px;min-height:36px;padding:0!important;border-radius:50%!important;display:grid;place-items:center;background:transparent!important;color:var(--color-primary)!important}.sessionQuickAction span,.sessionQuickAction svg{width:20px;height:20px;display:block;fill:currentColor}.sessionMenu>summary span,.sessionMenu>summary svg{width:20px;height:20px;display:block;fill:currentColor}.menuButtonIcon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px}.menuButtonIcon svg{width:18px;height:18px;fill:currentColor}.sessionMenuPanel button{display:flex;align-items:center;gap:10px}.sessionSnapshotChoice{display:flex;align-items:center;gap:8px;padding:4px 8px}.sessionSnapshotChoice>span,.sessionSnapshotChoice svg{width:20px;height:20px;display:block;fill:currentColor;color:var(--color-on-surface-variant)}.sessionSnapshotChoice select{min-width:0;flex:1;height:36px;border:0;border-radius:var(--otz-radius);background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);color:var(--color-on-surface);padding-inline:8px}.preview{display:flex;align-items:flex-start;gap:12px}.previewIcon{width:24px;height:24px;display:grid;place-items:center;color:var(--color-on-surface-variant);flex:0 0 24px}.previewIcon svg{width:20px;height:20px;fill:currentColor}.previewContent{min-width:0;flex:1}.sessionMeta{font-size:12px;color:var(--color-on-surface-variant);margin-top:3px}.sessionNote{font-size:13px;color:var(--color-on-surface);margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 45%,transparent)}.eventMain{min-width:0;flex:1}.eventMain b,.eventMain small{display:block}.eventFav span,.eventFav svg{width:18px;height:18px;display:block;fill:currentColor}
+.overviewStats{display:grid;grid-template-columns:1fr 1fr;gap:var(--otz-space-md)}@media(max-width:720px){.overviewStats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -370,17 +371,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
       <section class="screen" data-screen-panel="overview">
         <div class="page-head"><div><h2 data-i18n="screen_overview">סקירה</h2><div class="page-subtitle" data-i18n="overview_subtitle">סיכום הפעילות האחרונה</div></div></div>
-        <div class="card continue-card"><div><b data-i18n="continue_title">המשך מהמקום שבו הפסקת</b><div id="continueInfo"></div></div><button id="continueBtn" class="btn btn-filled" data-i18n="continue_work">המשך עבודה</button></div>
-        <div class="card">
-          <div class="stats">
-            <div class="stat"><b id="count">0</b><span data-i18n="events">אירועים</span></div>
-            <div class="stat"><b id="sessionCount">0</b><span data-i18n="sessions">הפעלות</span></div>
-            <div class="stat"><b id="bookCount">0</b><span data-i18n="books">ספרים</span></div>
-            <div class="stat"><b id="pluginCount">0</b><span data-i18n="plugins">תוספים</span></div>
-            <div class="stat"><b id="bookTime">0</b><span data-i18n="estimated_book_time">זמן ספרים משוער</span></div>
-            <div class="stat"><b id="toolTime">0</b><span data-i18n="estimated_plugin_time">זמן תוספים/כלים משוער</span></div>
+        <section class="native-section">
+          <div class="native-list">
+            <div class="native-row"><span class="native-row-icon" data-icon="play_24_regular"></span><div class="native-row-main"><b data-i18n="continue_title">המשך מהמקום שבו הפסקת</b><small id="continueInfo"></small></div><button id="continueBtn" data-i18n="continue_work">המשך עבודה</button></div>
           </div>
-        </div>
+        </section>
+        <section class="native-section" style="margin-top:16px">
+          <div class="native-section-title" data-i18n="statistics">סטטיסטיקות</div>
+          <div class="overviewStats">
+            <div class="native-list">
+              <div class="native-row"><span class="native-row-icon" data-icon="history_24_regular"></span><div class="native-row-main"><b data-i18n="events">אירועים</b></div><span id="count" class="native-row-trailing">0</span></div>
+              <div class="native-row"><span class="native-row-icon" data-icon="window_multiple_24_regular"></span><div class="native-row-main"><b data-i18n="sessions">הפעלות</b></div><span id="sessionCount" class="native-row-trailing">0</span></div>
+              <div class="native-row"><span class="native-row-icon" data-icon="book_open_24_regular"></span><div class="native-row-main"><b data-i18n="books">ספרים</b></div><span id="bookCount" class="native-row-trailing">0</span></div>
+            </div>
+            <div class="native-list">
+              <div class="native-row"><span class="native-row-icon" data-icon="puzzle_piece_24_regular"></span><div class="native-row-main"><b data-i18n="plugins">תוספים</b></div><span id="pluginCount" class="native-row-trailing">0</span></div>
+              <div class="native-row"><span class="native-row-icon" data-icon="clock_24_regular"></span><div class="native-row-main"><b data-i18n="estimated_book_time">זמן ספרים משוער</b></div><span id="bookTime" class="native-row-trailing">0</span></div>
+              <div class="native-row"><span class="native-row-icon" data-icon="timer_24_regular"></span><div class="native-row-main"><b data-i18n="estimated_plugin_time">זמן תוספים/כלים משוער</b></div><span id="toolTime" class="native-row-trailing">0</span></div>
+            </div>
+          </div>
+        </section>
         <div class="card"><div class="page-head"><h2 data-i18n="last_35_days">35 הימים האחרונים</h2><span class="muted" data-i18n="activity_intensity">עוצמת פעילות</span></div><div id="heatmap" class="heatmap"></div></div>
         <div class="card"><div class="page-head"><h2 data-i18n="recent_searches">חיפושים אחרונים</h2></div><div id="recentSearches" class="searches"></div></div>
         <div class="card">
