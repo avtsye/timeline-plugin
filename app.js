@@ -69,7 +69,7 @@ tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים
 year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
 book_visits:'ביקורים בספר',plugin_timeline:'ציר זמן של תוסף',visits:'אירועים',days:'ימים',places:'מקומות',open:'פתח',
 restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסרים',no_missing_plugins:'אין תוספים חסרים',choose_replacement:'בחר תוסף חלופי…',
-save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים'
+save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',cancel:'ביטול',confirm:'אישור',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים'
 },
 en:{
 settings:'Settings',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
@@ -114,7 +114,7 @@ tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_a
 year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
 book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days:'days',places:'places',open:'Open',
 restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
-save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More',copy_details:'Copy details',copied:'Details copied',open_history:'Open history',remove_favorite:'Remove from favorites',add_favorite:'Add to favorites'
+save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More',cancel:'Cancel',confirm:'Confirm',copy_details:'Copy details',copied:'Details copied',open_history:'Open history',remove_favorite:'Remove from favorites',add_favorite:'Add to favorites'
 }};
 const tr=(key,vars={})=>{
   let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
@@ -175,6 +175,36 @@ function showModal(title,bodyBuilder){
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
   if(bodyBuilder)bodyBuilder(body,()=>ov.remove());
   return ov;
+}
+function askText(title,initial=''){
+  return new Promise(resolve=>{
+    const ov=showModal(title,(body,close)=>{
+      const input=document.createElement('input');input.className='nativeDialogInput';input.value=initial||'';input.autocomplete='off';
+      const actions=document.createElement('div');actions.className='dialogActions';
+      const cancel=document.createElement('button');cancel.className='actionGhost';cancel.textContent=tr('cancel');
+      const ok=document.createElement('button');ok.className='actionRecommended';ok.textContent=tr('confirm');
+      const finish=value=>{close();resolve(value)};
+      cancel.onclick=()=>finish(null);ok.onclick=()=>finish(input.value);
+      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish(input.value)}if(e.key==='Escape'){e.preventDefault();finish(null)}};
+      actions.append(cancel,ok);body.append(input,actions);setTimeout(()=>{input.focus();input.select()},0);
+      ov.addEventListener('click',e=>{if(e.target===ov)resolve(null)},{once:true});
+    });
+  });
+}
+function askConfirm(message,{danger=false}={}){
+  return new Promise(resolve=>{
+    const ov=showModal('',(body,close)=>{
+      const text=document.createElement('div');text.className='dialogMessage';text.textContent=message;
+      const actions=document.createElement('div');actions.className='dialogActions';
+      const cancel=document.createElement('button');cancel.className='actionGhost';cancel.textContent=tr('cancel');
+      const ok=document.createElement('button');ok.className=danger?'actionWarning':'actionRecommended';ok.textContent=tr('confirm');
+      const finish=value=>{close();resolve(value)};
+      cancel.onclick=()=>finish(false);ok.onclick=()=>finish(true);
+      actions.append(cancel,ok);body.append(text,actions);
+      setTimeout(()=>ok.focus(),0);
+      ov.addEventListener('click',e=>{if(e.target===ov)resolve(false)},{once:true});
+    });
+  });
 }
 function bookKeyFromEvent(e){
   const d=e.data||{};
@@ -410,13 +440,13 @@ async function openEvent(e){
   if(r.success)await call('navigation.goTo',{target:'reading'});
 }
 async function renameSession(s){
-  const next=prompt(tr('session_name'),names[s.id]||smartTitle(s));
+  const next=await askText(tr('session_name'),names[s.id]||smartTitle(s));
   if(next===null)return;
   if(next.trim())names[s.id]=next.trim();else delete names[s.id];
   await set(NAMES,names);render();
 }
 async function deleteSession(s){
-  if(!confirm(tr('delete_session_confirm')))return;
+  if(!await askConfirm(tr('delete_session_confirm'),{danger:true}))return;
   events=events.filter(e=>e.sessionId!==s.id);
   s.events.forEach(e=>favorites.delete(e.id));
   pinned.delete(s.id);collapsed.delete(s.id);delete names[s.id];delete sessionNotes[s.id];
@@ -424,7 +454,7 @@ async function deleteSession(s){
   render();await notify(tr('session_deleted'),'success');
 }
 async function saveSessionAsWorkspace(s){
-  const name=prompt(tr('workspace_name'),names[s.id]||smartTitle(s));
+  const name=await askText(tr('workspace_name'),names[s.id]||smartTitle(s));
   if(!name||!name.trim())return;
   const cr=await call('workspace.create',{name:name.trim(),switchTo:true,reuseExisting:false});
   if(!cr.success){await notify(tr('workspace_create_failed'),'error');return}
@@ -825,7 +855,7 @@ async function importData(){
   try{
     const data=JSON.parse(read.data);
     if(!data||data.plugin!=='timeline-plugin'||!Array.isArray(data.events))throw new Error('bad');
-    if(!confirm(tr('merge_import_confirm')))return;
+    if(!await askConfirm(tr('merge_import_confirm')))return;
     events=mergeById(events,data.events);snaps=mergeById(snaps,data.snaps||data.snapshots||[]);
     if(data.settings)settings=Object.assign(settings,data.settings);
     pinned=new Set([...pinned,...(data.pins||[])]);collapsed=new Set([...collapsed,...(data.collapsed||[])]);favorites=new Set([...favorites,...(data.favorites||[])]);
@@ -836,7 +866,7 @@ async function importData(){
   }catch(_){await notify(tr('invalid_timeline_file'),'error')}
 }
 async function restoreInternalBackup(path){
-  if(!confirm(tr('restore_internal_confirm')))return;
+  if(!await askConfirm(tr('restore_internal_confirm'),{danger:true}))return;
   const read=await call('fs.readFile',{path});
   if(!read.success||!read.data||typeof read.data.content!=='string'){await notify(tr('read_file_failed'),'error');return}
   try{
@@ -884,7 +914,7 @@ function updateSavedFilterSelect(){
   el.innerHTML='<option value="">'+esc(tr('saved_filters'))+'</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
 }
 async function saveCurrentFilter(){
-  const name=prompt(tr('save_filter_name'));if(!name||!name.trim())return;
+  const name=await askText(tr('save_filter_name'));if(!name||!name.trim())return;
   savedFilters.push({name:name.trim(),search:$('search').value,type:$('type').value,plugin:$('pluginFilter').value,range:$('range').value,sort:$('sort').value,datePreset,selectedDayKey,favoritesOnly});
   if(savedFilters.length>30)savedFilters.shift();
   await set(SAVED_FILTERS,savedFilters);updateSavedFilterSelect();await notify(tr('filter_saved'),'success');
@@ -1102,7 +1132,7 @@ $('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
 $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
-$('clearBtn').onclick=async()=>{if(confirm(tr('clear_all_confirm'))){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
+$('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
 $('settingsFab').onclick=()=>switchScreen('settings');
 $('closeSettings').onclick=()=>switchScreen('timeline');
 $('saveSettings').onclick=async()=>{
