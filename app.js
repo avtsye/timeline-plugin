@@ -1741,12 +1741,17 @@ $('saveSettings').onclick=async()=>{
     settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
 
     const saved=await set(SETTINGS,settings);
-    if(!saved||saved.success===false)throw new Error('settings storage write failed');
-    const verify=await get(SETTINGS,{});
-    if(Number(verify.maxEvents)!==settings.maxEvents||Number(verify.retentionDays)!==settings.retentionDays)throw new Error('settings storage verification failed');
+    if(saved&&saved.success===false)throw new Error('settings storage write failed');
 
     const limitsOk=await applyStorageLimitsNow();
     if(!limitsOk)throw new Error('storage limits write failed');
+
+    // Read back opportunistically, but do not treat an eventually-consistent read as a failed save.
+    const verify=await get(SETTINGS,null);
+    if(verify&&typeof verify==='object'){
+      settings.maxEvents=Math.max(500,Math.min(50000,Number(verify.maxEvents)||settings.maxEvents));
+      settings.retentionDays=Number.isFinite(Number(verify.retentionDays))?Math.max(0,Number(verify.retentionDays)):settings.retentionDays;
+    }
 
     await resolveLanguage();applyTranslations();sync();
     await applyNewTabIntegration();await publishHomepageState();
@@ -1755,7 +1760,8 @@ $('saveSettings').onclick=async()=>{
     if(document.querySelector('[data-screen-panel="diagnostics"].active'))await renderDiagnosticsScreen();
     await updateTrackingStatus();
     await notify(tr('settings_saved'),'success');
-  }catch(_){
+  }catch(err){
+    try{console.error('[Timeline] settings save failed',err)}catch(_){}
     await notify(tr('settings_save_failed'),'error');
   }finally{
     saveBtn.disabled=false;saveBtn.removeAttribute('aria-busy');
