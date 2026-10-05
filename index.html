@@ -799,6 +799,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .feedbackToolbar .appDropdown,.feedbackToolbar .btn{width:100%;margin:0}
 }
 
+
+/* 0.15.7 compact secondary screens */
+.screen.native-page{padding:14px 16px!important}
+.screen.native-page>.page-head{margin-bottom:12px!important}
+.page-head{min-height:auto!important}
+.native-page-body>.native-section,
+.native-page-body>.native-chart-block{margin-block:0 12px!important}
+.native-section{margin-bottom:12px}
+.native-section-title{margin-bottom:6px}
+#diagnosticsContent .native-section:last-child,
+#analyticsContent .native-section:last-child{margin-bottom:0}
+.snapshotList{gap:4px!important}
+
 </style>
 </head>
 <body>
@@ -899,9 +912,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
       <section class="screen native-page" data-screen-panel="diagnostics">
         <div class="page-head"><div><h2 data-i18n="screen_diagnostics">אבחון</h2><div class="page-subtitle" data-i18n="diagnostics_subtitle">מצב מעקב, הרשאות ובריאות הנתונים</div></div></div>
-        <div class="native-list" style="margin-bottom:16px">
-          <div class="native-row"><span class="native-row-icon" data-icon="pulse_24_regular"></span><div class="native-row-main"><b data-i18n="tracking_status">מצב מעקב</b><small id="trackingDetail"></small></div><span id="trackingStatus" class="native-row-trailing"></span></div>
-        </div>
         <div id="diagnosticsContent" class="native-page-body"></div>
         </section>
 
@@ -911,7 +921,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
           <button class="settingsTabBtn active" role="tab" aria-selected="true" tabindex="0" data-settings-tab="general" data-i18n="settings_general">כללי</button>
           <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
-          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="advanced">מתקדם</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="advanced" data-i18n="settings_advanced">מתקדם</button>
         </div>
 
         <div class="settingsPane active" data-settings-pane="general">
@@ -959,7 +969,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           </section>
 
           <section class="settingsGroup">
-            <h3>שמירת נתונים</h3>
+            <h3 data-i18n="data_storage">שמירת נתונים</h3>
             <div class="settingsFieldsGrid">
               <div class="settingFieldRow"><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select></div>
               <div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
@@ -969,7 +979,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
         <div class="settingsPane" data-settings-pane="advanced">
           <section class="settingsGroup">
-            <h3>גיבוי וארכיון</h3>
+            <h3 data-i18n="backup_archive">גיבוי וארכיון</h3>
             <label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label>
           </section>
 
@@ -985,7 +995,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
           <section class="settingsGroup dangerGroup">
             <div class="settingsGroupHead">
-              <div><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="settingsHint">מחיקת כל היסטוריית ציר הזמן מהמכשיר.</div></div>
+              <div><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="settingsHint" data-i18n="clear_all_hint">מחיקת כל היסטוריית ציר הזמן מהמכשיר.</div></div>
               <button id="clearBtn" class="danger" data-i18n="delete">מחק הכל</button>
             </div>
           </section>
