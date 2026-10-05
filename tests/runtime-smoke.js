@@ -35,3 +35,14 @@ const missingIcons=[...usedIcons].filter(x=>!iconKeys.has(x));
 if(missingIcons.length) throw new Error('Missing bundled Fluent icons: '+missingIcons.join(', '));
 if(/\b(?:miniCard|modalGrid)\b/.test(app)) throw new Error('Legacy web-card UI class remains in app.js');
 console.log('Fluent icons verified: '+usedIcons.size);
+
+for(const legacy of ['dashboardBtn','diagnosticsBtn','settingsFab','closeSettings']){
+  if(app.includes("$('"+legacy+"')")||html.includes('id="'+legacy+'"')) throw new Error('Legacy UI control remains: '+legacy);
+}
+for(const legacyClass of ['miniCard','modalGrid']){
+  if(app.includes(legacyClass)||html.includes(legacyClass)) throw new Error('Legacy web UI class remains: '+legacyClass);
+}
+for(const requiredClass of ['native-list','native-row','settingsTabBtn','timelineRail','contextMenu','searchBox']){
+  if(!html.includes(requiredClass)) throw new Error('Required native Otzaria UI class missing: '+requiredClass);
+}
+console.log('Native Otzaria UI audit OK');
