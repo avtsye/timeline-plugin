@@ -1228,8 +1228,6 @@ $('savedFilterSelect').onchange=e=>{if(e.target.value!=='')applySavedFilter(e.ta
 $('zoomIn').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)+.2);
 $('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
 $('snapshotBrowserBtn').onclick=showSnapshotBrowser;
-if($('dashboardBtn'))$('dashboardBtn').onclick=()=>switchScreen('analytics');
-if($('diagnosticsBtn'))$('diagnosticsBtn').onclick=()=>switchScreen('diagnostics');
 $('openArchiveBtn').onclick=showSummaryArchive;
 $('sendFeedbackBtn').onclick=sendFeedback;
 $('focusModeBtn').onclick=()=>setFocusMode(!settings.focusMode);
@@ -1245,8 +1243,6 @@ $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
 $('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
-$('settingsFab').onclick=()=>switchScreen('settings');
-$('closeSettings').onclick=()=>switchScreen('timeline');
 $('saveSettings').onclick=async()=>{
   settings.maxEvents=+$('maxEvents').value||5000;
   settings.inAppNotifications=$('notificationsEnabled').checked;
