@@ -178,32 +178,37 @@ function showModal(title,bodyBuilder){
 }
 function askText(title,initial=''){
   return new Promise(resolve=>{
-    const ov=showModal(title,(body,close)=>{
+    let settled=false,ov=null;
+    const finish=value=>{if(settled)return;settled=true;if(ov)ov.remove();resolve(value)};
+    ov=showModal(title,body=>{
       const input=document.createElement('input');input.className='nativeDialogInput';input.value=initial||'';input.autocomplete='off';
       const actions=document.createElement('div');actions.className='dialogActions';
       const cancel=document.createElement('button');cancel.className='actionGhost';cancel.textContent=tr('cancel');
       const ok=document.createElement('button');ok.className='actionRecommended';ok.textContent=tr('confirm');
-      const finish=value=>{close();resolve(value)};
       cancel.onclick=()=>finish(null);ok.onclick=()=>finish(input.value);
-      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish(input.value)}if(e.key==='Escape'){e.preventDefault();finish(null)}};
+      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish(input.value)}else if(e.key==='Escape'){e.preventDefault();finish(null)}};
       actions.append(cancel,ok);body.append(input,actions);setTimeout(()=>{input.focus();input.select()},0);
-      ov.addEventListener('click',e=>{if(e.target===ov)resolve(null)},{once:true});
     });
+    const x=ov.querySelector('.modalHead button');if(x)x.onclick=()=>finish(null);
+    ov.addEventListener('click',e=>{if(e.target===ov)finish(null)});
   });
 }
 function askConfirm(message,{danger=false}={}){
   return new Promise(resolve=>{
-    const ov=showModal('',(body,close)=>{
+    let settled=false,ov=null;
+    const finish=value=>{if(settled)return;settled=true;if(ov)ov.remove();resolve(value)};
+    ov=showModal('',body=>{
       const text=document.createElement('div');text.className='dialogMessage';text.textContent=message;
       const actions=document.createElement('div');actions.className='dialogActions';
       const cancel=document.createElement('button');cancel.className='actionGhost';cancel.textContent=tr('cancel');
       const ok=document.createElement('button');ok.className=danger?'actionWarning':'actionRecommended';ok.textContent=tr('confirm');
-      const finish=value=>{close();resolve(value)};
       cancel.onclick=()=>finish(false);ok.onclick=()=>finish(true);
-      actions.append(cancel,ok);body.append(text,actions);
-      setTimeout(()=>ok.focus(),0);
-      ov.addEventListener('click',e=>{if(e.target===ov)resolve(false)},{once:true});
+      actions.append(cancel,ok);body.append(text,actions);setTimeout(()=>ok.focus(),0);
     });
+    const x=ov.querySelector('.modalHead button');if(x)x.onclick=()=>finish(false);
+    ov.addEventListener('click',e=>{if(e.target===ov)finish(false)});
+    const onKey=e=>{if(e.key==='Escape'){document.removeEventListener('keydown',onKey,true);finish(false)}};
+    document.addEventListener('keydown',onKey,true);
   });
 }
 function bookKeyFromEvent(e){
