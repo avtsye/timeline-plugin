@@ -834,6 +834,10 @@ function makeNativeSection(title){
 }
 function renderAnalyticsScreen(){
   const host=$('analyticsContent');if(!host)return;host.innerHTML='';
+  if(!events.length){
+    host.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="data_bar_vertical_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';
+    applyShellIcons();return;
+  }
   const charts=document.createElement('div');charts.className='analyticsCharts';
   const chartDefs=[
     [tr('day_activity'),aggregateDaily(30),x=>String(new Date(x.time).getDate())],
@@ -1274,8 +1278,10 @@ function showExportDialog(){
     const p=document.createElement('p');p.className='muted';p.textContent=tr('choose_export');body.appendChild(p);
     const actions=document.createElement('div');actions.className='actions';
     const all=document.createElement('button');all.className='actionRecommended';all.textContent=tr('all');all.onclick=()=>exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'all',exportedAt:new Date().toISOString(),events,snaps,settings,pins:[...pinned],collapsed:[...collapsed],favorites:[...favorites],names,sessionNotes,savedFilters,pluginMigrations},'otzaria-timeline-'+dk(Date.now()));
-    const filteredBtn=document.createElement('button');filteredBtn.className='actionGhost';filteredBtn.textContent=tr('filtered_view');filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
-    const day=document.createElement('button');day.className='actionGhost';day.textContent=tr('today');day.onclick=()=>{const today=dk(Date.now()),ev=events.filter(e=>dk(e.time)===today);exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:today,events:ev,snaps:snaps.filter(s=>dk(s.time)===today)},'otzaria-timeline-'+today)};
+    const filteredNow=filtered();
+    const filteredBtn=document.createElement('button');filteredBtn.className='actionGhost';filteredBtn.textContent=tr('filtered_view');filteredBtn.disabled=!filteredNow.length;filteredBtn.onclick=()=>{const ev=filtered(),times=ev.map(e=>e.time),min=times.length?Math.min(...times):0,max=times.length?Math.max(...times):0;exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'filtered',exportedAt:new Date().toISOString(),events:ev,snaps:snaps.filter(s=>s.time>=min-20*60000&&s.time<=max+20*60000)},'otzaria-timeline-filtered-'+dk(Date.now()))};
+    const todayKey=dk(Date.now()),todayEvents=events.filter(e=>dk(e.time)===todayKey);
+    const day=document.createElement('button');day.className='actionGhost';day.textContent=tr('today');day.disabled=!todayEvents.length;day.onclick=()=>{exportPayload({schemaVersion:1,plugin:'timeline-plugin',scope:'day',date:todayKey,events:todayEvents,snaps:snaps.filter(s=>dk(s.time)===todayKey)},'otzaria-timeline-'+todayKey)};
     actions.appendChild(all);actions.appendChild(filteredBtn);actions.appendChild(day);body.appendChild(actions);
   });
 }
@@ -1362,7 +1368,7 @@ function showMigrationManager(){
       const row=document.createElement('div');row.className='native-row pluginMapRow';
       const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='puzzle_piece_24_regular';
       const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');sub.textContent=tr('choose_replacement');main.append(b,sub);
-      const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.setAttribute('aria-label',tr('choose_replacement'));sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
       const btn=document.createElement('button');btn.className='actionRecommended';btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
       btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);close();render();await notify(tr('mapping_saved'),'success')};
       row.append(icon,main,sel,btn);list.appendChild(row);
