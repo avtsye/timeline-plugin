@@ -1397,15 +1397,26 @@ function activateSettingsTab(name){
   });
   document.querySelectorAll('.settingsPane').forEach(p=>p.classList.toggle('active',p.dataset.settingsPane===name));
 }
+function updateFeedbackButtonState(){
+  const btn=$('sendFeedbackBtn'),box=$('feedbackText');
+  if(!btn||!box)return;
+  const hasText=!!box.value.trim();
+  btn.disabled=!hasText;
+  btn.setAttribute('aria-disabled',hasText?'false':'true');
+}
 async function sendFeedback(){
-  const details=$('feedbackText').value.trim();
-  if(!details){await notify(tr('feedback_empty'),'error');return}
+  const btn=$('sendFeedbackBtn'),box=$('feedbackText');
+  const details=box.value.trim();
+  if(!details){updateFeedbackButtonState();await notify(tr('feedback_empty'),'error');return}
   const reportType=$('feedbackType').value||'other';
+  if(btn){btn.disabled=true;btn.setAttribute('aria-busy','true')}
   const r=await call('feedback.report',{details,reportType});
-  if(!r.success){await notify(tr('feedback_empty'),'error');return}
-  if(r.data==='sent'){await notify(tr('feedback_sent'),'success');$('feedbackText').value=''}
-  else if(r.data==='queued'){await notify(tr('feedback_queued'),'success');$('feedbackText').value=''}
+  if(btn)btn.removeAttribute('aria-busy');
+  if(!r.success){updateFeedbackButtonState();await notify(tr('feedback_empty'),'error');return}
+  if(r.data==='sent'){await notify(tr('feedback_sent'),'success');box.value=''}
+  else if(r.data==='queued'){await notify(tr('feedback_queued'),'success');box.value=''}
   else if(r.data==='cancelled'){await notify(tr('feedback_cancelled'),'info')}
+  updateFeedbackButtonState();
 }
 async function showSummaryArchive(){
   const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
@@ -1596,6 +1607,8 @@ $('zoomOut').onclick=()=>setTimelineZoom(Number(settings.timelineZoom||1)-.2);
 $('snapshotBrowserBtn').onclick=showSnapshotBrowser;
 $('openArchiveBtn').onclick=showSummaryArchive;
 $('sendFeedbackBtn').onclick=sendFeedback;
+$('feedbackText').addEventListener('input',updateFeedbackButtonState);
+updateFeedbackButtonState();
 $('focusModeBtn').onclick=()=>setFocusMode(!settings.focusMode);
 $('filterToggleBtn').onclick=e=>{e.stopPropagation();const p=$('filtersPopover');p.hidden=!p.hidden;$('filterToggleBtn').setAttribute('aria-expanded',p.hidden?'false':'true');if(!p.hidden){applyShellIcons();setTimeout(()=>p.querySelector('select')?.focus(),0)}};
 $('focusExitBtn').onclick=()=>setFocusMode(false);
@@ -1623,6 +1636,8 @@ $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
 $('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
 $('saveSettings').onclick=async()=>{
+  const saveBtn=$('saveSettings');
+  saveBtn.disabled=true;saveBtn.setAttribute('aria-busy','true');
   settings.maxEvents=+$('maxEvents').value||5000;
   settings.retentionDays=+$('retentionDays').value;
   settings.inAppNotifications=$('notificationsEnabled').checked;
@@ -1639,7 +1654,9 @@ $('saveSettings').onclick=async()=>{
   settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
   await set(SETTINGS,settings);
   await resolveLanguage();applyTranslations();sync();
-  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();await notify(tr('settings_saved'),'success');
+  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();
+  saveBtn.disabled=false;saveBtn.removeAttribute('aria-busy');
+  await notify(tr('settings_saved'),'success');
 };
 
 document.addEventListener('click',e=>{if(!e.target.closest('.contextMenu'))closeContextMenu();const p=$('filtersPopover');if(p&&!p.hidden&&!e.target.closest('#filtersPopover')&&!e.target.closest('#filterToggleBtn'))closeFilterPopover()});
