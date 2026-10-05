@@ -612,31 +612,26 @@ function renderStats(list,ss){
   $('bookTime').textContent=times.books+' '+(currentLang==='he'?'דק׳':'min');$('toolTime').textContent=times.tools+' '+(currentLang==='he'?'דק׳':'min');
 }
 function showBookHistory(bookKey){
-  const visits=eventsForBook(bookKey);
-  const title=visits.length?bookTitleFromEvent(visits[0]):String(bookKey);
+  const visits=eventsForBook(bookKey),title=visits.length?bookTitleFromEvent(visits[0]):String(bookKey);
   showModal(tr('book_visits')+' — '+title,body=>{
-    if(!visits.length){body.innerHTML='<div class="empty">'+esc(tr('no_activity'))+'</div>';return}
-    const places=[];const seen=new Set();
-    for(const e of visits){const d=e.data||{},ref=d.currentRef||d.ref||'',key=ref+'|'+(d.currentIndex??d.index??'');if(!seen.has(key)){seen.add(key);places.push(e)}}
-    const summary=document.createElement('p');summary.className='muted';
-    summary.textContent=visits.length+' '+tr('visits')+' · '+new Set(visits.map(e=>dk(e.time))).size+' '+tr('days')+' · '+places.length+' '+tr('places');body.appendChild(summary);
-    const grid=document.createElement('div');grid.className='modalGrid';
-    visits.slice(0,80).forEach(e=>{
-      const d=e.data||{},card=document.createElement('div');card.className='miniCard';
-      card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div>'+esc(d.currentRef||d.ref||'')+'</div><div class="muted">'+esc(String(d.currentIndex??d.index??''))+'</div>';
-      const b=document.createElement('button');b.textContent=tr('open');b.onclick=()=>openEvent(e);card.appendChild(b);grid.appendChild(card);
-    });
-    body.appendChild(grid);
+    if(!visits.length){body.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="book_open_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();return}
+    const places=[],seen=new Set();
+    for(const ev of visits){const d=ev.data||{},ref=d.currentRef||d.ref||'',key=ref+'|'+(d.currentIndex??d.index??'');if(!seen.has(key)){seen.add(key);places.push(ev)}}
+    const summary=document.createElement('div');summary.className='dialogSummary';summary.textContent=visits.length+' '+tr('visits')+' · '+new Set(visits.map(ev=>dk(ev.time))).size+' '+tr('days')+' · '+places.length+' '+tr('places');body.appendChild(summary);
+    const list=document.createElement('div');list.className='native-list';
+    visits.slice(0,100).forEach(ev=>{const d=ev.data||{};list.appendChild(makeNativeRow({icon:'book_open_24_regular',title:d.currentRef||d.ref||title,subtitle:fmtDate(ev.time)+' · '+fmt(ev.time),trailing:String(d.currentIndex??d.index??''),action:()=>openEvent(ev)}))});
+    body.appendChild(list);applyShellIcons();
   });
 }
 function showPluginHistory(pluginId){
   const list=eventsForPlugin(pluginId),name=pluginName(pluginId);
   showModal(tr('plugin_timeline')+' — '+name,body=>{
-    const p=document.createElement('p');p.className='muted';p.textContent=list.length+' '+tr('visits');body.appendChild(p);
-    const open=document.createElement('button');open.textContent=tr('open')+' '+tr('plugin');open.onclick=()=>openPlugin(pluginId);body.appendChild(open);
-    const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='12px';
-    list.slice(0,100).forEach(e=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(fmtDate(e.time)+' · '+fmt(e.time))+'</h3><div class="muted">'+esc((e.data||{}).toolId||'')+'</div>';grid.appendChild(card)});
-    body.appendChild(grid);
+    const actions=document.createElement('div');actions.className='dialogToolbar';
+    const open=document.createElement('button');open.className='actionRecommended';open.textContent=tr('open')+' '+tr('plugin');open.onclick=()=>openPlugin(pluginId);actions.appendChild(open);body.appendChild(actions);
+    const rows=document.createElement('div');rows.className='native-list';
+    if(!list.length){rows.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="puzzle_piece_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>'}
+    else list.slice(0,120).forEach(ev=>rows.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:name,subtitle:fmtDate(ev.time)+' · '+fmt(ev.time),trailing:(ev.data||{}).toolId||'',action:()=>openPlugin(pluginId)})));
+    body.appendChild(rows);applyShellIcons();
   });
 }
 function aggregateDaily(days=30){
@@ -942,14 +937,13 @@ function restoreSnapshot(s){
 }
 function showSnapshotBrowser(){
   showModal(tr('all_restore_points'),body=>{
-    if(!snaps.length){body.innerHTML='<div class="empty">'+esc(tr('no_snapshots'))+'</div>';return}
-    const grid=document.createElement('div');grid.className='modalGrid';
-    snaps.slice().reverse().forEach(s=>{
-      const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
-      const card=document.createElement('div');card.className='miniCard';
-      card.innerHTML='<h3>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</h3><div class="muted">'+books.length+' '+esc(tr('books'))+' · '+plugins.length+' '+esc(tr('plugins'))+'</div><div class="muted">'+esc(s.workspace&&s.workspace.name?s.workspace.name:'')+'</div>';
-      const btn=document.createElement('button');btn.textContent=tr('preview_restore');btn.onclick=()=>restoreSnapshot(s);card.appendChild(btn);grid.appendChild(card);
-    });body.appendChild(grid);
+    if(!snaps.length){body.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="history_24_regular"></div><div class="emptyTitle">'+esc(tr('no_snapshots'))+'</div></div>';applyShellIcons();return}
+    const list=document.createElement('div');list.className='native-list';
+    snaps.slice().reverse().forEach(sn=>{
+      const books=(sn.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId),plugins=(sn.tabs||[]).filter(tb=>tb.toolId&&!tb.isSelf);
+      list.appendChild(makeNativeRow({icon:'history_24_regular',title:fmtDate(sn.time)+' · '+fmt(sn.time),subtitle:books.length+' '+tr('books')+' · '+plugins.length+' '+tr('plugins')+(sn.workspace&&sn.workspace.name?' · '+sn.workspace.name:''),action:()=>restoreSnapshot(sn),buttonLabel:tr('preview_restore')}));
+    });
+    body.appendChild(list);applyShellIcons();
   });
 }
 function showExportDialog(){
