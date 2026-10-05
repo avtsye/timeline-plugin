@@ -831,6 +831,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
 }
 
+
+/* UX audit hardening */
+.srOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.settingsSaveBar{position:sticky;bottom:0;z-index:12;display:flex;justify-content:flex-end;padding:10px 14px;margin:8px -14px -10px;background:color-mix(in srgb,var(--color-surface-container-highest) 94%,transparent);border-top:1px solid var(--color-outline-variant);backdrop-filter:blur(8px)}
+.toolbarPopover{max-height:min(70vh,420px);overflow:auto;overscroll-behavior:contain}
+.contextMenu button:focus-visible{outline:2px solid var(--color-primary);outline-offset:-2px;background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.modalOverlay{overflow:auto;overscroll-behavior:contain}
+.modalBox{overscroll-behavior:contain}
+.screen[aria-hidden="true"]{pointer-events:none}
+@media(max-width:600px){
+  .toolbarPopover{width:min(360px,calc(100vw - 24px));inset-inline-end:4px;grid-template-columns:1fr}
+  .modalOverlay{padding:8px}
+  .modalBox{width:100%;max-height:calc(100vh - 16px);padding:12px;border-radius:var(--radius-sm)}
+  .settingsSaveBar{margin-inline:-10px;padding-inline:10px}
+}
+
 </style>
 </head>
 <body>
@@ -859,9 +875,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           <div class="timeline-controls">
             <div id="searchBox" class="searchBox"><span id="searchIcon" data-icon="search_24_regular">⌕</span><input id="search" class="timeline-search" autofocus data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…"><button id="searchClear" class="searchClear" aria-label="נקה">×</button></div>
             <div class="toolbarActions">
-              <button id="filterToggleBtn" class="icon-btn toolbarIcon" title="מסננים" aria-label="מסננים"><span data-icon="filter_24_regular"></span></button>
+              <button id="filterToggleBtn" class="icon-btn toolbarIcon" title="מסננים" aria-label="מסננים" aria-expanded="false" aria-controls="filtersPopover"><span data-icon="filter_24_regular"></span></button>
               <div class="zoomCtl"><button id="zoomOut" class="icon-btn toolbarIcon" title="הקטן"><span data-icon="subtract_24_regular">−</span></button><span id="zoomLabel">100%</span><button id="zoomIn" class="icon-btn toolbarIcon" title="הגדל"><span data-icon="add_24_regular">+</span></button></div>
-              <div class="segmented"><button data-view="day" class="active" data-i18n="day">יום</button><button data-view="week" data-i18n="week">שבוע</button><button data-view="month" data-i18n="month">חודש</button></div>
+              <div class="segmented" role="group" aria-label="תצוגת ציר הזמן"><button data-view="day" class="active" aria-pressed="true" data-i18n="day">יום</button><button data-view="week" aria-pressed="false" data-i18n="week">שבוע</button><button data-view="month" aria-pressed="false" data-i18n="month">חודש</button></div>
               <button id="focusModeBtn" class="icon-btn toolbarIcon" data-i18n-title="focus_mode" title="מצב פוקוס"><span data-icon="full_screen_maximize_24_regular"></span></button>
             </div>
             <div id="filtersPopover" class="toolbarPopover" hidden>
@@ -903,7 +919,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           <div class="page-head"><h2 data-i18n="quick_navigation">ניווט מהיר</h2></div>
           <div class="actions">
             <button id="saveFilterBtn" class="btn" data-i18n="save_filter">שמור מסנן</button>
-            <select id="savedFilterSelect"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
+            <select id="savedFilterSelect" aria-label="מסננים שמורים"><option value="" data-i18n="saved_filters">מסננים שמורים</option></select>
             <button class="btn" data-preset="today" data-i18n="today">היום</button><button class="btn" data-preset="yesterday" data-i18n="yesterday">אתמול</button><button class="btn" data-preset="week" data-i18n="this_week">השבוע</button><button class="btn" data-preset="all" data-i18n="all">הכול</button><button id="favoritesOnly" class="btn" data-i18n="favorites">מועדפים</button>
           </div>
         </div>
@@ -937,19 +953,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div id="diagnosticsContent" class="native-page-body"></div>
         </section>
 
-      <section id="dialog" class="screen settings-pane" data-screen-panel="settings">
+      <section id="settingsScreen" class="screen settings-pane" data-screen-panel="settings">
         <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">התאמת ציר הזמן, מעקב ואינטגרציות</div></div></div>
-        <div class="settings-tabs">
-          <button class="settingsTabBtn active" data-settings-tab="general" data-i18n="settings_general">כללי</button>
-          <button class="settingsTabBtn" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
-          <button class="settingsTabBtn" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
-          <button class="settingsTabBtn" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
-          <button class="settingsTabBtn" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
+        <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
+          <button class="settingsTabBtn active" role="tab" aria-selected="true" tabindex="0" data-settings-tab="general" data-i18n="settings_general">כללי</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
         </div>
 
         <div class="settingsPane active" data-settings-pane="general">
           <div class="card settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
-            <label data-i18n="language">שפה</label>
+            <label for="languageSelect" data-i18n="language">שפה</label>
             <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
             <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
           </div>
@@ -970,7 +986,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
             <div class="native-row"><span class="native-row-icon" data-icon="power_24_regular"></span><div class="native-row-main"><b data-i18n="pause_until_restart">השהה עד הפעלה מחדש</b></div><button id="privacySessionBtn" data-i18n="pause_until_restart">השהה</button></div>
             <div class="native-row"><span class="native-row-icon" data-icon="play_24_regular"></span><div class="native-row-main"><b data-i18n="resume_now">חדש עכשיו</b><small id="privacyStatus"></small></div><button id="privacyResumeBtn" data-i18n="resume_now">חדש</button></div>
           </div></div>
-          <div class="card settingsSection"><label data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select><label data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select><label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label></div>
+          <div class="card settingsSection"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select><label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label></div>
         </div>
 
         <div class="settingsPane" data-settings-pane="backup">
@@ -982,11 +998,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         </div>
 
         <div class="settingsPane" data-settings-pane="maintenance">
-          <div class="card settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3><select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select><textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="send_24_regular"></span><div class="native-row-main"><b data-i18n="send_feedback">שלח משוב</b></div><button id="sendFeedbackBtn" data-i18n="send_feedback">שלח</button></div></div></div>
+          <div class="card settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3><label for="feedbackType" class="srOnly" data-i18n="feedback">סוג משוב</label><select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select><textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="send_24_regular"></span><div class="native-row-main"><b data-i18n="send_feedback">שלח משוב</b></div><button id="sendFeedbackBtn" data-i18n="send_feedback">שלח</button></div></div></div>
           <div class="card settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="delete_24_regular"></span><div class="native-row-main"><b data-i18n="clear_all">נקה את כל ציר הזמן</b></div><button id="clearBtn" class="danger" data-i18n="delete">מחק</button></div></div></div>
         </div>
 
-        <div class="actions" style="margin-top:14px"><button id="saveSettings" class="btn btn-filled" data-i18n="save">שמור</button></div>
+        <div class="settingsSaveBar"><button id="saveSettings" class="btn btn-filled" data-i18n="save">שמור</button></div>
       </section>
     </main>
   </div>
