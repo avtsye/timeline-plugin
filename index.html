@@ -646,6 +646,63 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
 }
 
+
+/* 0.15.3 adaptive content-driven timeline */
+.adaptiveTimelineRail{
+  min-height:180px;
+  height:auto;
+  position:relative;
+  padding-block:12px 20px!important;
+}
+.adaptiveTimelineRail .dayHourLine{
+  display:none!important;
+}
+.adaptiveGapMarker{
+  position:absolute;
+  inset-inline:0;
+  height:1px;
+  border-top:1px dashed color-mix(in srgb,var(--color-outline-variant) 65%,transparent);
+  z-index:2;
+  pointer-events:none;
+}
+.adaptiveGapMarker::before{
+  content:"";
+  position:absolute;
+  inset-inline-start:50%;
+  top:-3px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--panel-bg);
+  border:1px solid var(--color-outline-variant);
+  transform:translateX(-50%);
+}
+.adaptiveGapMarker>span{
+  position:absolute;
+  inset-inline-start:calc(50% + 12px);
+  top:-10px;
+  padding:1px 6px;
+  border-radius:var(--otz-radius);
+  background:var(--panel-bg);
+  color:var(--color-on-surface-variant);
+  font-size:10px;
+  white-space:nowrap;
+}
+.adaptiveNowLine{
+  z-index:14!important;
+}
+.adaptiveTimelineRail .timelineEventNode{
+  transition:top 120ms ease;
+}
+@media(max-width:800px){
+  .adaptiveGapMarker::before{
+    inset-inline-start:20px;
+  }
+  .adaptiveGapMarker>span{
+    inset-inline-start:32px;
+  }
+}
+
 </style>
 </head>
 <body>
