@@ -742,26 +742,7 @@ async function renderDiagnosticsScreen(){
   }
   applyShellIcons();
 }
-function showDashboard(){
-  showModal(tr('activity_dashboard'),body=>{
-    const daily=aggregateDaily(30);
-    body.innerHTML='<h3>'+esc(tr('day_activity'))+'</h3>';body.appendChild(buildBarChart(daily,x=>String(new Date(x.time).getDate())));
-    const weeklyTitle=document.createElement('h3');weeklyTitle.textContent=tr('weeks_activity');body.appendChild(weeklyTitle);body.appendChild(buildBarChart(aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))));
-    const monthlyTitle=document.createElement('h3');monthlyTitle.textContent=tr('months_activity');body.appendChild(monthlyTitle);body.appendChild(buildBarChart(aggregateMonths(12),x=>x.label));
-    const yearTitle=document.createElement('h3');yearTitle.textContent=tr('year_heatmap');body.appendChild(yearTitle);
-    const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
-    for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=dk(tm)+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';document.querySelector('.modalOverlay')?.remove();render()};year.appendChild(cell)}
-    body.appendChild(year);
-    const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='18px';
-    const bcard=document.createElement('div');bcard.className='miniCard';bcard.innerHTML='<h3>'+esc(tr('top_books'))+'</h3>';
-    topBooks().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')';b.onclick=()=>showBookHistory(x.key);bcard.appendChild(b)});grid.appendChild(bcard);
-    const pcard=document.createElement('div');pcard.className='miniCard';pcard.innerHTML='<h3>'+esc(tr('top_plugins'))+'</h3>';
-    topPlugins().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+' ('+x.count+')'+(x.missing?' — '+tr('missing_plugins'):'');b.onclick=()=>showPluginHistory(x.key);pcard.appendChild(b)});grid.appendChild(pcard);
-    const rcard=document.createElement('div');rcard.className='miniCard';rcard.innerHTML='<h3>'+esc(tr('recent_places'))+'</h3>';
-    recentPlaces().forEach(x=>{const b=document.createElement('button');b.style.display='block';b.style.margin='5px 0';b.textContent=x.title+(x.ref?' — '+x.ref:'');b.onclick=()=>openEvent(x.event);rcard.appendChild(b)});grid.appendChild(rcard);
-    body.appendChild(grid);
-  });
-}
+function showDashboard(){switchScreen('analytics');renderAnalyticsScreen()}
 
 function renderSignature(){
   return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang]);
@@ -998,38 +979,7 @@ async function restoreInternalBackup(path){
     await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(tr('backup_restored'),'success');
   }catch(_){await notify(tr('backup_invalid'),'error')}
 }
-async function showDiagnostics(){
-  const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
-  const ps=perms.success&&perms.data&&Array.isArray(perms.data.permissions)?perms.data.permissions:[];
-  const required=['app.run_on_startup','app.background_keep_alive','reader.open','workspace.manage','notifications.send'];
-  const missing=required.filter(x=>!ps.includes(x));
-  const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
-  const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
-  showModal(tr('diagnostics_title'),body=>{
-    const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
-    body.innerHTML='<div class="modalGrid">'+
-      '<div class="miniCard"><h3>'+esc(tr('health'))+'</h3><div class="'+(missing.length?'diagBad':'diagGood')+'">'+esc(missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'))+'</div><div class="muted">'+esc(missing.join(', '))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(tr('storage'))+'</h3><div>'+events.length+' '+esc(tr('events'))+' · '+snaps.length+' '+esc(tr('recent_snapshots'))+'</div><div class="muted">~'+Math.round(bytes/1024)+' KB</div></div>'+
-      '<div class="miniCard"><h3>'+esc(tr('last_snapshot'))+'</h3><div class="'+(lastSnap&&now-lastSnap<35*60000?'diagGood':'diagWarn')+'">'+(lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):esc(tr('no_data')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(tr('internal_backups'))+'</h3><div>'+backupEntries.length+' '+esc(tr('versions'))+'</div><div class="muted">'+(health.lastBackupAt?esc(tr('last'))+' '+fmtDate(health.lastBackupAt)+' '+fmt(health.lastBackupAt):esc(tr('no_data')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(tr('tracking'))+'</h3><div>'+esc(health.lastEventType||'—')+'</div><div class="muted">'+(health.lastEventAt?esc(tr('last'))+' '+fmt(health.lastEventAt):esc(tr('no_event')))+'</div></div>'+
-      '<div class="miniCard"><h3>'+esc(tr('missing_plugins'))+'</h3><div>'+missingPluginIds().length+'</div></div>'+
-      '</div>';
-    const actions=document.createElement('div');actions.className='actions';actions.style.margin='16px 0';
-    const mig=document.createElement('button');mig.textContent=tr('missing_plugin_mapping');mig.disabled=!missingPluginIds().length;mig.onclick=showMigrationManager;actions.appendChild(mig);
-    const snapBtn=document.createElement('button');snapBtn.textContent=tr('open_snapshot_browser');snapBtn.onclick=showSnapshotBrowser;actions.appendChild(snapBtn);body.appendChild(actions);
-    if(backupEntries.length){
-      const h=document.createElement('h3');h.textContent=tr('restore_internal_backup');body.appendChild(h);
-      const grid=document.createElement('div');grid.className='modalGrid';
-      backupEntries.slice(0,5).forEach(x=>{
-        const m=String(x.name).match(/backup-(\d+)\.json/),ts=m?Number(m[1]):0,card=document.createElement('div');card.className='miniCard';
-        card.innerHTML='<b>'+(ts?esc(fmtDate(ts)+' · '+fmt(ts)):esc(x.name))+'</b><div class="muted">'+Math.round(Number(x.size||0)/1024)+' KB</div>';
-        const b=document.createElement('button');b.textContent=tr('restore_backup');b.onclick=()=>restoreInternalBackup(x.path);card.appendChild(b);grid.appendChild(card);
-      });
-      body.appendChild(grid);
-    }
-  });
-}
+async function showDiagnostics(){switchScreen('diagnostics');await renderDiagnosticsScreen()}
 function updateSavedFilterSelect(){
   const el=$('savedFilterSelect');
   el.innerHTML='<option value="">'+esc(tr('saved_filters'))+'</option>'+savedFilters.map((x,i)=>'<option value="'+i+'">'+esc(x.name)+'</option>').join('');
