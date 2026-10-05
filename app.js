@@ -16,7 +16,7 @@ const HEALTH='timeline.health.v1';
 
 const $=id=>document.getElementById(id);
 let events=[],snaps=[],searches=[],installed=[];
-let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto',focusMode:false,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,pauseUntil:0,pauseUntilRestart:false,summaryArchiveEnabled:true};
+let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto',dateCalendar:'auto',focusMode:false,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,pauseUntil:0,pauseUntilRestart:false,summaryArchiveEnabled:true};
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
@@ -28,7 +28,7 @@ const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.suc
 const set=(k,v)=>call('storage.set',{key:k,value:v});
 const I18N={
 he:{
-settings:'הגדרות',settings_advanced:'מתקדם',data_storage:'שמירת נתונים',backup_archive:'גיבוי וארכיון',clear_all_hint:'מחיקת כל היסטוריית ציר הזמן מהמכשיר.',close:'סגור',save:'שמור',language:'שפה',language_auto:'אוטומטי לפי אוצריא',language_appearance:'שפה ומראה',
+settings:'הגדרות',settings_advanced:'מתקדם',data_storage:'שמירת נתונים',backup_archive:'גיבוי וארכיון',clear_all_hint:'מחיקת כל היסטוריית ציר הזמן מהמכשיר.',close:'סגור',save:'שמור',language:'שפה',language_auto:'אוטומטי לפי אוצריא',language_appearance:'שפה ומראה',date_calendar:'תצוגת תאריכים',date_calendar_auto:'אוטומטי לפי השפה',date_calendar_hebrew:'עברי',date_calendar_gregorian:'לועזי',
 compact_mode:'מצב קומפקטי',timeline_actions:'פעולות ציר הזמן',save_snapshot:'שמור נקודת שחזור',all_snapshots:'כל נקודות השחזור',
 activity_dashboard:'לוח פעילות',diagnostics:'אבחון',export:'ייצוא',import:'ייבוא',tracking_storage:'מעקב ואחסון',
 max_events:'מספר אירועים מרבי',retention_period:'שמירת היסטוריה',retention_30:'30 ימים',retention_90:'90 ימים',retention_180:'180 ימים',retention_365:'שנה',retention_forever:'ללא הגבלה',in_app_notifications:'התראות פנימיות של אוצריא',integrations:'אינטגרציות',
@@ -73,7 +73,7 @@ restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסר
 save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'העדפות בסיסיות, מעקב ותחזוקה',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',cancel:'ביטול',confirm:'אישור',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים',filters:'מסננים',sort:'מיון',now:'עכשיו'
 },
 en:{
-settings:'Settings',settings_advanced:'Advanced',data_storage:'Data storage',backup_archive:'Backup & archive',clear_all_hint:'Delete all Timeline history stored on this device.',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
+settings:'Settings',settings_advanced:'Advanced',data_storage:'Data storage',backup_archive:'Backup & archive',clear_all_hint:'Delete all Timeline history stored on this device.',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',date_calendar:'Date display',date_calendar_auto:'Automatic — follow language',date_calendar_hebrew:'Hebrew calendar',date_calendar_gregorian:'Gregorian calendar',
 compact_mode:'Compact mode',timeline_actions:'Timeline actions',save_snapshot:'Save restore point',all_snapshots:'All restore points',
 activity_dashboard:'Activity dashboard',diagnostics:'Diagnostics',export:'Export',import:'Import',tracking_storage:'Tracking & storage',
 max_events:'Maximum events',retention_period:'History retention',retention_30:'30 days',retention_90:'90 days',retention_180:'180 days',retention_365:'1 year',retention_forever:'Forever',in_app_notifications:'Otzaria in-app notifications',integrations:'Integrations',
@@ -123,6 +123,13 @@ const tr=(key,vars={})=>{
   return s;
 };
 const locale=()=>currentLang==='en'?'en-US':'he-IL';
+const dateLocale=()=>{
+  const mode=settings.dateCalendar||'auto';
+  if(mode==='hebrew')return currentLang==='en'?'en-US-u-ca-hebrew':'he-IL-u-ca-hebrew';
+  if(mode==='gregory')return currentLang==='en'?'en-US-u-ca-gregory':'he-IL-u-ca-gregory';
+  return currentLang==='he'?'he-IL-u-ca-hebrew':'en-US-u-ca-gregory';
+};
+const formatDate=(value,options)=>new Intl.DateTimeFormat(dateLocale(),options).format(new Date(value));
 async function resolveLanguage(){
   if(settings.language&&settings.language!=='auto')currentLang=settings.language;
   else{
@@ -146,7 +153,7 @@ async function registerLocalizedShortcuts(){
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fmt=v=>new Intl.DateTimeFormat(locale(),{hour:'2-digit',minute:'2-digit'}).format(new Date(v));
-const fmtDate=v=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'short',year:'numeric'}).format(new Date(v));
+const fmtDate=v=>formatDate(v,{day:'numeric',month:'short',year:'numeric'});
 
 async function notify(message,type='info'){
   if(settings.inAppNotifications===false)return;
@@ -289,7 +296,7 @@ function dayTitle(ts){
   const k=dk(ts),now=Date.now();
   if(k===dk(now))return tr('today');
   if(k===dk(now-86400000))return tr('yesterday');
-  return new Intl.DateTimeFormat(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(ts));
+  return formatDate(ts,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 }
 function startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
 function startOfWeek(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getTime()}
@@ -302,7 +309,7 @@ function bucketKey(ts){
 function bucketTitle(key,ts){
   if(viewMode==='day')return dayTitle(ts);
   if(viewMode==='week'){const start=Number(key.slice(2));return tr('week')+' '+fmtDate(start)+' – '+fmtDate(start+6*86400000)}
-  return new Intl.DateTimeFormat(locale(),{month:'long',year:'numeric'}).format(new Date(ts));
+  return formatDate(ts,{month:'long',year:'numeric'});
 }
 function matchesPreset(e){
   if(selectedDayKey)return dk(e.time)===selectedDayKey;
@@ -1390,9 +1397,8 @@ function setFocusMode(on){
 }
 function syncSettingsPaneBottomInset(){
   const pane=document.querySelector('.settingsPane.active');
-  const saveBar=document.querySelector('.settingsSaveBar');
-  if(!pane||!saveBar)return;
-  pane.style.paddingBottom=(saveBar.offsetHeight+24)+'px';
+  if(!pane)return;
+  pane.style.removeProperty('padding-bottom');
 }
 function activateSettingsTab(name){
   document.querySelectorAll('.settingsTabBtn').forEach(b=>{
@@ -1468,6 +1474,7 @@ function sync(){
   $('newTabIntegration').checked=!!settings.newTabIntegration;
   $('homepageIntegration').checked=settings.homepageIntegration!==false;
   $('languageSelect').value=settings.language||'auto';
+  if($('dateCalendar'))$('dateCalendar').value=settings.dateCalendar||'auto';
   $('trackBooks').checked=settings.trackBooks!==false;
   $('trackRefs').checked=settings.trackRefs!==false;
   $('trackPlugins').checked=settings.trackPlugins!==false;
@@ -1653,6 +1660,7 @@ $('saveSettings').onclick=async()=>{
   settings.newTabIntegration=$('newTabIntegration').checked;
   settings.homepageIntegration=$('homepageIntegration').checked;
   settings.language=$('languageSelect').value||'auto';
+  settings.dateCalendar=$('dateCalendar')?$('dateCalendar').value||'auto':'auto';
   settings.trackBooks=$('trackBooks').checked;
   settings.trackRefs=$('trackRefs').checked;
   settings.trackPlugins=$('trackPlugins').checked;
