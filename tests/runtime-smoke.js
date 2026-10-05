@@ -116,3 +116,14 @@ if(!app.includes("box.setAttribute('role','dialog')")||!app.includes('ov.__reque
 if(!app.includes("menu.setAttribute('role','menu')")||!app.includes("setAttribute('role','menuitem')")) throw new Error('Context menu accessibility roles missing');
 if(!html.includes('aria-controls="filtersPopover"')||!html.includes('aria-expanded="false"')) throw new Error('Filter popover accessibility state missing');
 console.log('Comprehensive UX structure audit OK');
+
+
+// Dead controls / obsolete CSS audit
+const buttonIds=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>(m[1].match(/\bid="([^"]+)"/)||[])[1]).filter(Boolean);
+const deadButtons=buttonIds.filter(id=>!app.includes("$('"+id+"')")&&!app.includes('"'+id+'"')&&!app.includes("'"+id+"'"));
+if(deadButtons.length) throw new Error('Button ids with no runtime wiring: '+deadButtons.join(', '));
+
+for(const obsolete of ['trueTimeNode','timelineAnchor','timelineConnector','timelineDuration','timelineNode','timelineDot','timelineStamp','timelineCard','snapshotMarks','snapshotMark','hourMarker','dayHourLine']){
+  if(html.includes(obsolete)) throw new Error('Obsolete pre-event Timeline CSS remains: '+obsolete);
+}
+console.log('Dead-control and obsolete-CSS audit OK');
