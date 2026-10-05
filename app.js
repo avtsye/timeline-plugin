@@ -64,7 +64,7 @@ permissions_ok:'ההרשאות המרכזיות תקינות',missing_permission
 restore_internal_backup:'שחזור גיבוי פנימי',restore_internal_confirm:'לשחזר את הגיבוי הפנימי הזה? הנתונים הנוכחיים יוחלפו.',
 backup_restored:'הגיבוי שוחזר',backup_invalid:'קובץ הגיבוי אינו תקין',save_filter_name:'שם למסנן השמור',filter_saved:'המסנן נשמר',
 plugin_missing:'התוסף אינו מותקן. ניתן למפות אותו באבחון.',plugin_disabled:'התוסף מושבת',plugin_open_failed:'לא ניתן לפתוח את התוסף',
-builtin_open_unavailable:'אין ממשק כללי לפתיחה מחדש של כלי מובנה בגרסה זו של אוצריא',settings_saved:'הגדרות ציר הזמן נשמרו',
+builtin_open_unavailable:'אין ממשק כללי לפתיחה מחדש של כלי מובנה בגרסה זו של אוצריא',settings_saved:'הגדרות ציר הזמן נשמרו',settings_save_failed:'שמירת ההגדרות נכשלה',
 timeline_cleared:'ציר הזמן נוקה',clear_all_confirm:'למחוק את כל ציר הזמן ונקודות השחזור?',tracking_paused:'תיעוד ציר הזמן הושהה',
 tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים אחרונים',weeks_activity:'12 שבועות אחרונים',months_activity:'12 חודשים אחרונים',
 year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
@@ -109,7 +109,7 @@ permissions_ok:'Core permissions are available',missing_permissions:'Missing per
 restore_internal_backup:'Restore internal backup',restore_internal_confirm:'Restore this internal backup? Current data will be replaced.',
 backup_restored:'Backup restored',backup_invalid:'The backup file is invalid',save_filter_name:'Saved filter name',filter_saved:'Filter saved',
 plugin_missing:'The plugin is not installed. You can map it in Diagnostics.',plugin_disabled:'The plugin is disabled',plugin_open_failed:'Could not open the plugin',
-builtin_open_unavailable:'There is no general API for reopening built-in tools in this Otzaria version',settings_saved:'Timeline settings saved',
+builtin_open_unavailable:'There is no general API for reopening built-in tools in this Otzaria version',settings_saved:'Timeline settings saved',settings_save_failed:'Saving settings failed',
 timeline_cleared:'Timeline cleared',clear_all_confirm:'Clear the entire timeline and all restore points?',tracking_paused:'Timeline tracking paused',
 tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_activity:'Last 12 weeks',months_activity:'Last 12 months',
 year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
@@ -428,7 +428,7 @@ function renderHeatmap(){
   for(let i=34;i>=0;i--){
     const t=Date.now()-i*86400000,k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
     b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
-    b.title=k+' · '+n+' '+tr('events');
+    b.title=formatDate(t,{day:'numeric',month:'long',year:'numeric'})+' · '+n+' '+tr('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();switchScreen('timeline');render()};
     box.appendChild(b);
   }
@@ -819,7 +819,7 @@ function aggregateMonths(count=12){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1),next=new Date(d.getFullYear(),d.getMonth()+1,1);
     let total=0;
     for(const [day,list] of eventIndex.byDay.entries()){const ts=new Date(day+'T00:00:00').getTime();if(ts>=d.getTime()&&ts<next.getTime())total+=list.length}
-    out.push({time:d.getTime(),label:new Intl.DateTimeFormat(locale(),{month:'short'}).format(d),count:total});
+    out.push({time:d.getTime(),label:formatDate(d,{month:'short'}),count:total});
   }
   return out;
 }
@@ -848,7 +848,7 @@ function renderAnalyticsScreen(){
   const charts=document.createElement('div');charts.className='analyticsCharts';
   const chartDefs=[
     [tr('day_activity'),aggregateDaily(30),x=>String(new Date(x.time).getDate())],
-    [tr('weeks_activity'),aggregateWeeks(12),x=>new Intl.DateTimeFormat(locale(),{day:'numeric',month:'numeric'}).format(new Date(x.time))],
+    [tr('weeks_activity'),aggregateWeeks(12),x=>formatDate(x.time,{day:'numeric',month:'numeric'})],
     [tr('months_activity'),aggregateMonths(12),x=>x.label]
   ];
   for(const [title,data,labelFn] of chartDefs){
@@ -866,7 +866,7 @@ function renderAnalyticsScreen(){
   const tops=document.createElement('div');tops.className='topLists';
   const books=makeNativeSection(tr('top_books'));topBooks(12).forEach(x=>books.list.appendChild(makeNativeRow({icon:'book_open_24_regular',title:x.title,subtitle:fmtDate(x.last),trailing:String(x.count),action:()=>showBookHistory(x.key)})));tops.appendChild(books.section);
   const plugins=makeNativeSection(tr('top_plugins'));topPlugins(12).forEach(x=>plugins.list.appendChild(makeNativeRow({icon:'puzzle_piece_24_regular',title:x.title,subtitle:x.missing?tr('missing_plugins'):fmtDate(x.last),trailing:String(x.count),action:()=>showPluginHistory(x.key)})));tops.appendChild(plugins.section);
-  const places=makeNativeSection(tr('recent_places'));recentPlaces(12).forEach(x=>places.list.appendChild(makeNativeRow({icon:'location_24_regular',title:x.title,subtitle:x.ref||'',trailing:fmt(x.time),action:()=>openEvent(x.event)})));tops.appendChild(places.section);
+  const places=makeNativeSection(tr('recent_places'));recentPlaces(12).forEach(x=>places.list.appendChild(makeNativeRow({icon:'location_24_regular',title:x.title,subtitle:x.ref||'',trailing:fmtDate(x.time)+' · '+fmt(x.time),action:()=>openEvent(x.event)})));tops.appendChild(places.section);
   host.appendChild(tops);applyShellIcons();
 }
 async function renderDiagnosticsScreen(){
@@ -1399,6 +1399,7 @@ function syncSettingsPaneBottomInset(){
   const pane=document.querySelector('.settingsPane.active');
   if(!pane)return;
   pane.style.removeProperty('padding-bottom');
+  pane.scrollTop=Math.max(0,pane.scrollTop);
 }
 function activateSettingsTab(name){
   document.querySelectorAll('.settingsTabBtn').forEach(b=>{
@@ -1443,7 +1444,7 @@ async function showSummaryArchive(){
       summary.appendChild(makeNativeRow({icon:'save_24_regular',title:tr('recent_snapshots'),trailing:String(Number(totals.snapshots||0))}));
       body.appendChild(summary);
       const sec=makeNativeSection(tr('archive_days')),days=Object.entries(data.days||{}).sort((a,b)=>b[0].localeCompare(a[0]));
-      days.slice(0,120).forEach(([date,x])=>sec.list.appendChild(makeNativeRow({icon:'calendar_24_regular',title:date,subtitle:Number(x.events||0)+' '+tr('events'),trailing:Number(x.sessions||0)+' '+tr('sessions')})));
+      days.slice(0,120).forEach(([date,x])=>{const ts=new Date(date+'T12:00:00').getTime();sec.list.appendChild(makeNativeRow({icon:'calendar_24_regular',title:Number.isFinite(ts)?formatDate(ts,{day:'numeric',month:'long',year:'numeric'}):date,subtitle:Number(x.events||0)+' '+tr('events'),trailing:Number(x.sessions||0)+' '+tr('sessions')}))});
       body.appendChild(sec.section);applyShellIcons();
     });
   }catch(_){await notify(tr('archive_empty'),'error')}
@@ -1650,29 +1651,73 @@ $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
 $('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
+
+async function applyStorageLimitsNow(){
+  const max=Math.max(500,Math.min(50000,Number(settings.maxEvents)||5000));
+  const days=Number(settings.retentionDays);
+  let nextEvents=Array.isArray(events)?events.slice():[];
+  let nextSnaps=Array.isArray(snaps)?snaps.slice():[];
+  if(nextEvents.length>max)nextEvents=nextEvents.slice(nextEvents.length-max);
+  if(Number.isFinite(days)&&days>0){
+    const cutoff=Date.now()-days*86400000;
+    nextEvents=nextEvents.filter(e=>Number(e.time||0)>=cutoff);
+    nextSnaps=nextSnaps.filter(s=>Number(s.time||0)>=cutoff);
+  }
+  const changedEvents=nextEvents.length!==events.length;
+  const changedSnaps=nextSnaps.length!==snaps.length;
+  events=nextEvents;snaps=nextSnaps;
+  if(changedEvents||changedSnaps){
+    const writes=[];
+    if(changedEvents)writes.push(set(EVENTS,events));
+    if(changedSnaps)writes.push(set(SNAPS,snaps));
+    const results=await Promise.all(writes);
+    if(results.some(r=>!r||r.success===false))return false;
+    rebuildEventIndex();
+  }
+  return true;
+}
 $('saveSettings').onclick=async()=>{
   const saveBtn=$('saveSettings');
   saveBtn.disabled=true;saveBtn.setAttribute('aria-busy','true');
-  settings.maxEvents=+$('maxEvents').value||5000;
-  settings.retentionDays=+$('retentionDays').value;
-  settings.inAppNotifications=$('notificationsEnabled').checked;
-  settings.compactMode=$('compactMode').checked;
-  settings.newTabIntegration=$('newTabIntegration').checked;
-  settings.homepageIntegration=$('homepageIntegration').checked;
-  settings.language=$('languageSelect').value||'auto';
-  settings.dateCalendar=$('dateCalendar')?$('dateCalendar').value||'auto':'auto';
-  settings.trackBooks=$('trackBooks').checked;
-  settings.trackRefs=$('trackRefs').checked;
-  settings.trackPlugins=$('trackPlugins').checked;
-  settings.trackTools=$('trackTools').checked;
-  settings.trackWorkspaces=$('trackWorkspaces').checked;
-  settings.trackNavigation=$('trackNavigation').checked;
-  settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
-  await set(SETTINGS,settings);
-  await resolveLanguage();applyTranslations();sync();
-  await applyNewTabIntegration();await publishHomepageState();render();await updateTrackingStatus();
-  saveBtn.disabled=false;saveBtn.removeAttribute('aria-busy');
-  await notify(tr('settings_saved'),'success');
+  try{
+    const maxEvents=Number($('maxEvents').value);
+    const retentionDays=Number($('retentionDays').value);
+    settings.maxEvents=Number.isFinite(maxEvents)?Math.max(500,Math.min(50000,maxEvents)):5000;
+    settings.retentionDays=Number.isFinite(retentionDays)?Math.max(0,retentionDays):180;
+    settings.inAppNotifications=$('notificationsEnabled').checked;
+    settings.compactMode=$('compactMode').checked;
+    settings.newTabIntegration=$('newTabIntegration').checked;
+    settings.homepageIntegration=$('homepageIntegration').checked;
+    settings.language=$('languageSelect').value||'auto';
+    settings.dateCalendar=$('dateCalendar')?$('dateCalendar').value||'auto':'auto';
+    settings.trackBooks=$('trackBooks').checked;
+    settings.trackRefs=$('trackRefs').checked;
+    settings.trackPlugins=$('trackPlugins').checked;
+    settings.trackTools=$('trackTools').checked;
+    settings.trackWorkspaces=$('trackWorkspaces').checked;
+    settings.trackNavigation=$('trackNavigation').checked;
+    settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
+
+    const saved=await set(SETTINGS,settings);
+    if(!saved||saved.success===false)throw new Error('settings storage write failed');
+    const verify=await get(SETTINGS,{});
+    if(Number(verify.maxEvents)!==settings.maxEvents||Number(verify.retentionDays)!==settings.retentionDays)throw new Error('settings storage verification failed');
+
+    const limitsOk=await applyStorageLimitsNow();
+    if(!limitsOk)throw new Error('storage limits write failed');
+
+    await resolveLanguage();applyTranslations();sync();
+    await applyNewTabIntegration();await publishHomepageState();
+    render();renderSnapshots();updateContinue();
+    if(document.querySelector('[data-screen-panel="analytics"].active'))renderAnalyticsScreen();
+    if(document.querySelector('[data-screen-panel="diagnostics"].active'))await renderDiagnosticsScreen();
+    await updateTrackingStatus();
+    await notify(tr('settings_saved'),'success');
+  }catch(_){
+    await notify(tr('settings_save_failed'),'error');
+  }finally{
+    saveBtn.disabled=false;saveBtn.removeAttribute('aria-busy');
+  }
 };
 
 document.addEventListener('click',e=>{if(!e.target.closest('.contextMenu'))closeContextMenu();const p=$('filtersPopover');if(p&&!p.hidden&&!e.target.closest('#filtersPopover')&&!e.target.closest('#filterToggleBtn'))closeFilterPopover()});
