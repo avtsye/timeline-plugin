@@ -919,20 +919,27 @@ function restoreSnapshot(s){
   if(!s)return;
   const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
   showModal(tr('restore_preview'),body=>{
-    body.innerHTML='<p><b>'+esc(fmtDate(s.time)+' · '+fmt(s.time))+'</b></p><p class="muted">'+esc(tr('select_books_restore'))+'</p>';
-    const grid=document.createElement('div');grid.className='modalGrid',checks=[];
+    const summary=document.createElement('div');summary.className='dialogSummary';
+    summary.textContent=fmtDate(s.time)+' · '+fmt(s.time)+' — '+tr('select_books_restore');body.appendChild(summary);
+    const list=document.createElement('div');list.className='native-list restoreSelectionList',checks=[];
     for(const tb of books){
-      const id=String(tb.bookUid||tb.bookId),card=document.createElement('label');card.className='miniCard';
-      card.innerHTML='<input type="checkbox" checked> <b>'+esc(tb.book||tb.bookId||id)+'</b><div class="muted">'+esc(tb.currentRef||String(tb.index??''))+'</div>';
-      checks.push({id,input:card.querySelector('input')});grid.appendChild(card);
+      const id=String(tb.bookUid||tb.bookId),row=document.createElement('label');row.className='native-row restoreChoice';
+      const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='book_open_24_regular';
+      const main=document.createElement('div');main.className='native-row-main';
+      const b=document.createElement('b');b.textContent=tb.book||tb.bookId||id;
+      const sub=document.createElement('small');sub.textContent=tb.currentRef||String(tb.index??'');
+      main.append(b,sub);
+      const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='restoreCheck';
+      checks.push({id,input});row.append(icon,main,input);list.appendChild(row);
     }
-    body.appendChild(grid);
-    if(plugins.length){const p=document.createElement('p');p.className='muted';p.textContent=plugins.length+' '+tr('plugins')+'/'+tr('built_in_tool');body.appendChild(p)}
-    const actions=document.createElement('div');actions.className='actions';actions.style.marginTop='14px';
-    const all=document.createElement('button');all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
-    const none=document.createElement('button');none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='primary';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
-    actions.appendChild(all);actions.appendChild(none);actions.appendChild(go);body.appendChild(actions);
+    if(!books.length){list.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="book_open_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>'}
+    body.appendChild(list);
+    if(plugins.length){const info=document.createElement('div');info.className='dialogSummary';info.textContent=plugins.length+' '+tr('plugins')+'/'+tr('built_in_tool');body.appendChild(info)}
+    const actions=document.createElement('div');actions.className='dialogActions';
+    const all=document.createElement('button');all.className='actionGhost';all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
+    const none=document.createElement('button');none.className='actionGhost';none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
+    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);document.querySelector('.modalOverlay')?.remove();await performRestoreSnapshot(s,sel)};
+    actions.append(all,none,go);body.appendChild(actions);applyShellIcons();
   });
 }
 function showSnapshotBrowser(){
@@ -1064,14 +1071,18 @@ function missingPluginIds(){
 function showMigrationManager(){
   const missing=missingPluginIds();
   showModal(tr('missing_plugin_mapping'),body=>{
-    if(!missing.length){body.innerHTML='<div class="empty">'+esc(tr('no_missing_plugins'))+'</div>';return}
+    if(!missing.length){body.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="puzzle_piece_24_regular"></div><div class="emptyTitle">'+esc(tr('no_missing_plugins'))+'</div></div>';applyShellIcons();return}
+    const list=document.createElement('div');list.className='native-list';
     for(const oldId of missing){
-      const row=document.createElement('div');row.className='miniCard';row.style.margin='8px 0';
-      const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
-      const title=document.createElement('b');title.textContent=oldId;
-      const btn=document.createElement('button');btn.textContent=tr('save_mapping');btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('mapping_saved'),'success')};
-      row.appendChild(title);row.appendChild(document.createElement('br'));row.appendChild(sel);row.appendChild(btn);body.appendChild(row);
+      const row=document.createElement('div');row.className='native-row pluginMapRow';
+      const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='puzzle_piece_24_regular';
+      const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');sub.textContent=tr('choose_replacement');main.append(b,sub);
+      const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const btn=document.createElement('button');btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
+      btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);document.querySelector('.modalOverlay')?.remove();render();await notify(tr('mapping_saved'),'success')};
+      row.append(icon,main,sel,btn);list.appendChild(row);
     }
+    body.appendChild(list);applyShellIcons();
   });
 }
 function updatePrivacyStatus(){
@@ -1104,13 +1115,16 @@ async function showSummaryArchive(){
   const r=await call('fs.readFile',{path:'backups/archive-summary.json'});
   if(!r.success||!r.data||typeof r.data.content!=='string'){await notify(tr('archive_empty'),'info');return}
   try{
-    const data=JSON.parse(r.data.content);
+    const data=JSON.parse(r.data.content),totals=data.totals||{};
     showModal(tr('archive_title'),body=>{
-      const totals=data.totals||{};
-      body.innerHTML='<div class="modalGrid"><div class="miniCard"><h3>'+esc(tr('archive_events'))+'</h3><div>'+Number(totals.events||0)+'</div></div><div class="miniCard"><h3>'+esc(tr('archive_days'))+'</h3><div>'+Number(totals.days||0)+'</div></div><div class="miniCard"><h3>'+esc(tr('recent_snapshots'))+'</h3><div>'+Number(totals.snapshots||0)+'</div></div></div>';
-      const days=Object.entries(data.days||{}).sort((a,b)=>b[0].localeCompare(a[0]));
-      const grid=document.createElement('div');grid.className='modalGrid';grid.style.marginTop='14px';
-      days.slice(0,120).forEach(([date,x])=>{const card=document.createElement('div');card.className='miniCard';card.innerHTML='<h3>'+esc(date)+'</h3><div>'+Number(x.events||0)+' '+esc(tr('events'))+' · '+Number(x.sessions||0)+' '+esc(tr('sessions'))+'</div>';grid.appendChild(card)});body.appendChild(grid);
+      const summary=document.createElement('div');summary.className='native-list archiveTotals';
+      summary.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('archive_events'),trailing:String(Number(totals.events||0))}));
+      summary.appendChild(makeNativeRow({icon:'calendar_24_regular',title:tr('archive_days'),trailing:String(Number(totals.days||0))}));
+      summary.appendChild(makeNativeRow({icon:'save_24_regular',title:tr('recent_snapshots'),trailing:String(Number(totals.snapshots||0))}));
+      body.appendChild(summary);
+      const sec=makeNativeSection(tr('archive_days')),days=Object.entries(data.days||{}).sort((a,b)=>b[0].localeCompare(a[0]));
+      days.slice(0,120).forEach(([date,x])=>sec.list.appendChild(makeNativeRow({icon:'calendar_24_regular',title:date,subtitle:Number(x.events||0)+' '+tr('events'),trailing:Number(x.sessions||0)+' '+tr('sessions')})));
+      body.appendChild(sec.section);applyShellIcons();
     });
   }catch(_){await notify(tr('archive_empty'),'error')}
 }
