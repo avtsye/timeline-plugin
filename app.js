@@ -1018,11 +1018,11 @@ function adaptiveGapPx(deltaMs,zoom){
   const mins=Math.max(0,deltaMs/60000);
   // Preserve chronology, but heavily compress long idle periods.
   // Dense events still receive a readable minimum separation.
-  const base=52*zoom;
+  const base=42*zoom;
   if(mins<=5)return base;
-  if(mins<=30)return base+Math.min(28,(mins-5)*1.1)*zoom;
-  if(mins<=120)return base+(28+Math.log2(1+(mins-30)/15)*18)*zoom;
-  return Math.min(150*zoom,base+68*zoom+Math.log2(1+(mins-120)/60)*18*zoom);
+  if(mins<=30)return base+Math.min(20,(mins-5)*0.75)*zoom;
+  if(mins<=120)return base+(20+Math.log2(1+(mins-30)/15)*14)*zoom;
+  return Math.min(126*zoom,base+52*zoom+Math.log2(1+(mins-120)/60)*15*zoom);
 }
 function buildAdaptiveTimelinePositions(events,zoom){
   const positions=new Map();
@@ -1079,13 +1079,18 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
     const y=positions.get(ev);
     if(previous){
       const gap=ev.time-previous.time;
-      if(gap>=45*60000){
+      if(gap>=35*60000){
         const marker=document.createElement('div');
-        marker.className='adaptiveGapMarker';
+        marker.className='adaptiveGapMarker idleBreak';
         marker.style.top=((positions.get(previous)+y)/2)+'px';
+        marker.dataset.gapMinutes=String(Math.round(gap/60000));
+        const breakGlyph=document.createElement('span');
+        breakGlyph.className='idleBreakGlyph';
+        breakGlyph.setAttribute('aria-hidden','true');
         const label=document.createElement('span');
-        label.textContent=formatGap(gap);
-        marker.appendChild(label);
+        label.className='idleBreakLabel';
+        label.textContent=(currentLang==='he'?'הפסקה · ':'Pause · ')+formatGap(gap);
+        marker.append(breakGlyph,label);
         rail.appendChild(marker);
       }
     }
@@ -1110,7 +1115,7 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
     const anchorY=parseFloat(node.style.top)||0;
     const h=Math.max(40,card.offsetHeight||40);
     let desired=anchorY-h/2;
-    if(desired<lastBottom[side]+8)desired=lastBottom[side]+8;
+    if(desired<lastBottom[side]+4)desired=lastBottom[side]+4;
     const maxTop=Math.max(8,(parseFloat(rail.style.height)||180)-h-8);
     desired=Math.max(8,Math.min(maxTop,desired));
     const shift=desired-anchorY;
