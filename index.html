@@ -935,6 +935,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   padding-block:4px;
 }
 
+
+/* UX audit 2: resilient bottom navigation */
+.side-nav{min-height:0}
+.side-nav>.nav-group{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+}
+.side-nav>.nav-bottom{
+  flex:0 0 auto;
+  background:var(--color-surface-container-low);
+}
+
 </style>
 </head>
 <body>
