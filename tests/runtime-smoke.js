@@ -154,3 +154,24 @@ for(const required of ['.dangerGroup .danger{','.settingsSaveBar .btn{','border-
   if(!html.includes(required)) throw new Error('Settings polish missing: '+required);
 }
 console.log('Bottom settings navigation and settings polish audit OK');
+
+
+// UX audit 2 guards
+if(/document\.querySelector\('\.modalOverlay'\)\?\.remove\(\)/.test(app)) throw new Error('Direct modal removal bypasses lifecycle cleanup');
+if(html.includes('data-i18n="quick_navigation"')) throw new Error('Duplicated overview quick-navigation panel returned');
+if(/<button id="pauseBtn"[^>]*><\/button>/.test(html)) throw new Error('Tracking pause button must not start empty');
+const bodyHtml=html.slice(html.indexOf('</style>')+8);
+if(/\sstyle="[^"]+"/.test(bodyHtml)) throw new Error('Inline layout styles returned to HTML body');
+if(!app.includes("document.querySelectorAll('.settingsGroup .checkRow')")) throw new Error('Simplified settings are not receiving native enhancement');
+if(!app.includes('function closeFilterPopover')) throw new Error('Filter popover close helper missing');
+if(!app.includes("switchScreen('timeline');render()")) throw new Error('Overview day selection must navigate to visible Timeline result');
+for(const required of [
+  'button:disabled',
+  '@media(prefers-reduced-motion:reduce)',
+  '.side-nav>.nav-bottom',
+  '.filterQuickRow',
+  '.empty.nativeEmpty'
+]){
+  if(!html.includes(required)) throw new Error('UX audit 2 capability missing: '+required);
+}
+console.log('UX audit 2 interaction/layout guards OK');
