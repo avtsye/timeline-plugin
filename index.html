@@ -319,6 +319,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 .eventLeading,.snapshotLeading{width:24px;height:24px;flex:0 0 24px;display:grid;place-items:center;color:var(--color-on-surface-variant)}.eventLeading svg,.snapshotLeading svg{width:20px;height:20px;fill:currentColor}.snapshotCard{display:flex;align-items:center;gap:12px}.snapshotText{min-width:0;flex:1}.snapshotText b,.snapshotText small{display:block}.snapshotText small{margin-top:2px}
 .nativeDialogInput{width:100%;height:48px;border:0;border-radius:28px;background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);padding:0 16px;font:inherit;color:var(--color-on-surface);outline:none}.nativeDialogInput:focus{background:color-mix(in srgb,var(--color-on-surface) 12%,transparent)}.dialogMessage{font-size:var(--otz-font-md);color:var(--color-on-surface);padding:4px 0 16px}.dialogActions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.actionRecommended,.actionGhost,.actionWarning{min-height:40px;border:0;border-radius:20px;padding:0 18px;font:inherit}.actionRecommended{background:var(--color-primary);color:var(--color-on-primary)}.actionGhost{background:transparent;color:var(--color-primary)}.actionWarning{background:transparent;color:var(--color-error)}.actionGhost:hover,.actionWarning:hover{background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
+.native-page{max-width:none}.native-page-body{display:flex;flex-direction:column;gap:var(--otz-space-md)}.native-section{background:transparent}.native-section-title{padding:6px 4px 10px;font-size:var(--otz-font-lg);font-weight:600;color:var(--color-on-surface)}.native-list{background:var(--panel-bg);border-radius:var(--otz-radius);overflow:hidden;display:flex;flex-direction:column;gap:var(--card-gap)}.native-row{min-height:52px;display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--card-bg);color:var(--color-on-surface)}.native-row:hover{background:color-mix(in srgb,var(--color-on-surface) 5%,var(--card-bg))}.native-row-icon{width:24px;height:24px;display:grid;place-items:center;color:var(--color-on-surface-variant);flex:0 0 24px}.native-row-icon svg{width:20px;height:20px;fill:currentColor}.native-row-main{min-width:0;flex:1}.native-row-main b,.native-row-main small{display:block}.native-row-main b{font-size:var(--otz-font-md);font-weight:500}.native-row-main small{font-size:12px;color:var(--color-on-surface-variant);margin-top:2px}.native-row-trailing{font-size:12px;color:var(--color-on-surface-variant);white-space:nowrap}.native-row button{min-height:36px;border:0;border-radius:var(--otz-radius);background:transparent;color:var(--color-primary);padding:0 10px}.native-row button:hover{background:color-mix(in srgb,var(--color-primary) 8%,transparent)}.analyticsCharts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--otz-space-md)}.native-chart-block{background:var(--card-bg);border-radius:var(--otz-radius);padding:12px 14px}.native-chart-block h3{margin:0 0 10px;font-size:var(--otz-font-md);font-weight:600}.topLists{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--otz-space-md)}.chart{height:150px}.yearHeat{padding:10px;background:var(--card-bg);border-radius:var(--otz-radius)}.health-good{color:var(--color-primary)}.health-warn{color:var(--color-tertiary)}.health-bad{color:var(--color-error)}
 </style>
 </head>
 <body>
@@ -389,15 +390,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div class="card"><div class="page-head"><h2 data-i18n="backup_restore_actions">גיבוי ושחזור</h2></div><div class="actions"><button id="exportBtn" class="btn" data-i18n="export">ייצוא</button><button id="importBtn" class="btn" data-i18n="import">ייבוא</button><button id="openArchiveBtn" class="btn" data-i18n="open_archive">פתח ארכיון מתומצת</button></div></div>
       </section>
 
-      <section class="screen" data-screen-panel="analytics">
+      <section class="screen native-page" data-screen-panel="analytics">
         <div class="page-head"><div><h2 data-i18n="screen_analytics">פעילות</h2><div class="page-subtitle" data-i18n="analytics_subtitle">גרפים, מפות פעילות וסיכומים</div></div></div>
-        <div class="card"><button id="dashboardBtn" class="btn btn-tonal" data-i18n="activity_dashboard">פתח לוח פעילות</button></div>
+        <div id="analyticsContent" class="native-page-body"></div>
+        <button id="dashboardBtn" hidden></button>
       </section>
 
-      <section class="screen" data-screen-panel="diagnostics">
+      <section class="screen native-page" data-screen-panel="diagnostics">
         <div class="page-head"><div><h2 data-i18n="screen_diagnostics">אבחון</h2><div class="page-subtitle" data-i18n="diagnostics_subtitle">מצב מעקב, הרשאות ובריאות הנתונים</div></div></div>
-        <div class="card"><div class="page-head"><h2 data-i18n="tracking_status">מצב מעקב</h2><span id="trackingStatus" class="muted"></span></div><div id="trackingDetail" class="muted"></div></div>
-        <div class="card"><button id="diagnosticsBtn" class="btn btn-tonal" data-i18n="diagnostics">פתח אבחון מפורט</button></div>
+        <div class="native-list" style="margin-bottom:16px">
+          <div class="native-row"><span class="native-row-icon" data-icon="pulse_24_regular"></span><div class="native-row-main"><b data-i18n="tracking_status">מצב מעקב</b><small id="trackingDetail"></small></div><span id="trackingStatus" class="native-row-trailing"></span></div>
+        </div>
+        <div id="diagnosticsContent" class="native-page-body"></div>
+        <button id="diagnosticsBtn" hidden></button>
       </section>
 
       <section id="dialog" class="screen settings-pane" data-screen-panel="settings">
