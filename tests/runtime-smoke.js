@@ -86,3 +86,8 @@ for(const required of ['idleBreak','idleBreakLabel','35*60000','const base=42*zo
   if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing compact/idle-break Timeline capability: '+required);
 }
 console.log('Compact Timeline spacing and idle-break audit OK');
+
+for(const required of ['const base=34*zoom','idleBreakGlyph','min-height:32px','z-index:8']){
+  if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing 0.15.5 compact/pause-label polish: '+required);
+}
+console.log('Timeline 0.15.5 compact spacing + pause label audit OK');
