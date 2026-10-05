@@ -63,3 +63,15 @@ for(const required of ['function applyRetention','function archiveExpired','RETE
   if(!bg.includes(required)) throw new Error('Missing retention/performance capability: '+required);
 }
 console.log('Timeline 0.15 feature guards OK');
+
+for(const required of [
+  'function createTimelineEventNode',
+  'timelineEventAnchor',
+  'timelineEventConnectorV',
+  'timelineEventConnectorH',
+  'timelineEventCard'
+]){
+  if(!app.includes(required)&&!html.includes(required)) throw new Error('Missing exact event timeline capability: '+required);
+}
+if(app.includes('function createTimelineNode(')) throw new Error('Legacy session-only Timeline node renderer still present');
+console.log('Exact per-event Timeline audit OK');
