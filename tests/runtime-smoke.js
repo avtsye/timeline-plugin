@@ -46,3 +46,20 @@ for(const requiredClass of ['native-list','native-row','settingsTabBtn','timelin
   if(!html.includes(requiredClass)) throw new Error('Required native Otzaria UI class missing: '+requiredClass);
 }
 console.log('Native Otzaria UI audit OK');
+
+for(const required of [
+  'function renderTrueDayRail',
+  'function rebuildEventIndex',
+  'function appendBatchedRows',
+  'retentionDays',
+  'eventIndex.byBook',
+  'eventIndex.byPlugin',
+  'eventIndex.bySession'
+]){
+  if(!app.includes(required)) throw new Error('Missing Timeline 0.15 capability: '+required);
+}
+const bg=fs.readFileSync('background.js','utf8');
+for(const required of ['function applyRetention','function archiveExpired','RETENTION_CHECK_GAP','50000']){
+  if(!bg.includes(required)) throw new Error('Missing retention/performance capability: '+required);
+}
+console.log('Timeline 0.15 feature guards OK');
