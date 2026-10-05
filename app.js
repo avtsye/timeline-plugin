@@ -517,49 +517,91 @@ function eventIconName(type){
     navigation:'arrow_routing_24_regular'
   }[type]||'history_24_regular';
 }
+function createMenuButton(className,iconName,label){
+  const b=document.createElement('button');b.className=className;
+  const ic=document.createElement('span');ic.className='menuButtonIcon';ic.dataset.icon=iconName;
+  const tx=document.createElement('span');tx.textContent=label;b.append(ic,tx);return b;
+}
 function createSessionCard(s){
   const ssnaps=snapshotsForSession(s),nearest=nearestSnap(s.end);
   const books=[...new Set(s.events.filter(e=>['book','ref'].includes(e.type)).map(e=>(e.data||{}).currentBook||(e.data||{}).book||(e.data||{}).currentBookId||(e.data||{}).bookId).filter(Boolean))];
   const plugins=[...new Set(s.events.filter(e=>e.type==='plugin').map(e=>(e.data||{}).toolId).filter(Boolean))];
   const tools=[...new Set(s.events.filter(e=>e.type==='tool').map(e=>(e.data||{}).toolId).filter(Boolean))];
-  const preview=previewForSession(s),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id),dom=dominantType(s);
-  const note=sessionNotes[s.id]||'';
-  const card=document.createElement('section');
-  card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
-  card.innerHTML=
-    '<div class="sessionHead"><div><div class="sessionTitleLine"><h3>'+esc(smartTitle(s))+'</h3>'+(isPinned?'<span class="pinBadge">'+esc(tr('pinned'))+'</span>':'')+'</div><div class="muted">'+esc(sessionSummary(s))+(nearest?' · '+esc(tr('recent_snapshots'))+' '+fmt(nearest.time):'')+'</div></div>'+
-    '<div class="sessionTools">'+(nearest?'<button class="restoreNearest">'+esc(tr('restore'))+'</button>':'')+
-    '<details class="sessionMenu"><summary title="'+esc(tr('session_actions'))+'">⋯</summary><div class="sessionMenuPanel">'+
-    '<button class="renameBtn">'+esc(tr('name'))+'</button><button class="noteBtn">'+esc(tr('note'))+'</button>'+
-    '<button class="pinBtn">'+esc(isPinned?tr('unpin'):tr('pin'))+'</button><button class="collapseBtn">'+esc(isCollapsed?tr('expand'):tr('collapse'))+'</button>'+
-    '<button class="workspaceBtn">'+esc(tr('to_workspace'))+'</button><button class="exportSessionBtn">'+esc(tr('export'))+'</button>'+
-    (ssnaps.length?'<select class="snapshotSelect"><option value="">'+esc(tr('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+'</option>').join('')+'</select>':'')+
-    '<button class="deleteBtn danger">'+esc(tr('delete'))+'</button></div></details></div></div>'+
-    '<div class="preview"><strong>'+esc(preview.title)+'</strong><div class="ref">'+esc(preview.ref)+'</div><div class="muted">'+books.length+' '+esc(tr('books'))+' · '+plugins.length+' '+esc(tr('plugins'))+' · '+tools.length+' '+esc(tr('built_in_tool'))+(note?' · '+esc(tr('note')):'')+'</div>'+(note?'<div style="margin-top:8px">'+esc(note)+'</div>':'')+'</div>'+
-    '<div class="books">'+books.slice(0,8).map(x=>'<span>'+esc(x)+'</span>').join('')+plugins.slice(0,5).map(x=>'<span title="'+esc(pluginIconName(x))+'">'+pluginIconHtml(x)+' '+esc(pluginName(x))+'</span>').join('')+tools.slice(0,5).map(x=>'<span>🛠 '+esc(x.replace(/^builtin\./,''))+'</span>').join('')+'</div><div class="events"></div>';
+  const preview=previewForSession(s),isPinned=pinned.has(s.id),isCollapsed=collapsed.has(s.id),dom=dominantType(s),note=sessionNotes[s.id]||'';
 
-  const eb=card.querySelector('.events');
+  const card=document.createElement('section');card.className='session type-'+dom+(isPinned?' pinned':'')+(isCollapsed?' collapsed':'');
+  const head=document.createElement('div');head.className='sessionHead';
+  const heading=document.createElement('div');heading.className='sessionHeading';
+  const titleLine=document.createElement('div');titleLine.className='sessionTitleLine';
+  const title=document.createElement('h3');title.textContent=smartTitle(s);titleLine.appendChild(title);
+  if(isPinned){const pin=document.createElement('span');pin.className='sessionStatusIcon';pin.dataset.icon='pin_16_filled';pin.title=tr('pinned');titleLine.appendChild(pin)}
+  const summary=document.createElement('div');summary.className='sessionSummary';summary.textContent=sessionSummary(s)+(nearest?' · '+tr('recent_snapshots')+' '+fmt(nearest.time):'');
+  heading.append(titleLine,summary);
+
+  const toolsBox=document.createElement('div');toolsBox.className='sessionTools';
+  if(nearest){
+    const restore=document.createElement('button');restore.className='restoreNearest sessionQuickAction';restore.title=tr('restore');restore.setAttribute('aria-label',tr('restore'));
+    const ri=document.createElement('span');ri.dataset.icon='arrow_counterclockwise_24_regular';restore.appendChild(ri);restore.onclick=()=>restoreSnapshot(nearest);toolsBox.appendChild(restore);
+  }
+  const menu=document.createElement('details');menu.className='sessionMenu';
+  const menuSummary=document.createElement('summary');menuSummary.title=tr('session_actions');menuSummary.setAttribute('aria-label',tr('session_actions'));
+  const moreIcon=document.createElement('span');moreIcon.dataset.icon='more_horizontal_24_regular';moreIcon.textContent='⋯';menuSummary.appendChild(moreIcon);
+  const panel=document.createElement('div');panel.className='sessionMenuPanel';
+  const rename=createMenuButton('renameBtn','edit_24_regular',tr('name'));
+  const noteBtn=createMenuButton('noteBtn','note_24_regular',tr('note'));
+  const pinBtn=createMenuButton('pinBtn',isPinned?'pin_off_24_regular':'pin_24_regular',isPinned?tr('unpin'):tr('pin'));
+  const collapseBtn=createMenuButton('collapseBtn',isCollapsed?'chevron_down_24_regular':'chevron_up_24_regular',isCollapsed?tr('expand'):tr('collapse'));
+  const workspaceBtn=createMenuButton('workspaceBtn','window_multiple_24_regular',tr('to_workspace'));
+  const exportBtn=createMenuButton('exportSessionBtn','arrow_export_24_regular',tr('export'));
+  panel.append(rename,noteBtn,pinBtn,collapseBtn,workspaceBtn,exportBtn);
+  if(ssnaps.length){
+    const wrap=document.createElement('div');wrap.className='sessionSnapshotChoice';
+    const ic=document.createElement('span');ic.dataset.icon='history_24_regular';
+    const sel=document.createElement('select');sel.className='snapshotSelect';
+    sel.innerHTML='<option value="">'+esc(tr('recent_snapshots'))+' ('+ssnaps.length+')</option>'+ssnaps.map((x,i)=>'<option value="'+i+'">'+fmt(x.time)+'</option>').join('');
+    wrap.append(ic,sel);panel.appendChild(wrap);
+  }
+  const del=createMenuButton('deleteBtn danger','delete_24_regular',tr('delete'));panel.appendChild(del);
+  menu.append(menuSummary,panel);toolsBox.appendChild(menu);
+  head.append(heading,toolsBox);card.appendChild(head);
+
+  const previewBox=document.createElement('div');previewBox.className='preview';
+  const previewIcon=document.createElement('span');previewIcon.className='previewIcon';previewIcon.dataset.icon=dom==='plugin'?'puzzle_piece_24_regular':dom==='tool'?'wrench_24_regular':'book_open_24_regular';
+  const previewContent=document.createElement('div');previewContent.className='previewContent';
+  const previewTitle=document.createElement('strong');previewTitle.textContent=preview.title;
+  const previewRef=document.createElement('div');previewRef.className='ref';previewRef.textContent=preview.ref||'';
+  const meta=document.createElement('div');meta.className='sessionMeta';
+  const metaParts=[];
+  if(books.length)metaParts.push(books.length+' '+tr('books'));
+  if(plugins.length)metaParts.push(plugins.length+' '+tr('plugins'));
+  if(tools.length)metaParts.push(tools.length+' '+tr('built_in_tool'));
+  meta.textContent=metaParts.join(' · ');
+  previewContent.append(previewTitle,previewRef,meta);
+  if(note){const nt=document.createElement('div');nt.className='sessionNote';nt.textContent=note;previewContent.appendChild(nt)}
+  previewBox.append(previewIcon,previewContent);card.appendChild(previewBox);
+
+  const eb=document.createElement('div');eb.className='events';
   for(const ev of s.events.slice().reverse()){
-    const d=ev.data||{},row=document.createElement('div');row.className='event';
-    const lead=document.createElement('span');lead.className='eventLeading';lead.dataset.icon=eventIconName(ev.type);lead.textContent='•';
-    const main=document.createElement('div');main.style.flex='1';
-    main.innerHTML='<b>'+esc(ev.type==='plugin'?pluginName(d.toolId):ev.label)+'</b><small>'+esc(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'')+'</small>';
-    main.onclick=()=>openEvent(ev);
-    const fav=document.createElement('button');fav.className='eventFav';fav.textContent=favorites.has(ev.id)?'★':'☆';fav.title=tr('favorites');
+    const d=ev.data||{},row=document.createElement('div');row.className='event';row.tabIndex=0;
+    const lead=document.createElement('span');lead.className='eventLeading';lead.dataset.icon=eventIconName(ev.type);
+    const main=document.createElement('div');main.className='eventMain';
+    const evTitle=document.createElement('b');evTitle.textContent=ev.type==='plugin'?pluginName(d.toolId):ev.label;
+    const sub=document.createElement('small');sub.textContent=(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'');
+    main.append(evTitle,sub);main.onclick=()=>openEvent(ev);
+    const fav=document.createElement('button');fav.className='eventFav icon-btn';fav.title=tr('favorites');fav.setAttribute('aria-label',tr('favorites'));
+    const fi=document.createElement('span');fi.dataset.icon=favorites.has(ev.id)?'star_24_filled':'star_24_regular';fav.appendChild(fi);
     fav.onclick=async e=>{e.stopPropagation();favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()};
     const time=document.createElement('time');time.textContent=fmt(ev.time);
     row.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();showContextMenu(e.clientX,e.clientY,eventContextItems(ev))};
-    row.appendChild(lead);row.appendChild(main);row.appendChild(fav);row.appendChild(time);eb.appendChild(row);
+    row.append(lead,main,fav,time);eb.appendChild(row);
   }
-  card.querySelector('.renameBtn').onclick=()=>renameSession(s);
-  card.querySelector('.noteBtn').onclick=()=>editSessionNote(s);
-  card.querySelector('.pinBtn').onclick=async()=>{pinned.has(s.id)?pinned.delete(s.id):pinned.add(s.id);await set(PINS,[...pinned]);render()};
-  card.querySelector('.collapseBtn').onclick=async()=>{collapsed.has(s.id)?collapsed.delete(s.id):collapsed.add(s.id);await set(COLLAPSED,[...collapsed]);render()};
-  card.querySelector('.workspaceBtn').onclick=()=>saveSessionAsWorkspace(s);
-  card.querySelector('.exportSessionBtn').onclick=()=>exportSession(s);
-  card.querySelector('.deleteBtn').onclick=()=>deleteSession(s);
+  card.appendChild(eb);
+
+  rename.onclick=()=>renameSession(s);noteBtn.onclick=()=>editSessionNote(s);
+  pinBtn.onclick=async()=>{pinned.has(s.id)?pinned.delete(s.id):pinned.add(s.id);await set(PINS,[...pinned]);render()};
+  collapseBtn.onclick=async()=>{collapsed.has(s.id)?collapsed.delete(s.id):collapsed.add(s.id);await set(COLLAPSED,[...collapsed]);render()};
+  workspaceBtn.onclick=()=>saveSessionAsWorkspace(s);exportBtn.onclick=()=>exportSession(s);del.onclick=()=>deleteSession(s);
   const sel=card.querySelector('.snapshotSelect');if(sel)sel.onchange=()=>{const i=Number(sel.value);if(Number.isInteger(i)&&ssnaps[i])restoreSnapshot(ssnaps[i]);sel.value=''};
-  const restore=card.querySelector('.restoreNearest');if(restore)restore.onclick=()=>restoreSnapshot(nearest);
   return card;
 }
 function renderStats(list,ss){
