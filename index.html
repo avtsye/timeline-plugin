@@ -812,6 +812,99 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 #analyticsContent .native-section:last-child{margin-bottom:0}
 .snapshotList{gap:4px!important}
 
+
+/* 0.15.8 sidebar-bottom settings + polished settings actions */
+.side-nav{
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.nav-group{
+  flex:0 1 auto;
+}
+.nav-bottom{
+  margin-top:auto;
+  padding-top:6px;
+  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 70%,transparent);
+  flex:0 0 auto;
+}
+.nav-bottom .nav-item{
+  margin-top:2px;
+}
+
+/* Keep settings controls flat and native instead of boxed HTML defaults */
+.settingsGroup{
+  background:transparent!important;
+}
+.settingsGroup .checkRow{
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.settingsGroup .checkRow:hover{
+  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
+}
+.settingsGroup .appDropdown{
+  background:transparent!important;
+}
+
+/* Clean action buttons */
+.settingsCompactActions button,
+.settingsInlineAction,
+.dangerGroup .danger,
+.settingsSaveBar .btn{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0!important;
+  outline:0;
+  box-shadow:none!important;
+  min-height:34px;
+  padding:6px 13px;
+  border-radius:var(--radius-pill)!important;
+  font-weight:600;
+}
+.settingsCompactActions button,
+.settingsInlineAction{
+  background:var(--color-secondary-container)!important;
+  color:var(--color-on-secondary-container)!important;
+}
+.dangerGroup .danger{
+  background:var(--color-error-container)!important;
+  color:var(--color-on-error-container)!important;
+}
+.dangerGroup .danger:hover{
+  background:color-mix(in srgb,var(--color-error-container) 86%,var(--color-error))!important;
+}
+.settingsSaveBar{
+  background:transparent!important;
+  border-top:1px solid var(--color-outline-variant)!important;
+  backdrop-filter:none!important;
+  padding:8px 16px!important;
+}
+.settingsSaveBar .btn{
+  min-width:74px;
+  background:var(--color-primary)!important;
+  color:var(--color-on-primary)!important;
+}
+
+/* Prevent inherited old card rules from creating rectangular blocks */
+.settingsGroup .native-list,
+.settingsGroup .settingsNativeList{
+  background:transparent!important;
+  border:0!important;
+}
+.settingsGroup select,
+.settingsGroup textarea{
+  box-shadow:none!important;
+}
+.settingsGroup textarea{
+  border-radius:var(--otz-radius)!important;
+}
+@media(max-width:700px){
+  .side-nav{overflow-y:auto!important}
+  .nav-bottom{position:sticky;bottom:0;background:var(--color-surface-container-low)}
+}
+
 </style>
 </head>
 <body>
@@ -830,6 +923,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <button class="nav-item" data-screen="restore"><span class="nav-icon" data-icon="arrow_counterclockwise_24_regular" data-icon-active="arrow_counterclockwise_24_filled">↶</span><span class="nav-label" data-i18n="screen_restore">שחזור</span></button>
         <button class="nav-item" data-screen="analytics"><span class="nav-icon" data-icon="data_bar_vertical_24_regular" data-icon-active="data_bar_vertical_24_filled">▥</span><span class="nav-label" data-i18n="screen_analytics">פעילות</span></button>
         <button class="nav-item" data-screen="diagnostics"><span class="nav-icon" data-icon="pulse_24_regular" data-icon-active="pulse_24_filled">✓</span><span class="nav-label" data-i18n="screen_diagnostics">אבחון</span></button>
+
+      </nav>
+      <nav class="nav-bottom" aria-label="הגדרות">
         <button class="nav-item" data-screen="settings"><span class="nav-icon" data-icon="settings_24_regular" data-icon-active="settings_24_filled">⚙</span><span class="nav-label" data-i18n="settings">הגדרות</span></button>
       </nav>
     </aside>
