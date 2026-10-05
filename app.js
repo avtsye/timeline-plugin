@@ -137,7 +137,6 @@ function applyTranslations(){
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const key=el.dataset.i18nPlaceholder;if(I18N[currentLang][key])el.placeholder=tr(key)});
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{const key=el.dataset.i18nTitle;if(I18N[currentLang][key]){el.title=tr(key);el.setAttribute('aria-label',tr(key))}});
   document.title=currentLang==='he'?'ציר זמן':'Timeline';
-  $('settingsFab').title=tr('settings');$('settingsFab').setAttribute('aria-label',tr('settings'));
 }
 async function registerLocalizedShortcuts(){
   await call('app.registerShortcut',{id:'open-timeline',label:currentLang==='he'?'פתח ציר זמן':'Open Timeline',key:'ctrl+alt+t',command:'openTimeline'});
