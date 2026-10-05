@@ -24,3 +24,14 @@ console.log('runtime smoke OK: '+ids.length+' DOM references checked');
 
 if(/\b(?:alert|prompt|confirm)\s*\(/.test(app)) throw new Error('Browser-native dialogs are forbidden; use Otzaria-style internal dialogs');
 console.log('Browser-native dialogs: none');
+
+const iconsSource=fs.readFileSync('official-fluent-icons.js','utf8');
+const iconKeys=new Set([...iconsSource.matchAll(/"([a-z0-9_]+_(?:regular|filled))":/g)].map(m=>m[1]));
+const usedIcons=new Set([
+  ...[...html.matchAll(/data-icon(?:-active)?="([a-z0-9_]+_(?:regular|filled))"/g)].map(m=>m[1]),
+  ...[...app.matchAll(/['"]([a-z0-9_]+_(?:regular|filled))['"]/g)].map(m=>m[1])
+]);
+const missingIcons=[...usedIcons].filter(x=>!iconKeys.has(x));
+if(missingIcons.length) throw new Error('Missing bundled Fluent icons: '+missingIcons.join(', '));
+if(/\b(?:miniCard|modalGrid)\b/.test(app)) throw new Error('Legacy web-card UI class remains in app.js');
+console.log('Fluent icons verified: '+usedIcons.size);
