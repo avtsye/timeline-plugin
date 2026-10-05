@@ -2268,6 +2268,106 @@ html[dir="ltr"] #settingsScreen>.settingsSaveBar{
   }
 }
 
+
+/* ===== 0.15.16 compact settings rows ===== */
+#settingsScreen .settingsGroup{
+  padding:10px 0!important;
+}
+#settingsScreen .settingsGroup h3{
+  margin:0 0 8px!important;
+}
+#settingsScreen .settingsChecksGrid{
+  grid-template-columns:repeat(2,minmax(220px,280px))!important;
+  justify-content:start!important;
+  gap:4px 14px!important;
+  max-width:590px!important;
+}
+#settingsScreen .settingsChecksGrid .checkRow,
+#settingsScreen .settingsGroup>.checkRow{
+  min-height:40px!important;
+  height:auto!important;
+  padding:3px 4px!important;
+  border-radius:8px!important;
+  background:transparent!important;
+}
+#settingsScreen .settingsChecksGrid .checkRow:hover,
+#settingsScreen .settingsGroup>.checkRow:hover{
+  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
+}
+#settingsScreen .settingTileContent{
+  gap:8px!important;
+  flex:0 1 auto!important;
+}
+#settingsScreen .settingTileIcon{
+  width:20px!important;
+  height:20px!important;
+  flex-basis:20px!important;
+}
+#settingsScreen .settingTileIcon svg{
+  width:18px!important;
+  height:18px!important;
+}
+#settingsScreen .settingTileText{
+  font-size:13px!important;
+  line-height:1.3!important;
+}
+#settingsScreen .checkRow input[type="checkbox"]{
+  transform:scale(.92);
+  transform-origin:center;
+}
+#settingsScreen .settingFieldRow{
+  grid-template-columns:150px 230px!important;
+  gap:12px!important;
+  min-height:44px!important;
+  padding:3px 4px!important;
+  max-width:430px!important;
+}
+#settingsScreen .settingFieldRow .appDropdown{
+  width:230px!important;
+}
+#settingsScreen .settingsFieldsGrid{
+  max-width:430px!important;
+  gap:4px!important;
+}
+#settingsScreen .settingsGroupHead,
+#settingsScreen .settingsCompactActions,
+#settingsScreen .feedbackCompact,
+#settingsScreen .dangerGroup{
+  max-width:590px!important;
+}
+#settingsScreen .settingsCompactActions button,
+#settingsScreen .settingsInlineAction{
+  min-height:30px!important;
+  padding:4px 10px!important;
+}
+#settingsScreen .feedbackToolbar{
+  grid-template-columns:220px auto!important;
+  max-width:590px!important;
+}
+#settingsScreen .feedbackBox{
+  min-height:76px!important;
+  height:82px!important;
+}
+#settingsScreen>.settingsPane,
+#settingsScreen>.settingsPane.active{
+  padding-top:10px!important;
+  padding-bottom:18px!important;
+}
+
+@media(max-width:760px){
+  #settingsScreen .settingsChecksGrid{
+    grid-template-columns:1fr!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingFieldRow{
+    grid-template-columns:1fr!important;
+    max-width:none!important;
+  }
+  #settingsScreen .settingFieldRow .appDropdown{
+    width:100%!important;
+  }
+}
+
 </style>
 </head>
 <body>
