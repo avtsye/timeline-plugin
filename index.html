@@ -764,6 +764,41 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .yearHeat{min-width:420px}
 }
 
+
+/* 0.15.7 simplified settings */
+.settings-pane.screen.active{grid-template-columns:132px minmax(0,1fr)!important}
+.settings-tabs{padding:6px 4px!important}
+.settingsPane{padding:12px 16px!important;max-width:820px;width:100%}
+.settingsGroup{padding:12px 0;border-bottom:1px solid var(--color-outline-variant)}
+.settingsGroup:last-child{border-bottom:0}
+.settingsGroup h3{margin:0 0 10px;font-size:15px}
+.settingsGroupHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settingsGroupHead h3{margin:0}
+.settingsHint{font-size:11px;color:var(--color-on-surface-variant);margin-top:3px}
+.settingFieldRow{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:42px}
+.settingFieldRow>label{font-size:13px;color:var(--color-on-surface)}
+.settingFieldRow .appDropdown{min-width:180px;max-width:260px}
+.settingsFieldsGrid{display:grid;grid-template-columns:1fr;gap:4px}
+.settingsChecksGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
+.settingsGroup .checkRow{min-height:40px;margin:0;padding:4px 0}
+.settingsCompactActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.settingsCompactActions button,.settingsInlineAction{min-height:32px;padding:4px 10px;border:0;border-radius:var(--otz-radius);background:var(--color-secondary-container);color:var(--color-on-secondary-container)}
+.feedbackCompact{max-width:680px}
+.feedbackToolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.feedbackToolbar .appDropdown{min-width:180px}
+.feedbackToolbar .btn{margin-inline-start:auto}
+.feedbackBox{min-height:84px!important;max-height:180px!important;height:96px;padding:10px 12px;box-sizing:border-box}
+.dangerGroup .danger{flex:0 0 auto}
+.settingsSaveBar{max-width:820px}
+@media(max-width:700px){
+  .settings-pane.screen.active{grid-template-columns:1fr!important}
+  .settingsChecksGrid{grid-template-columns:1fr}
+  .settingFieldRow{align-items:flex-start;flex-direction:column;gap:5px;padding:6px 0}
+  .settingFieldRow .appDropdown{width:100%;max-width:none}
+  .feedbackToolbar{align-items:stretch;flex-direction:column}
+  .feedbackToolbar .appDropdown,.feedbackToolbar .btn{width:100%;margin:0}
+}
+
 </style>
 </head>
 <body>
@@ -871,52 +906,89 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         </section>
 
       <section id="settingsScreen" class="screen settings-pane" data-screen-panel="settings">
-        <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">התאמת ציר הזמן, מעקב ואינטגרציות</div></div></div>
+        <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">העדפות בסיסיות, מעקב ותחזוקה</div></div></div>
+
         <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
           <button class="settingsTabBtn active" role="tab" aria-selected="true" tabindex="0" data-settings-tab="general" data-i18n="settings_general">כללי</button>
           <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="tracking" data-i18n="settings_tracking">מעקב</button>
-          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="backup" data-i18n="settings_backup">גיבוי ושחזור</button>
-          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="integrations" data-i18n="settings_integrations">אינטגרציות</button>
-          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="maintenance" data-i18n="settings_maintenance">תחזוקה ומשוב</button>
+          <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="advanced">מתקדם</button>
         </div>
 
         <div class="settingsPane active" data-settings-pane="general">
-          <div class="card settingsSection"><h3 data-i18n="language_appearance">שפה ומראה</h3>
-            <label for="languageSelect" data-i18n="language">שפה</label>
-            <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
+          <section class="settingsGroup">
+            <h3 data-i18n="language_appearance">שפה ומראה</h3>
+            <div class="settingFieldRow">
+              <label for="languageSelect" data-i18n="language">שפה</label>
+              <select id="languageSelect"><option value="auto" data-i18n="language_auto">אוטומטי לפי אוצריא</option><option value="he">עברית</option><option value="en">English</option></select>
+            </div>
             <label class="checkRow"><input id="compactMode" type="checkbox"><span data-i18n="compact_mode">מצב קומפקטי</span></label>
-          </div>
-          <div class="card settingsSection"><h3 data-i18n="timeline_actions">פעולות ציר הזמן</h3><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="pause_24_regular"></span><div class="native-row-main"><b data-i18n="tracking">מעקב</b><small data-i18n="tracking_active">שליטה בתיעוד הפעילות</small></div><button id="pauseBtn"></button></div></div></div>
+            <label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label>
+          </section>
+
+          <section class="settingsGroup">
+            <h3 data-i18n="integrations">אינטגרציות</h3>
+            <label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label>
+            <label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label>
+          </section>
         </div>
 
         <div class="settingsPane" data-settings-pane="tracking">
-          <div class="card settingsSection"><h3 data-i18n="tracking_types">מה לתעד</h3>
-            <label class="checkRow"><input id="trackBooks" type="checkbox"><span data-i18n="track_books">פתיחת ספרים</span></label>
-            <label class="checkRow"><input id="trackRefs" type="checkbox"><span data-i18n="track_positions">מיקומי קריאה</span></label>
-            <label class="checkRow"><input id="trackPlugins" type="checkbox"><span data-i18n="track_plugins">תוספים</span></label>
-            <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
-            <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
-            <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
-          </div>
-          <div class="card settingsSection"><h3 data-i18n="privacy_mode">מצב פרטיות</h3><div class="native-list settingsNativeList">
-            <div class="native-row"><span class="native-row-icon" data-icon="clock_24_regular"></span><div class="native-row-main"><b data-i18n="pause_one_hour">השהה לשעה</b></div><button id="privacyHourBtn" data-i18n="pause_one_hour">השהה</button></div>
-            <div class="native-row"><span class="native-row-icon" data-icon="power_24_regular"></span><div class="native-row-main"><b data-i18n="pause_until_restart">השהה עד הפעלה מחדש</b></div><button id="privacySessionBtn" data-i18n="pause_until_restart">השהה</button></div>
-            <div class="native-row"><span class="native-row-icon" data-icon="play_24_regular"></span><div class="native-row-main"><b data-i18n="resume_now">חדש עכשיו</b><small id="privacyStatus"></small></div><button id="privacyResumeBtn" data-i18n="resume_now">חדש</button></div>
-          </div></div>
-          <div class="card settingsSection"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select><label class="checkRow"><input id="notificationsEnabled" type="checkbox" checked><span data-i18n="in_app_notifications">התראות פנימיות של אוצריא</span></label></div>
+          <section class="settingsGroup">
+            <div class="settingsGroupHead">
+              <h3 data-i18n="tracking">מעקב</h3>
+              <button id="pauseBtn" class="settingsInlineAction"></button>
+            </div>
+            <div id="privacyStatus" class="settingsHint"></div>
+            <div class="settingsCompactActions">
+              <button id="privacyHourBtn" data-i18n="pause_one_hour">השהה לשעה</button>
+              <button id="privacySessionBtn" data-i18n="pause_until_restart">עד הפעלה מחדש</button>
+              <button id="privacyResumeBtn" data-i18n="resume_now">חדש עכשיו</button>
+            </div>
+          </section>
+
+          <section class="settingsGroup">
+            <h3 data-i18n="tracking_types">מה לתעד</h3>
+            <div class="settingsChecksGrid">
+              <label class="checkRow"><input id="trackBooks" type="checkbox"><span data-i18n="track_books">פתיחת ספרים</span></label>
+              <label class="checkRow"><input id="trackRefs" type="checkbox"><span data-i18n="track_positions">מיקומי קריאה</span></label>
+              <label class="checkRow"><input id="trackPlugins" type="checkbox"><span data-i18n="track_plugins">תוספים</span></label>
+              <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
+              <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
+              <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
+            </div>
+          </section>
+
+          <section class="settingsGroup">
+            <h3>שמירת נתונים</h3>
+            <div class="settingsFieldsGrid">
+              <div class="settingFieldRow"><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select></div>
+              <div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
+            </div>
+          </section>
         </div>
 
-        <div class="settingsPane" data-settings-pane="backup">
-          <div class="card settingsSection"><label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label></div>
-        </div>
+        <div class="settingsPane" data-settings-pane="advanced">
+          <section class="settingsGroup">
+            <h3>גיבוי וארכיון</h3>
+            <label class="checkRow"><input id="summaryArchiveEnabled" type="checkbox" checked><span data-i18n="summary_archive_auto">צור ארכיון מתומצת בגיבוי האוטומטי</span></label>
+          </section>
 
-        <div class="settingsPane" data-settings-pane="integrations">
-          <div class="card settingsSection"><h3 data-i18n="integrations">אינטגרציות</h3><label class="checkRow"><input id="newTabIntegration" type="checkbox"><span data-i18n="plus_target">השתמש בציר הזמן כיעד של כפתור +</span></label><label class="checkRow"><input id="homepageIntegration" type="checkbox" checked><span data-i18n="homepage_integration">פרסם “המשך עבודה” לדף הבית</span></label></div>
-        </div>
+          <section class="settingsGroup feedbackCompact">
+            <h3 data-i18n="feedback">שליחת משוב</h3>
+            <div class="feedbackToolbar">
+              <label for="feedbackType" class="srOnly" data-i18n="feedback">סוג משוב</label>
+              <select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select>
+              <button id="sendFeedbackBtn" class="btn btn-filled" data-i18n="send_feedback">שלח משוב</button>
+            </div>
+            <textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea>
+          </section>
 
-        <div class="settingsPane" data-settings-pane="maintenance">
-          <div class="card settingsSection"><h3 data-i18n="feedback">שליחת משוב</h3><label for="feedbackType" class="srOnly" data-i18n="feedback">סוג משוב</label><select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select><textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="send_24_regular"></span><div class="native-row-main"><b data-i18n="send_feedback">שלח משוב</b></div><button id="sendFeedbackBtn" data-i18n="send_feedback">שלח</button></div></div></div>
-          <div class="card settingsSection"><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="native-list settingsNativeList"><div class="native-row"><span class="native-row-icon" data-icon="delete_24_regular"></span><div class="native-row-main"><b data-i18n="clear_all">נקה את כל ציר הזמן</b></div><button id="clearBtn" class="danger" data-i18n="delete">מחק</button></div></div></div>
+          <section class="settingsGroup dangerGroup">
+            <div class="settingsGroupHead">
+              <div><h3 data-i18n="danger_zone">פעולות מתקדמות</h3><div class="settingsHint">מחיקת כל היסטוריית ציר הזמן מהמכשיר.</div></div>
+              <button id="clearBtn" class="danger" data-i18n="delete">מחק הכל</button>
+            </div>
+          </section>
         </div>
 
         <div class="settingsSaveBar"><button id="saveSettings" class="btn btn-filled" data-i18n="save">שמור</button></div>
