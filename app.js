@@ -1018,11 +1018,11 @@ function adaptiveGapPx(deltaMs,zoom){
   const mins=Math.max(0,deltaMs/60000);
   // Preserve chronology, but heavily compress long idle periods.
   // Dense events still receive a readable minimum separation.
-  const base=42*zoom;
+  const base=34*zoom;
   if(mins<=5)return base;
-  if(mins<=30)return base+Math.min(20,(mins-5)*0.75)*zoom;
-  if(mins<=120)return base+(20+Math.log2(1+(mins-30)/15)*14)*zoom;
-  return Math.min(126*zoom,base+52*zoom+Math.log2(1+(mins-120)/60)*15*zoom);
+  if(mins<=30)return base+Math.min(14,(mins-5)*0.55)*zoom;
+  if(mins<=120)return base+(14+Math.log2(1+(mins-30)/15)*10)*zoom;
+  return Math.min(96*zoom,base+36*zoom+Math.log2(1+(mins-120)/60)*12*zoom);
 }
 function buildAdaptiveTimelinePositions(events,zoom){
   const positions=new Map();
@@ -1115,7 +1115,7 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
     const anchorY=parseFloat(node.style.top)||0;
     const h=Math.max(40,card.offsetHeight||40);
     let desired=anchorY-h/2;
-    if(desired<lastBottom[side]+4)desired=lastBottom[side]+4;
+    if(desired<lastBottom[side]+2)desired=lastBottom[side]+2;
     const maxTop=Math.max(8,(parseFloat(rail.style.height)||180)-h-8);
     desired=Math.max(8,Math.min(maxTop,desired));
     const shift=desired-anchorY;
