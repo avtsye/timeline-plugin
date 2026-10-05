@@ -21,7 +21,7 @@ let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilte
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
 let virtualLimit=80,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
-let eventIndex={byBook:new Map(),byPlugin:new Map(),byDay:new Map(),search:new Map(),sortedDesc:[]};
+let eventIndex={byBook:new Map(),byPlugin:new Map(),byDay:new Map(),bySession:new Map(),search:new Map(),sortedDesc:[]};
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -311,10 +311,11 @@ function eventSearchText(e){
   ].filter(Boolean).join(' ').toLowerCase();
 }
 function rebuildEventIndex(){
-  const byBook=new Map(),byPlugin=new Map(),byDay=new Map(),search=new Map();
+  const byBook=new Map(),byPlugin=new Map(),byDay=new Map(),bySession=new Map(),search=new Map();
   const sortedDesc=events.slice().sort((a,b)=>b.time-a.time);
   for(const e of sortedDesc){
     const day=dk(e.time);if(!byDay.has(day))byDay.set(day,[]);byDay.get(day).push(e);
+    const sid=e.sessionId||'unknown';if(!bySession.has(sid))bySession.set(sid,[]);bySession.get(sid).push(e);
     if(['book','ref'].includes(e.type)){
       const key=String(bookKeyFromEvent(e)||'');
       if(key){if(!byBook.has(key))byBook.set(key,[]);byBook.get(key).push(e)}
@@ -325,7 +326,7 @@ function rebuildEventIndex(){
     }
     search.set(e.id,eventSearchText(e));
   }
-  eventIndex={byBook,byPlugin,byDay,search,sortedDesc};
+  eventIndex={byBook,byPlugin,byDay,bySession,search,sortedDesc};
 }
 function indexedSearchText(e){return eventIndex.search.get(e.id)||eventSearchText(e)}
 function matchesAdvancedQuery(e,parsed){
@@ -340,22 +341,24 @@ function matchesAdvancedQuery(e,parsed){
 }
 function filtered(){
   const parsed=parseQuery($('search').value.trim());
-  const type=$('type').value;
-  const pluginFilter=$('pluginFilter').value;
-  const days=+$('range').value;
+  const type=$('type').value,pluginFilter=$('pluginFilter').value,days=+$('range').value;
   const cut=days?Date.now()-days*86400000:0;
-  let list=events.filter(e=>{
-    if(type&&e.type!==type)return false;
-    if(pluginFilter&&resolvedPluginId((e.data||{}).toolId)!==pluginFilter)return false;
-    if(cut&&e.time<cut)return false;
-    if(!matchesPreset(e))return false;
-    if(favoritesOnly&&!favorites.has(e.id))return false;
-    if(!matchesAdvancedQuery(e,parsed))return false;
-    return true;
-  });
-  const sort=$('sort').value;
-  list.sort((a,b)=>sort==='oldest'?a.time-b.time:b.time-a.time);
-  return list;
+  let source=pluginFilter?(eventIndex.byPlugin.get(pluginFilter)||[]):eventIndex.sortedDesc;
+  const out=[];
+  for(const ev of source){
+    if(cut&&ev.time<cut){
+      if(!pluginFilter)break;
+      continue;
+    }
+    if(type&&ev.type!==type)continue;
+    if(pluginFilter&&resolvedPluginId((ev.data||{}).toolId)!==pluginFilter)continue;
+    if(!matchesPreset(ev))continue;
+    if(favoritesOnly&&!favorites.has(ev.id))continue;
+    if(!matchesAdvancedQuery(ev,parsed))continue;
+    out.push(ev);
+  }
+  if($('sort').value==='oldest')out.reverse();
+  return out;
 }
 function sessions(list){
   const m=new Map();
@@ -715,7 +718,7 @@ function showPluginHistory(pluginId){
 
     const groups=makeNativeSection(tr('visit_sessions'));
     sessionGroupsForEvents(list).slice(0,100).forEach(group=>{
-      const sessionAll=events.filter(e=>e.sessionId===group.id);
+      const sessionAll=eventIndex.bySession.get(group.id)||[];
       const books=[...new Set(sessionAll.filter(e=>['book','ref'].includes(e.type)).map(e=>bookTitleFromEvent(e)).filter(Boolean))];
       groups.list.appendChild(makeNativeRow({
         icon:'puzzle_piece_24_regular',
