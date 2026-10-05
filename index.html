@@ -769,6 +769,68 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
 }
 
+
+/* 0.15.5 compact cards + unobstructed pause label */
+.adaptiveTimelineRail .timelineEventCard{
+  min-height:32px!important;
+  padding:4px 8px!important;
+  gap:8px!important;
+}
+.adaptiveTimelineRail .timelineEventContent b{
+  font-size:13px!important;
+  line-height:1.1!important;
+}
+.adaptiveTimelineRail .timelineEventContent small,
+.adaptiveTimelineRail .timelineEventCard time{
+  font-size:10px!important;
+}
+.idleBreak{
+  border-top:0!important;
+  height:18px!important;
+  pointer-events:none;
+  overflow:visible!important;
+}
+.idleBreak::before,
+.idleBreak::after{
+  content:"";
+  position:absolute;
+  inset-inline-start:50%;
+  width:10px;
+  height:2px;
+  background:var(--color-outline-variant);
+  transform-origin:center;
+  z-index:2;
+}
+.idleBreak::before{
+  top:4px;
+  transform:translateX(-50%) rotate(32deg);
+}
+.idleBreak::after{
+  top:10px;
+  transform:translateX(-50%) rotate(-32deg);
+}
+.idleBreakGlyph{
+  display:none!important;
+}
+.idleBreakLabel{
+  position:absolute;
+  inset-inline-start:calc(50% + 28px)!important;
+  top:-4px!important;
+  padding:2px 7px!important;
+  border-radius:999px!important;
+  background:var(--color-surface-container-high)!important;
+  color:var(--color-on-surface-variant)!important;
+  font-size:10px!important;
+  white-space:nowrap!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--color-outline-variant) 70%,transparent)!important;
+  z-index:8!important;
+}
+@media(max-width:800px){
+  .idleBreakLabel{
+    inset-inline-start:42px!important;
+  }
+}
+
 </style>
 </head>
 <body>
