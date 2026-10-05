@@ -70,7 +70,7 @@ tracking_resumed:'תיעוד ציר הזמן חודש',day_activity:'30 ימים
 year_heatmap:'מפת פעילות שנתית',top_books:'ספרים מובילים',top_plugins:'תוספים מובילים',recent_places:'מקומות אחרונים',
 book_visits:'ביקורים בספר',plugin_timeline:'ציר זמן של תוסף',visits:'אירועים',days:'ימים',places:'מקומות',open:'פתח',estimated_time:'זמן משוער',unique_locations:'מקומות ייחודיים',visit_sessions:'ביקורים',most_visited_places:'המקומות הנפוצים',activity_days:'ימי פעילות',first_visit:'ביקור ראשון',last_visit:'ביקור אחרון',
 restore_backup:'שחזר',missing_plugin_mapping:'מיפוי תוספים חסרים',no_missing_plugins:'אין תוספים חסרים',choose_replacement:'בחר תוסף חלופי…',
-save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',cancel:'ביטול',confirm:'אישור',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים',filters:'מסננים',sort:'מיון'
+save_mapping:'שמור מיפוי',mapping_saved:'מיפוי התוסף נשמר',approx:'משוער',hour:'שעה',app_title:'ציר זמן',screen_timeline:'ציר הזמן',screen_overview:'סקירה',screen_restore:'שחזור',screen_analytics:'פעילות',screen_diagnostics:'אבחון',overview_subtitle:'סיכום הפעילות האחרונה',restore_subtitle:'נקודות שחזור וגיבויים',analytics_subtitle:'גרפים, מפות פעילות וסיכומים',diagnostics_subtitle:'מצב מעקב, הרשאות ובריאות הנתונים',settings_subtitle:'התאמת ציר הזמן, מעקב ואינטגרציות',statistics:'סטטיסטיקות',focus_mode:'מצב פוקוס',exit_focus:'צא ממצב פוקוס',settings_general:'כללי',settings_tracking:'מעקב',settings_backup:'גיבוי ושחזור',settings_integrations:'אינטגרציות',settings_maintenance:'תחזוקה ומשוב',tracking_types:'מה לתעד',track_books:'פתיחת ספרים',track_positions:'מיקומי קריאה',track_plugins:'תוספים',track_tools:'כלים מובנים',track_workspaces:'סביבות עבודה',track_navigation:'ניווט',privacy_mode:'מצב פרטיות',pause_one_hour:'השהה לשעה',pause_until_restart:'השהה עד הפעלה מחדש',resume_now:'חדש עכשיו',privacy_active_until:'המעקב מושהה עד',privacy_active_restart:'המעקב מושהה עד ההפעלה מחדש',privacy_inactive:'מצב פרטיות כבוי',backup_restore_actions:'גיבוי ושחזור',open_archive:'פתח ארכיון מתומצת',summary_archive_auto:'צור ארכיון מתומצת בגיבוי האוטומטי',feedback:'שליחת משוב',feedback_bug:'דיווח על תקלה',feedback_other:'משוב / הצעה',feedback_placeholder:'כתוב כאן את המשוב…',send_feedback:'שלח משוב',feedback_empty:'יש לכתוב תוכן לפני השליחה',feedback_sent:'המשוב נשלח',feedback_queued:'המשוב נשמר לשליחה מאוחרת',feedback_cancelled:'שליחת המשוב בוטלה',archive_title:'ארכיון מתומצת',archive_empty:'עדיין לא נוצר ארכיון מתומצת',archive_days:'ימים בארכיון',archive_events:'אירועים שסוכמו',session_actions:'פעולות',more:'עוד',cancel:'ביטול',confirm:'אישור',copy_details:'העתק פרטים',copied:'הפרטים הועתקו',open_history:'פתח היסטוריה',remove_favorite:'הסר ממועדפים',add_favorite:'הוסף למועדפים',filters:'מסננים',sort:'מיון',now:'עכשיו'
 },
 en:{
 settings:'Settings',close:'Close',save:'Save',language:'Language',language_auto:'Automatic — follow Otzaria',language_appearance:'Language & appearance',
@@ -115,7 +115,7 @@ tracking_resumed:'Timeline tracking resumed',day_activity:'Last 30 days',weeks_a
 year_heatmap:'Year activity heatmap',top_books:'Top books',top_plugins:'Top plugins',recent_places:'Recent places',
 book_visits:'Book visits',plugin_timeline:'Plugin timeline',visits:'events',days:'days',places:'places',open:'Open',estimated_time:'Estimated time',unique_locations:'Unique locations',visit_sessions:'Visits',most_visited_places:'Most visited places',activity_days:'Activity days',first_visit:'First visit',last_visit:'Last visit',
 restore_backup:'Restore',missing_plugin_mapping:'Map missing plugins',no_missing_plugins:'No missing plugins',choose_replacement:'Choose a replacement plugin…',
-save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More',cancel:'Cancel',confirm:'Confirm',copy_details:'Copy details',copied:'Details copied',open_history:'Open history',remove_favorite:'Remove from favorites',add_favorite:'Add to favorites',filters:'Filters',sort:'Sort'
+save_mapping:'Save mapping',mapping_saved:'Plugin mapping saved',approx:'estimated',hour:'hour',app_title:'Timeline',screen_timeline:'Timeline',screen_overview:'Overview',screen_restore:'Restore',screen_analytics:'Activity',screen_diagnostics:'Diagnostics',overview_subtitle:'Summary of recent activity',restore_subtitle:'Restore points and backups',analytics_subtitle:'Charts, activity maps, and summaries',diagnostics_subtitle:'Tracking, permissions, and data health',settings_subtitle:'Timeline, tracking, and integration preferences',statistics:'Statistics',focus_mode:'Focus mode',exit_focus:'Exit focus mode',settings_general:'General',settings_tracking:'Tracking',settings_backup:'Backup & restore',settings_integrations:'Integrations',settings_maintenance:'Maintenance & feedback',tracking_types:'What to track',track_books:'Book opens',track_positions:'Reading positions',track_plugins:'Plugins',track_tools:'Built-in tools',track_workspaces:'Workspaces',track_navigation:'Navigation',privacy_mode:'Privacy mode',pause_one_hour:'Pause for one hour',pause_until_restart:'Pause until restart',resume_now:'Resume now',privacy_active_until:'Tracking paused until',privacy_active_restart:'Tracking paused until restart',privacy_inactive:'Privacy mode is off',backup_restore_actions:'Backup & restore',open_archive:'Open compact archive',summary_archive_auto:'Create a compact archive during automatic backup',feedback:'Send feedback',feedback_bug:'Report a bug',feedback_other:'Feedback / suggestion',feedback_placeholder:'Write your feedback here…',send_feedback:'Send feedback',feedback_empty:'Write some feedback before sending',feedback_sent:'Feedback sent',feedback_queued:'Feedback queued for later delivery',feedback_cancelled:'Feedback sending cancelled',archive_title:'Compact archive',archive_empty:'No compact archive has been created yet',archive_days:'Archived days',archive_events:'Summarized events',session_actions:'Actions',more:'More',cancel:'Cancel',confirm:'Confirm',copy_details:'Copy details',copied:'Details copied',open_history:'Open history',remove_favorite:'Remove from favorites',add_favorite:'Add to favorites',filters:'Filters',sort:'Sort',now:'Now'
 }};
 const tr=(key,vars={})=>{
   let s=(I18N[currentLang]&&I18N[currentLang][key])||I18N.he[key]||key;
@@ -846,6 +846,45 @@ function scheduleLiveRefresh(){
   clearTimeout(liveRefreshTimer);
   liveRefreshTimer=setTimeout(refreshTimelineData,250);
 }
+function minuteOfDay(ts){
+  const d=new Date(ts);return d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
+}
+function createTimelineNode(s,index){
+  const node=document.createElement('div');node.className='timelineNode '+(index%2===0?'right':'left');node.tabIndex=0;node.dataset.sessionId=s.id;
+  const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
+  const dot=document.createElement('div');dot.className='timelineDot';
+  const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
+  const marks=document.createElement('div');marks.className='snapshotMarks';
+  snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
+  const tip=document.createElement('div');tip.className='timelineTooltip';tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
+  node.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};
+  node.append(cw,dot,stamp,marks,tip);return node;
+}
+function renderTrueDayRail(rail,items,dayTs){
+  rail.classList.add('trueDayRail');
+  const zoom=Math.max(.4,Math.min(3,Number(settings.timelineZoom||1)));
+  const pxPerMinute=.82*zoom,canvasHeight=Math.max(760,1440*pxPerMinute);
+  rail.style.height=canvasHeight+'px';
+  for(let hour=0;hour<=24;hour++){
+    const line=document.createElement('div');line.className='dayHourLine';line.style.top=(hour*60*pxPerMinute)+'px';
+    const label=document.createElement('span');label.textContent=String(hour%24).padStart(2,'0')+':00';line.appendChild(label);rail.appendChild(line);
+  }
+  if(dk(dayTs)===dk(Date.now())){
+    const nowLine=document.createElement('div');nowLine.className='dayNowLine';nowLine.style.top=(minuteOfDay(Date.now())*pxPerMinute)+'px';
+    const label=document.createElement('span');label.textContent=tr('now');nowLine.appendChild(label);rail.appendChild(nowLine);
+  }
+  const sideLast={left:-Infinity,right:-Infinity},minGap=72;
+  const chronological=items.slice().sort((a,b)=>a.start-b.start);
+  chronological.forEach((s,i)=>{
+    const side=i%2===0?'right':'left',node=createTimelineNode(s,i);
+    node.classList.remove('left','right');node.classList.add(side,'trueTimeNode');
+    let y=minuteOfDay(s.start)*pxPerMinute;
+    if(y-sideLast[side]<minGap)y=sideLast[side]+minGap;
+    sideLast[side]=y;
+    node.style.top=Math.min(canvasHeight-60,y)+'px';
+    rail.appendChild(node);
+  });
+}
 function render(){
   const sig=renderSignature();
   if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
@@ -859,28 +898,7 @@ function render(){
     const wrap=document.createElement('section');wrap.className='bucket';
     if(viewMode==='day'){
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="timelineRail"></div>';
-      const rail=wrap.querySelector('.timelineRail');
-      let lastHour=null;
-      items.forEach((s,i)=>{
-        const hour=new Date(s.start).getHours();
-        if(lastHour!==null&&hour!==lastHour){
-          const hm=document.createElement('div');hm.className='hourMarker';const label=document.createElement('span');label.textContent=String(hour).padStart(2,'0')+':00';hm.appendChild(label);rail.appendChild(hm);
-        }
-        lastHour=hour;
-        const node=document.createElement('div');node.className='timelineNode '+(i%2===0?'right':'left');node.tabIndex=0;node.dataset.sessionId=s.id;
-        if(i>0){
-          const prev=items[i-1],gapMin=Math.max(0,Math.abs(prev.start-s.start)/60000);
-          node.style.marginTop=Math.round(Math.max(8,Math.min(180,gapMin*1.1*Number(settings.timelineZoom||1))))+'px';
-        }
-        const cw=document.createElement('div');cw.className='timelineCard';cw.appendChild(createSessionCard(s));
-        const dot=document.createElement('div');dot.className='timelineDot';
-        const stamp=document.createElement('div');stamp.className='timelineStamp';stamp.textContent=fmt(s.start);
-        const marks=document.createElement('div');marks.className='snapshotMarks';
-        snapshotsForSession(s).slice(0,8).forEach(sn=>{const m=document.createElement('button');m.className='snapshotMark';m.title=tr('recent_snapshots')+' '+fmt(sn.time);m.onclick=()=>restoreSnapshot(sn);marks.appendChild(m)});
-        const tip=document.createElement('div');tip.className='timelineTooltip';tip.innerHTML='<b>'+esc(smartTitle(s))+'</b><div>'+esc(sessionSummary(s))+'</div><div>'+esc(fmt(s.start)+'–'+fmt(s.end))+'</div>';
-        node.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};
-        node.appendChild(cw);node.appendChild(dot);node.appendChild(stamp);node.appendChild(marks);node.appendChild(tip);rail.appendChild(node);
-      });
+      renderTrueDayRail(wrap.querySelector('.timelineRail'),items,items[0].start);
     }else{
       wrap.innerHTML='<div class="bucketTitle"><h2>'+esc(bucketTitle(key,items[0].start))+'</h2><span class="muted">'+items.length+' '+esc(tr('sessions'))+'</span></div><div class="sessionGrid"></div>';
       const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>{const card=createSessionCard(s);card.tabIndex=0;card.dataset.sessionId=s.id;card.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};grid.appendChild(card)});
