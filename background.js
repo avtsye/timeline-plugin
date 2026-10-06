@@ -14,7 +14,7 @@ const TOOL_POLL_MS=5000;
 const BACKUP_GAP=30*60*1000;
 const STALE_SNAPSHOT=35*60*1000;
 const RETENTION_CHECK_GAP=60*60*1000;
-let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0,bootPrivacyCleared=false;
+let q=Promise.resolve(),wired=false,pollTimer=null,knownToolTabs=new Set(),toolBaselineReady=false,lastHealthTick=0,bootPrivacyCleared=false,lastSearchSignatures=null;
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null}}};
 const get=async(k,f)=>{const r=await call('storage.get',{key:k});return r&&r.success&&r.data!=null?r.data:f};
@@ -50,7 +50,7 @@ async function registerLocalizedShortcuts(){
   await call('app.registerShortcut',{id:'open-timeline',label:await bgText('openTimeline'),key:'ctrl+alt+t',command:'openTimeline'});
   await call('app.registerShortcut',{id:'save-timeline-snapshot',label:await bgText('saveSnapshot'),key:'ctrl+alt+s',command:'saveTimelineSnapshot'});
 }
-const clean=o=>{const x={};for(const k of ['book','bookId','bookUid','id','type','source','index','currentBook','currentBookId','currentIndex','currentRef','screen','workspaceId','toolId','title'])if(o&&o[k]!=null)x[k]=o[k];return x};
+const clean=o=>{const x={};for(const k of ['book','bookId','bookUid','id','type','source','index','currentBook','currentBookId','currentIndex','currentRef','screen','workspaceId','workspaceName','toolId','title','query','ref','key','newValue'])if(o&&o[k]!=null)x[k]=o[k];return x};
 const bookKey=d=>d.bookUid||d.currentBookId||d.bookId||d.currentBook||d.book||d.toolId||'';
 
 function toolKind(id){return id&&id.startsWith('builtin.')?'tool':'plugin'}
@@ -59,6 +59,9 @@ function label(type,d){
   if(type==='book'||type==='ref')return d.currentBook||d.book||d.currentBookId||d.bookId||'ספר';
   if(type==='workspace')return'שולחן עבודה';
   if(type==='navigation')return'מעבר '+(d.screen||'');
+  if(type==='find')return'מסך האיתור';
+  if(type==='search')return'חיפוש'+(d.query?': '+d.query:'');
+  if(type==='setting')return'שינוי הגדרה'+(d.key?': '+d.key:'');
   if(type==='plugin'||type==='tool')return toolLabel(d.toolId);
   return'פעילות';
 }
@@ -235,11 +238,11 @@ function record(type,p){
   q=q.then(async()=>{
     const settings=Object.assign({
       paused:false,maxEvents:5000,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,
-      pauseUntil:0,pauseUntilRestart:false
+      trackFind:true,trackSearches:true,trackSettingsChanges:true,pauseUntil:0,pauseUntilRestart:false
     },await get(SETTINGS,{}));
     const now=Date.now();
     if(settings.paused||settings.pauseUntilRestart||Number(settings.pauseUntil||0)>now)return;
-    const enabled={book:settings.trackBooks!==false,ref:settings.trackRefs!==false,plugin:settings.trackPlugins!==false,tool:settings.trackTools!==false,workspace:settings.trackWorkspaces!==false,navigation:settings.trackNavigation!==false};
+    const enabled={book:settings.trackBooks!==false,ref:settings.trackRefs!==false,plugin:settings.trackPlugins!==false,tool:settings.trackTools!==false,workspace:settings.trackWorkspaces!==false,navigation:settings.trackNavigation!==false,find:settings.trackFind!==false,search:settings.trackSearches!==false,setting:settings.trackSettingsChanges!==false};
     if(enabled[type]===false)return;
     const d=clean(p),raw=await get(EVENTS,[]),list=Array.isArray(raw)?raw:[];
     const prev=list[list.length-1];
@@ -260,19 +263,44 @@ function record(type,p){
   return q;
 }
 
+
+function searchSignature(x){
+  return [x&&x.query||'',x&&x.ref||'',x&&x.workspaceName||''].join('|');
+}
+async function detectSearches(){
+  const settings=Object.assign({trackSearches:true},await get(SETTINGS,{}));
+  const r=await call('history.listSearches',{limit:20});
+  if(!r.success||!Array.isArray(r.data))return;
+  const rows=r.data,signatures=rows.map(searchSignature);
+  if(lastSearchSignatures===null){lastSearchSignatures=signatures;return}
+  if(settings.trackSearches!==false){
+    const previous=new Set(lastSearchSignatures);
+    const fresh=[];
+    for(const row of rows){
+      const sig=searchSignature(row);
+      if(previous.has(sig))break;
+      fresh.push(row);
+    }
+    for(const row of fresh.reverse())await record('search',row);
+  }
+  lastSearchSignatures=signatures;
+}
+
 async function startPolling(){
   if(pollTimer)return;
   const saved=await get(TOOL_STATE,{open:[]});
   if(!toolBaselineReady&&saved&&Array.isArray(saved.open)){knownToolTabs=new Set(saved.open);toolBaselineReady=true}
   await detectToolTabs();
-  pollTimer=setInterval(async()=>{await detectToolTabs();await checkHealth()},TOOL_POLL_MS);
+  await detectSearches();
+  pollTimer=setInterval(async()=>{await detectToolTabs();await detectSearches();await checkHealth()},TOOL_POLL_MS);
 }
 function wire(){
   if(wired)return;wired=true;
-  Otzaria.on('navigation.changed',p=>{record('navigation',p);detectToolTabs()});
+  Otzaria.on('navigation.changed',p=>{if(p&&p.screen==='find')record('find',p);else record('navigation',p);detectToolTabs();});
   Otzaria.on('reader.current_book_changed',p=>{record('book',p);detectToolTabs()});
   Otzaria.on('reader.current_ref_changed',p=>record('ref',p));
   Otzaria.on('workspace.changed',p=>{record('workspace',p);detectToolTabs()});
+  Otzaria.on('settings.changed',p=>record('setting',p));
   Otzaria.on('plugin.resumed',()=>detectToolTabs());
   Otzaria.on('app.command',async p=>{
     if(!p)return;
