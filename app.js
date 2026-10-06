@@ -1155,8 +1155,18 @@ function positionForTimeAdaptive(ts,events,positions,zoom){
   }
   return positions.get(last);
 }
+function syncTimelineAxisCenter(rail){
+  if(!rail)return;
+  if(window.innerWidth<=800){
+    rail.style.removeProperty('--timeline-axis-x');
+    return;
+  }
+  const width=rail.getBoundingClientRect().width||rail.clientWidth||0;
+  if(width>0)rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px');
+}
 function renderTrueDayRail(rail,sessionItems,dayTs){
   rail.classList.add('trueDayRail','adaptiveTimelineRail');
+  syncTimelineAxisCenter(rail);
   const zoom=Math.max(.5,Math.min(2.4,Number(settings.timelineZoom||1)));
 
   const unique=new Map();
@@ -1668,6 +1678,10 @@ function closeFilterPopover({focus=false}={}){
   const toggle=$('filterToggleBtn');if(toggle){toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
 }
 window.addEventListener('resize',syncSettingsPaneBottomInset);
+function syncVisibleTimelineAxes(){
+  document.querySelectorAll('.trueDayRail').forEach(syncTimelineAxisCenter);
+}
+window.addEventListener('resize',syncVisibleTimelineAxes);
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
 $('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
