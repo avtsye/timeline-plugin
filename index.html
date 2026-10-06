@@ -1322,6 +1322,46 @@ textarea:focus-visible{
     width:auto;
   }
 }
+
+/* ===== 0.16.3 symmetric centered timeline ===== */
+@media(min-width:801px){
+  #content .trueDayRail::before,
+  #content .trueDayRail .timelineEventAnchor,
+  #content .trueDayRail .timelineEventConnectorV,
+  #content .trueDayRail .timelineEventDuration{
+    left:var(--timeline-axis-x)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .timelineEventNode.right .timelineEventCard{
+    left:calc(var(--timeline-axis-x) + 38px)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    width:calc(var(--timeline-axis-x) - 54px)!important;
+  }
+  #content .trueDayRail .timelineEventNode.left .timelineEventCard{
+    right:calc(100% - var(--timeline-axis-x) + 38px)!important;
+    left:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    width:calc(100% - var(--timeline-axis-x) - 54px)!important;
+  }
+  #content .trueDayRail .timelineEventNode.right .timelineEventConnectorH{
+    left:var(--timeline-axis-x)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .timelineEventNode.left .timelineEventConnectorH{
+    right:calc(100% - var(--timeline-axis-x))!important;
+    left:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+}
+
 </style>
 </head>
 <body>
