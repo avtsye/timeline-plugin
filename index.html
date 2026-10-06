@@ -1233,88 +1233,26 @@ textarea:focus-visible{
   .screen.native-page{padding-inline:22px}
 }
 
-/* ===== 0.16.4 canonical centered timeline geometry ===== */
-/* Desktop rail: one centered physical axis with alternating cards on both sides. */
-.trueDayRail{--timeline-axis-x:50%}
+
+/* ===== 0.16.5 legacy centered rail + exact marker alignment ===== */
+/* Preserve the original two-sided timeline layout. Only the circular markers use
+   a physical center coordinate so RTL cannot shift them beside the line. */
 @media(min-width:801px){
-  #content .trueDayRail{
-    position:relative;
-    width:100%;
-    --timeline-axis-x:50%;
-  }
-  #content .trueDayRail::before,
-  #content .trueDayRail .timelineEventAnchor,
-  #content .trueDayRail .timelineEventConnectorV,
-  #content .trueDayRail .timelineEventDuration,
-  #content .trueDayRail .dayNowLine::before,
-  #content .trueDayRail .adaptiveGapMarker::before,
-  #content .trueDayRail .idleBreak::before,
-  #content .trueDayRail .idleBreak::after,
-  #content .trueDayRail .idleBreakGlyph{
+  .trueDayRail .timelineEventAnchor{
     left:50%;
     right:auto;
     inset-inline-start:auto;
     inset-inline-end:auto;
-  }
-  #content .trueDayRail::before,
-  #content .trueDayRail .timelineEventConnectorV,
-  #content .trueDayRail .timelineEventDuration,
-  #content .trueDayRail .dayNowLine::before,
-  #content .trueDayRail .adaptiveGapMarker::before,
-  #content .trueDayRail .idleBreakGlyph{
-    transform:translateX(-50%)!important;
-  }
-  #content .trueDayRail .timelineEventAnchor{
     transform:translate(-50%,-50%)!important;
   }
-  #content .trueDayRail .timelineEventNode.right .timelineEventCard{
-    left:calc(50% + 38px);
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-    width:calc(50% - 54px);
-  }
-  #content .trueDayRail .timelineEventNode.left .timelineEventCard{
-    right:calc(50% + 38px);
-    left:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-    width:calc(50% - 54px);
-  }
-  #content .trueDayRail .timelineEventNode.right .timelineEventConnectorH{
+  .trueDayRail .adaptiveGapMarker::before,
+  .trueDayRail .dayNowLine::before{
     left:50%;
     right:auto;
     inset-inline-start:auto;
     inset-inline-end:auto;
+    transform:translateX(-50%)!important;
   }
-  #content .trueDayRail .timelineEventNode.left .timelineEventConnectorH{
-    right:50%;
-    left:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-  }
-  #content .trueDayRail .dayNowLine>span{
-    left:calc(50% + 12px);
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-  }
-  #content .trueDayRail .idleBreakLabel{
-    left:calc(50% + 22px);
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-  }
-  #content .trueDayRail .timelineTooltip{
-    left:50%;
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
-    transform:translateX(-50%);
-  }
-}
-@media(max-width:800px){
-  #content .trueDayRail{--timeline-axis-x:20px}
 }
 </style>
 </head>
