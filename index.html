@@ -1261,6 +1261,27 @@ textarea:focus-visible{
     transform:translateX(-50%)!important;
   }
 }
+
+/* ===== 0.16.8 clean bottom settings nav ===== */
+.side-nav>.nav-bottom{
+  padding-top:4px!important;
+  border-top:0!important;
+  background:transparent!important;
+}
+.side-nav>.nav-bottom .nav-item{
+  margin-top:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border:0!important;
+}
+.side-nav>.nav-bottom .nav-item:hover{
+  background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)!important;
+}
+.side-nav>.nav-bottom .nav-item.active{
+  background:var(--color-secondary-container)!important;
+  color:var(--color-on-secondary-container)!important;
+}
+
 </style>
 </head>
 <body>
