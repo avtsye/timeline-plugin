@@ -1109,18 +1109,38 @@ function buildAdaptiveTimelinePositions(events,zoom){
   positions.set(events[0],y);
   for(let i=1;i<events.length;i++){
     const prev=events[i-1],cur=events[i];
-    y+=adaptiveGapPx(Math.max(0,cur.time-prev.time),zoom);
+    y+=adaptiveGapPx(Math.abs(cur.time-prev.time),zoom);
     positions.set(cur,y);
   }
   return{positions,height:y+92*zoom};
 }
 function positionForTimeAdaptive(ts,events,positions,zoom){
   if(!events.length)return 34;
-  if(ts<=events[0].time){
-    const d=events[0].time-ts;
-    return Math.max(18,positions.get(events[0])-Math.min(80*zoom,adaptiveGapPx(d,zoom)));
+  const descending=events.length<2||events[0].time>=events[events.length-1].time;
+  const first=events[0],last=events[events.length-1];
+  if(descending){
+    if(ts>=first.time){
+      const d=ts-first.time;
+      return Math.max(18,positions.get(first)-Math.min(80*zoom,adaptiveGapPx(d,zoom)));
+    }
+    if(ts<=last.time){
+      const d=last.time-ts;
+      return positions.get(last)+Math.min(120*zoom,adaptiveGapPx(d,zoom));
+    }
+    for(let i=1;i<events.length;i++){
+      const a=events[i-1],b=events[i];
+      if(ts>=b.time){
+        const ya=positions.get(a),yb=positions.get(b);
+        const ratio=(a.time-ts)/Math.max(1,a.time-b.time);
+        return ya+(yb-ya)*ratio;
+      }
+    }
+    return positions.get(last);
   }
-  const last=events[events.length-1];
+  if(ts<=first.time){
+    const d=first.time-ts;
+    return Math.max(18,positions.get(first)-Math.min(80*zoom,adaptiveGapPx(d,zoom)));
+  }
   if(ts>=last.time){
     const d=ts-last.time;
     return positions.get(last)+Math.min(120*zoom,adaptiveGapPx(d,zoom));
@@ -1146,7 +1166,8 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
       if(!unique.has(key))unique.set(key,ev);
     }
   }
-  const eventsForDay=[...unique.values()].sort((a,b)=>a.time-b.time);
+  // Keep the same chronological direction as the day buckets: newest/most recent first.
+  const eventsForDay=[...unique.values()].sort((a,b)=>b.time-a.time);
   const layout=buildAdaptiveTimelinePositions(eventsForDay,zoom);
   const positions=layout.positions;
   rail.style.height=Math.max(180,layout.height)+'px';
@@ -1156,7 +1177,7 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
   eventsForDay.forEach((ev,index)=>{
     const y=positions.get(ev);
     if(previous){
-      const gap=ev.time-previous.time;
+      const gap=Math.abs(ev.time-previous.time);
       if(gap>=35*60000){
         const marker=document.createElement('div');
         marker.className='adaptiveGapMarker idleBreak';
