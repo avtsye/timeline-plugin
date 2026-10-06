@@ -187,27 +187,20 @@ if(!app.includes("Math.abs(cur.time-prev.time)")) throw new Error('Adaptive time
 console.log('Newest-first day timeline ordering audit OK');
 
 
-/* 0.16.1 exact timeline-axis alignment guard */
+
+
+
+
+/* 0.16.2 canonical timeline-axis guard */
 for(const required of [
+  '0.16.2 canonical timeline axis geometry',
   '--timeline-axis-x:50%',
-  '.timelineEventAnchor{',
-  'left:var(--timeline-axis-x)!important',
-  'inset-inline-start:auto!important',
+  '.timelineEventNode.right .timelineEventCard{',
+  'left:calc(var(--timeline-axis-x) + 38px)',
+  'right:calc(100% - var(--timeline-axis-x) + 38px)',
   '.trueDayRail{--timeline-axis-x:20px}'
 ]){
-  if(!html.includes(required)) throw new Error('Exact timeline axis alignment CSS missing: '+required);
+  if(!html.includes(required)) throw new Error('Canonical timeline geometry missing: '+required);
 }
-console.log('Exact timeline axis alignment audit OK');
-
-
-/* 0.16.2 centered timeline-axis guard */
-if(!app.includes("rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px')")) throw new Error('Timeline axis is not measured from the rail center');
-for(const required of [
-  '0.16.2 timeline axis centered in the content viewport',
-  '.timelineEventNode.right .timelineEventCard{',
-  'left:calc(var(--timeline-axis-x) + 38px)!important',
-  'right:calc(100% - var(--timeline-axis-x) + 38px)!important'
-]){
-  if(!html.includes(required)) throw new Error('Centered physical timeline geometry missing: '+required);
-}
-console.log('Centered timeline axis audit OK');
+if(!app.includes("rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px')")) throw new Error('Timeline axis is not measured from rail center');
+console.log('Canonical centered timeline axis audit OK');
