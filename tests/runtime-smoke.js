@@ -201,21 +201,27 @@ console.log('Newest-first day timeline ordering audit OK');
 
 
 
-/* 0.16.5 restored centered-rail guard */
+
+
+
+
+/* 0.16.7 centered timeline structural regression guard */
 for(const required of [
+  '.timelineEventNode{',
+  'inset-inline:0;',
   '.timelineEventNode.right .timelineEventCard{',
   'inset-inline-start:calc(50% + 38px)',
   '.timelineEventNode.left .timelineEventCard{',
   'inset-inline-end:calc(50% + 38px)',
-  '0.16.5 legacy centered rail + exact marker alignment',
-  '.trueDayRail .timelineEventAnchor{',
-  'left:50%'
+  '0.16.7 RTL-safe centered marker alignment',
+  'html[dir="rtl"] .trueDayRail .timelineEventAnchor{',
+  'transform:translate(50%,-50%)!important'
 ]){
-  if(!html.includes(required)) throw new Error('Restored centered timeline layout missing: '+required);
+  if(!html.includes(required)) throw new Error('Centered timeline structure missing: '+required);
 }
-if(app.includes('syncTimelineAxisCenter(')) throw new Error('Runtime axis recentering must stay removed');
-console.log('Legacy centered rail marker alignment audit OK');
-
+if(html.includes('0.16.6 marker containing-block fix')) throw new Error('Broken physical/logical marker patch returned');
+if(/\.trueDayRail \.timelineEventNode\{[\s\S]{0,260}inset-inline-start:auto!important/.test(html)) throw new Error('Do not mix physical and logical insets on timeline event nodes');
+console.log('Centered timeline structure audit OK');
 
 /* 0.16.6 extended optional tracking guard */
 for(const id of ['trackFind','trackSearches','trackSettingsChanges']){
@@ -230,5 +236,4 @@ for(const required of [
   if(!background.includes(required)) throw new Error('Extended background tracking missing: '+required);
 }
 if(!manifest.permissions.includes('events.subscribe:settings.changed')) throw new Error('settings.changed permission missing');
-if(!html.includes('0.16.6 marker containing-block fix')) throw new Error('Marker containing-block fix missing');
 console.log('Extended optional tracking audit OK');
