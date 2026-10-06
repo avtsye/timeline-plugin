@@ -1232,6 +1232,84 @@ textarea:focus-visible{
   .screen[data-screen-panel="overview"],
   .screen.native-page{padding-inline:22px}
 }
+
+/* ===== 0.16.1 exact physical timeline axis alignment ===== */
+.trueDayRail{
+  --timeline-axis-x:50%;
+}
+.trueDayRail::before{
+  left:var(--timeline-axis-x)!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  transform:translateX(-50%)!important;
+}
+.timelineEventAnchor{
+  left:var(--timeline-axis-x)!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  transform:translate(-50%,-50%)!important;
+}
+.timelineEventConnectorV,
+.timelineEventDuration{
+  left:var(--timeline-axis-x)!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  transform:translateX(-50%)!important;
+}
+.timelineEventNode.right .timelineEventConnectorH{
+  left:var(--timeline-axis-x)!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+}
+.timelineEventNode.left .timelineEventConnectorH{
+  right:calc(100% - var(--timeline-axis-x))!important;
+  left:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+}
+.dayNowLine::before,
+.adaptiveGapMarker::before,
+.idleBreak::before,
+.idleBreak::after,
+.idleBreakGlyph{
+  left:var(--timeline-axis-x)!important;
+  right:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:auto!important;
+  transform-origin:center!important;
+}
+.dayNowLine::before,
+.adaptiveGapMarker::before,
+.idleBreakGlyph{
+  transform:translateX(-50%)!important;
+}
+.idleBreak::before{
+  transform:translateX(-50%) rotate(32deg)!important;
+}
+.idleBreak::after{
+  transform:translateX(-50%) rotate(-32deg)!important;
+}
+@media(max-width:800px){
+  .trueDayRail{--timeline-axis-x:20px}
+  .timelineEventNode.right .timelineEventConnectorH,
+  .timelineEventNode.left .timelineEventConnectorH{
+    left:var(--timeline-axis-x)!important;
+    right:auto!important;
+    width:26px!important;
+  }
+  .dayNowLine::before,
+  .adaptiveGapMarker::before,
+  .idleBreak::before,
+  .idleBreak::after,
+  .idleBreakGlyph{
+    left:var(--timeline-axis-x)!important;
+  }
+}
+
 </style>
 </head>
 <body>
