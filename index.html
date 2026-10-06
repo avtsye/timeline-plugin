@@ -1233,160 +1233,95 @@ textarea:focus-visible{
   .screen.native-page{padding-inline:22px}
 }
 
-/* ===== 0.16.1 exact physical timeline axis alignment ===== */
-.trueDayRail{
-  --timeline-axis-x:50%;
-}
-.trueDayRail::before{
-  left:var(--timeline-axis-x)!important;
-  right:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-  transform:translateX(-50%)!important;
-}
-.timelineEventAnchor{
-  left:var(--timeline-axis-x)!important;
-  right:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-  transform:translate(-50%,-50%)!important;
-}
+/* ===== 0.16.2 canonical timeline axis geometry ===== */
+/* One physical X coordinate drives the rail, anchors, connectors, cards and labels. */
+.trueDayRail{--timeline-axis-x:50%}
+.trueDayRail::before,
+.timelineEventAnchor,
 .timelineEventConnectorV,
-.timelineEventDuration{
-  left:var(--timeline-axis-x)!important;
-  right:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-  transform:translateX(-50%)!important;
-}
-.timelineEventNode.right .timelineEventConnectorH{
-  left:var(--timeline-axis-x)!important;
-  right:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-}
-.timelineEventNode.left .timelineEventConnectorH{
-  right:calc(100% - var(--timeline-axis-x))!important;
-  left:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-}
+.timelineEventDuration,
 .dayNowLine::before,
 .adaptiveGapMarker::before,
 .idleBreak::before,
 .idleBreak::after,
 .idleBreakGlyph{
-  left:var(--timeline-axis-x)!important;
-  right:auto!important;
-  inset-inline-start:auto!important;
-  inset-inline-end:auto!important;
-  transform-origin:center!important;
+  left:var(--timeline-axis-x);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
 }
+.trueDayRail::before,
+.timelineEventConnectorV,
+.timelineEventDuration,
 .dayNowLine::before,
 .adaptiveGapMarker::before,
 .idleBreakGlyph{
   transform:translateX(-50%)!important;
 }
-.idleBreak::before{
-  transform:translateX(-50%) rotate(32deg)!important;
+.timelineEventAnchor{transform:translate(-50%,-50%)!important}
+.timelineEventNode.right .timelineEventCard{
+  left:calc(var(--timeline-axis-x) + 38px);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
 }
-.idleBreak::after{
-  transform:translateX(-50%) rotate(-32deg)!important;
+.timelineEventNode.left .timelineEventCard{
+  right:calc(100% - var(--timeline-axis-x) + 38px);
+  left:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
 }
+.timelineEventNode.right .timelineEventConnectorH{
+  left:var(--timeline-axis-x);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
+}
+.timelineEventNode.left .timelineEventConnectorH{
+  right:calc(100% - var(--timeline-axis-x));
+  left:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
+}
+.dayNowLine>span{
+  left:calc(var(--timeline-axis-x) + 12px);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
+}
+.idleBreakLabel{
+  left:calc(var(--timeline-axis-x) + 22px);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
+}
+.timelineTooltip{
+  left:var(--timeline-axis-x);
+  right:auto;
+  inset-inline-start:auto;
+  inset-inline-end:auto;
+  transform:translateX(-50%);
+}
+.idleBreak::before{transform:translateX(-50%) rotate(32deg)!important}
+.idleBreak::after{transform:translateX(-50%) rotate(-32deg)!important}
+
 @media(max-width:800px){
   .trueDayRail{--timeline-axis-x:20px}
   .timelineEventNode.right .timelineEventConnectorH,
   .timelineEventNode.left .timelineEventConnectorH{
-    left:var(--timeline-axis-x)!important;
-    right:auto!important;
-    width:26px!important;
+    left:var(--timeline-axis-x);
+    right:auto;
+    width:26px;
   }
-  .dayNowLine::before,
-  .adaptiveGapMarker::before,
-  .idleBreak::before,
-  .idleBreak::after,
-  .idleBreakGlyph{
-    left:var(--timeline-axis-x)!important;
-  }
-}
-
-
-/* ===== 0.16.2 timeline axis centered in the content viewport ===== */
-/* Geometry is physical (left/right), independent of RTL logical insets. */
-@media(min-width:801px){
-  .trueDayRail{
-    --timeline-axis-x:50%;
-  }
-  .trueDayRail::before,
-  .timelineEventAnchor,
-  .timelineEventConnectorV,
-  .timelineEventDuration,
-  .dayNowLine::before,
-  .adaptiveGapMarker::before,
-  .idleBreak::before,
-  .idleBreak::after,
-  .idleBreakGlyph{
-    left:var(--timeline-axis-x)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .trueDayRail::before,
-  .timelineEventConnectorV,
-  .timelineEventDuration,
-  .dayNowLine::before,
-  .adaptiveGapMarker::before,
-  .idleBreakGlyph{
-    transform:translateX(-50%)!important;
-  }
-  .timelineEventAnchor{
-    transform:translate(-50%,-50%)!important;
-  }
+  .timelineEventNode.left .timelineEventCard,
   .timelineEventNode.right .timelineEventCard{
-    left:calc(var(--timeline-axis-x) + 38px)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .timelineEventNode.left .timelineEventCard{
-    right:calc(100% - var(--timeline-axis-x) + 38px)!important;
-    left:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .timelineEventNode.right .timelineEventConnectorH{
-    left:var(--timeline-axis-x)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .timelineEventNode.left .timelineEventConnectorH{
-    right:calc(100% - var(--timeline-axis-x))!important;
-    left:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .dayNowLine>span{
-    left:calc(var(--timeline-axis-x) + 12px)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .idleBreakLabel{
-    left:calc(var(--timeline-axis-x) + 22px)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-  }
-  .timelineTooltip{
-    left:var(--timeline-axis-x)!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-    transform:translateX(-50%)!important;
+    left:46px;
+    right:8px;
+    inset-inline-start:auto;
+    inset-inline-end:auto;
+    width:auto;
   }
 }
-
 </style>
 </head>
 <body>
