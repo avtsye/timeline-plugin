@@ -1234,47 +1234,33 @@ textarea:focus-visible{
 }
 
 
-/* ===== 0.16.5 legacy centered rail + exact marker alignment ===== */
-/* Preserve the original two-sided timeline layout. Only the circular markers use
-   a physical center coordinate so RTL cannot shift them beside the line. */
+
+/* ===== 0.16.7 RTL-safe centered marker alignment ===== */
+/*
+  Root cause fixed here:
+  the previous patches mixed left/right with inset-inline-* on the same element.
+  In RTL those logical properties map back onto left/right and overrode the physical
+  center, collapsing each event node toward the right edge.
+  Keep the original full-width node + logical 50% layout; only correct the half-dot
+  transform direction in RTL.
+*/
 @media(min-width:801px){
-  .trueDayRail .timelineEventAnchor{
-    left:50%;
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
+  html[dir="rtl"] .trueDayRail .timelineEventAnchor{
+    transform:translate(50%,-50%)!important;
+  }
+  html[dir="ltr"] .trueDayRail .timelineEventAnchor{
     transform:translate(-50%,-50%)!important;
   }
-  .trueDayRail .adaptiveGapMarker::before,
-  .trueDayRail .dayNowLine::before{
-    left:50%;
-    right:auto;
-    inset-inline-start:auto;
-    inset-inline-end:auto;
+
+  html[dir="rtl"] .trueDayRail .adaptiveGapMarker::before,
+  html[dir="rtl"] .trueDayRail .dayNowLine::before{
+    transform:translateX(50%)!important;
+  }
+  html[dir="ltr"] .trueDayRail .adaptiveGapMarker::before,
+  html[dir="ltr"] .trueDayRail .dayNowLine::before{
     transform:translateX(-50%)!important;
   }
 }
-
-/* ===== 0.16.6 marker containing-block fix ===== */
-/* Keep the restored legacy two-sided layout. The event node itself must span the
-   full physical rail; otherwise 50% can resolve against a collapsed/right-edge box in RTL. */
-@media(min-width:801px){
-  .trueDayRail .timelineEventNode{
-    left:0!important;
-    right:0!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-    width:auto!important;
-  }
-  .trueDayRail .timelineEventAnchor{
-    left:50%!important;
-    right:auto!important;
-    inset-inline-start:auto!important;
-    inset-inline-end:auto!important;
-    transform:translate(-50%,-50%)!important;
-  }
-}
-
 </style>
 </head>
 <body>
