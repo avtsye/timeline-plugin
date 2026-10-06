@@ -202,7 +202,7 @@ for(const required of [
 ]){
   if(!html.includes(required)) throw new Error('Canonical timeline geometry missing: '+required);
 }
-if(!app.includes("rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px')")) throw new Error('Timeline axis is not measured from rail center');
+if(!app.includes("viewportCenter=hr&&hr.width?hr.left+hr.width/2:rr.left+width/2")) throw new Error('Timeline axis is not measured from the visible content center');
 console.log('Canonical centered timeline axis audit OK');
 
 
