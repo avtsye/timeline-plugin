@@ -204,3 +204,18 @@ for(const required of [
 }
 if(!app.includes("rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px')")) throw new Error('Timeline axis is not measured from rail center');
 console.log('Canonical centered timeline axis audit OK');
+
+
+/* 0.16.3 symmetric center guard */
+if(!app.includes("viewportCenter=hr&&hr.width?hr.left+hr.width/2:rr.left+width/2")) throw new Error('Timeline center must be based on visible content host');
+if(!app.includes("requestAnimationFrame(()=>syncTimelineAxisCenter(rail))")) throw new Error('Timeline center must be resynced after layout');
+for(const required of [
+  '0.16.3 symmetric centered timeline',
+  '#content .trueDayRail .timelineEventNode.right .timelineEventCard{',
+  '#content .trueDayRail .timelineEventNode.left .timelineEventCard{',
+  'width:calc(var(--timeline-axis-x) - 54px)!important',
+  'width:calc(100% - var(--timeline-axis-x) - 54px)!important'
+]){
+  if(!html.includes(required)) throw new Error('Symmetric centered timeline CSS missing: '+required);
+}
+console.log('Symmetric centered timeline audit OK');
