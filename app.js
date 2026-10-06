@@ -1161,12 +1161,19 @@ function syncTimelineAxisCenter(rail){
     rail.style.removeProperty('--timeline-axis-x');
     return;
   }
-  const width=rail.getBoundingClientRect().width||rail.clientWidth||0;
-  if(width>0)rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px');
+  const rr=rail.getBoundingClientRect();
+  const host=document.querySelector('.content-host');
+  const hr=host?host.getBoundingClientRect():null;
+  const width=rr.width||rail.clientWidth||0;
+  if(!width)return;
+  const viewportCenter=hr&&hr.width?hr.left+hr.width/2:rr.left+width/2;
+  const localCenter=Math.max(40,Math.min(width-40,viewportCenter-rr.left));
+  rail.style.setProperty('--timeline-axis-x',Math.round(localCenter)+'px');
 }
 function renderTrueDayRail(rail,sessionItems,dayTs){
   rail.classList.add('trueDayRail','adaptiveTimelineRail');
   syncTimelineAxisCenter(rail);
+  requestAnimationFrame(()=>syncTimelineAxisCenter(rail));
   const zoom=Math.max(.5,Math.min(2.4,Number(settings.timelineZoom||1)));
 
   const unique=new Map();
@@ -1271,6 +1278,7 @@ function render(){
       const grid=wrap.querySelector('.sessionGrid');items.forEach(s=>{const card=createSessionCard(s);card.tabIndex=0;card.dataset.sessionId=s.id;card.oncontextmenu=e=>{e.preventDefault();showContextMenu(e.clientX,e.clientY,sessionContextItems(s))};grid.appendChild(card)});
     }
     cont.appendChild(wrap);
+    if(viewMode==='day')requestAnimationFrame(()=>syncTimelineAxisCenter(wrap.querySelector('.timelineRail')));
   }
   armVirtualSentinel(allSessions.length);
   applyShellIcons();
