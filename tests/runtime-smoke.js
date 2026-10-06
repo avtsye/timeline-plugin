@@ -202,20 +202,20 @@ for(const required of [
 ]){
   if(!html.includes(required)) throw new Error('Canonical timeline geometry missing: '+required);
 }
-if(!app.includes("viewportCenter=hr&&hr.width?hr.left+hr.width/2:rr.left+width/2")) throw new Error('Timeline axis is not measured from the visible content center');
 console.log('Canonical centered timeline axis audit OK');
 
 
-/* 0.16.3 symmetric center guard */
-if(!app.includes("viewportCenter=hr&&hr.width?hr.left+hr.width/2:rr.left+width/2")) throw new Error('Timeline center must be based on visible content host');
-if(!app.includes("requestAnimationFrame(()=>syncTimelineAxisCenter(rail))")) throw new Error('Timeline center must be resynced after layout');
+
+
+/* 0.16.4 fixed physical-center timeline guard */
+if(!app.includes("rail.style.removeProperty('--timeline-axis-x')")) throw new Error('Timeline runtime must not inject a drifting axis coordinate');
 for(const required of [
-  '0.16.3 symmetric centered timeline',
-  '#content .trueDayRail .timelineEventNode.right .timelineEventCard{',
-  '#content .trueDayRail .timelineEventNode.left .timelineEventCard{',
-  'width:calc(var(--timeline-axis-x) - 54px)!important',
-  'width:calc(100% - var(--timeline-axis-x) - 54px)!important'
+  '0.16.4 fixed center-axis geometry',
+  '--timeline-axis-x:50%!important',
+  'left:calc(50% + 38px)!important',
+  'right:calc(50% + 38px)!important',
+  'width:calc(50% - 54px)!important'
 ]){
-  if(!html.includes(required)) throw new Error('Symmetric centered timeline CSS missing: '+required);
+  if(!html.includes(required)) throw new Error('Fixed centered timeline geometry missing: '+required);
 }
-console.log('Symmetric centered timeline audit OK');
+console.log('Fixed physical-center timeline audit OK');
