@@ -1155,15 +1155,8 @@ function positionForTimeAdaptive(ts,events,positions,zoom){
   }
   return positions.get(last);
 }
-function syncTimelineAxisCenter(rail){
-  if(!rail)return;
-  // Desktop geometry is intentionally CSS-only: 50% of the rendered rail.
-  // Keeping runtime measurements out avoids RTL/layout timing drift.
-  rail.style.removeProperty('--timeline-axis-x');
-}
 function renderTrueDayRail(rail,sessionItems,dayTs){
   rail.classList.add('trueDayRail','adaptiveTimelineRail');
-  syncTimelineAxisCenter(rail);
   const zoom=Math.max(.5,Math.min(2.4,Number(settings.timelineZoom||1)));
 
   const unique=new Map();
@@ -1675,10 +1668,6 @@ function closeFilterPopover({focus=false}={}){
   const toggle=$('filterToggleBtn');if(toggle){toggle.setAttribute('aria-expanded','false');if(focus)toggle.focus()}
 }
 window.addEventListener('resize',syncSettingsPaneBottomInset);
-function syncVisibleTimelineAxes(){
-  document.querySelectorAll('.trueDayRail').forEach(syncTimelineAxisCenter);
-}
-window.addEventListener('resize',syncVisibleTimelineAxes);
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
 $('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
