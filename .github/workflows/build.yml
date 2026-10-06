@@ -33,6 +33,36 @@ jobs:
       - name: Runtime smoke
         run: node tests/runtime-smoke.js
 
+      - name: CSS architecture audit
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const css=(html.match(/<style>([\s\S]*?)<\/style>/)||[])[1]||'';
+          const forbidden=[
+            '0.15.7 simplified settings',
+            '0.15.8 sidebar-bottom settings',
+            '0.15.9 comprehensive UX pass',
+            '0.15.10 settings overlap hardening',
+            '0.15.11 settings alignment + clipping fix',
+            '0.15.12 settings right-cluster + footer containment',
+            '0.15.13 definitive settings layout',
+            '0.15.14 settings: restore right navigation + table layout',
+            '0.15.15 Otzaria-style settings sidebar',
+            '0.15.16 compact settings rows',
+            '0.15.17 truly compact settings controls',
+            '0.15.18 compact inline toggle rows'
+          ];
+          const returned=forbidden.filter(x=>css.includes(x));
+          if(returned.length) throw new Error('Legacy settings CSS returned: '+returned.join(', '));
+          if(!css.includes('0.16.0 canonical Otzaria UI')) throw new Error('Canonical Otzaria UI block missing');
+          const important=(css.match(/!important/g)||[]).length;
+          if(important>150) throw new Error('CSS !important budget exceeded: '+important);
+          const settingsLayout=(css.match(/#settingsScreen\.settings-pane\.screen\.active\s*\{/g)||[]).length;
+          if(settingsLayout!==1) throw new Error('Settings root layout must have exactly one canonical definition; found '+settingsLayout);
+          console.log('CSS architecture OK: '+important+' !important declarations');
+          NODE
+
       - name: Check 0.9.97 API compatibility
         run: |
           node <<'NODE'
