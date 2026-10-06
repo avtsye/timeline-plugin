@@ -213,3 +213,20 @@ for(const required of [
 }
 if(app.includes('syncTimelineAxisCenter(')) throw new Error('Runtime axis recentering must stay removed');
 console.log('Legacy centered rail marker alignment audit OK');
+
+
+/* 0.16.6 extended optional tracking guard */
+for(const id of ['trackFind','trackSearches','trackSettingsChanges']){
+  if(!html.includes('id="'+id+'"')) throw new Error('Missing optional tracking control: '+id);
+}
+for(const required of [
+  "Otzaria.on('settings.changed'",
+  "history.listSearches",
+  "record('search'",
+  "record('find'"
+]){
+  if(!background.includes(required)) throw new Error('Extended background tracking missing: '+required);
+}
+if(!manifest.permissions.includes('events.subscribe:settings.changed')) throw new Error('settings.changed permission missing');
+if(!html.includes('0.16.6 marker containing-block fix')) throw new Error('Marker containing-block fix missing');
+console.log('Extended optional tracking audit OK');
