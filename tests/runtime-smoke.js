@@ -198,3 +198,16 @@ for(const required of [
   if(!html.includes(required)) throw new Error('Exact timeline axis alignment CSS missing: '+required);
 }
 console.log('Exact timeline axis alignment audit OK');
+
+
+/* 0.16.2 centered timeline-axis guard */
+if(!app.includes("rail.style.setProperty('--timeline-axis-x',Math.round(width/2)+'px')")) throw new Error('Timeline axis is not measured from the rail center');
+for(const required of [
+  '0.16.2 timeline axis centered in the content viewport',
+  '.timelineEventNode.right .timelineEventCard{',
+  'left:calc(var(--timeline-axis-x) + 38px)!important',
+  'right:calc(100% - var(--timeline-axis-x) + 38px)!important'
+]){
+  if(!html.includes(required)) throw new Error('Centered physical timeline geometry missing: '+required);
+}
+console.log('Centered timeline axis audit OK');
