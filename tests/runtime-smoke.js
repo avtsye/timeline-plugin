@@ -185,3 +185,16 @@ console.log('UX audit 2 interaction/layout guards OK');
 if(!app.includes("const eventsForDay=[...unique.values()].sort((a,b)=>b.time-a.time)")) throw new Error('Day timeline must render newest events first, matching day bucket order');
 if(!app.includes("Math.abs(cur.time-prev.time)")) throw new Error('Adaptive timeline gaps must support descending chronological order');
 console.log('Newest-first day timeline ordering audit OK');
+
+
+/* 0.16.1 exact timeline-axis alignment guard */
+for(const required of [
+  '--timeline-axis-x:50%',
+  '.timelineEventAnchor{',
+  'left:var(--timeline-axis-x)!important',
+  'inset-inline-start:auto!important',
+  '.trueDayRail{--timeline-axis-x:20px}'
+]){
+  if(!html.includes(required)) throw new Error('Exact timeline axis alignment CSS missing: '+required);
+}
+console.log('Exact timeline axis alignment audit OK');
