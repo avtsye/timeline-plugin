@@ -1,6 +1,8 @@
 const fs=require('fs');
 const app=fs.readFileSync('app.js','utf8');
 const html=fs.readFileSync('index.html','utf8');
+const background=fs.readFileSync('background.js','utf8');
+const manifest=JSON.parse(fs.readFileSync('manifest.json','utf8'));
 
 const ids=[...app.matchAll(/\$\('([^']+)'\)/g)].map(m=>m[1]);
 const missing=[...new Set(ids)].filter(id=>!html.includes('id="'+id+'"'));
