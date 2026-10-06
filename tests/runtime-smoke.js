@@ -139,7 +139,7 @@ for(const legacy of ['data-settings-tab="backup"','data-settings-tab="integratio
   if(html.includes(legacy)) throw new Error('Legacy sparse settings tab returned: '+legacy);
 }
 if(html.includes('id="trackingStatus"')||html.includes('id="trackingDetail"')) throw new Error('Duplicated diagnostics tracking summary returned');
-if(!html.includes('feedbackCompact')||!html.includes('height:96px')) throw new Error('Compact feedback layout missing');
+if(!html.includes('feedbackCompact')||!html.includes('height:84px')) throw new Error('Compact feedback layout missing');
 console.log('Simplified settings and secondary-screen UX audit OK');
 
 
@@ -150,8 +150,12 @@ if(!html.includes('class="nav-bottom"')) throw new Error('Settings must live in 
 const mainNavStart=html.indexOf('<nav class="nav-group">');
 const mainNavEnd=html.indexOf('</nav>',mainNavStart);
 if(mainNavStart>=0&&mainNavEnd>mainNavStart&&html.slice(mainNavStart,mainNavEnd).includes('data-screen="settings"')) throw new Error('Settings returned to the primary nav group');
-for(const required of ['.dangerGroup .danger{','.settingsSaveBar .btn{','border-radius:var(--radius-pill)!important']){
+for(const required of ['#settingsScreen .dangerGroup .danger{','#settingsScreen .settingsSaveBar .btn{','border-radius:var(--radius-pill)']){
   if(!html.includes(required)) throw new Error('Settings polish missing: '+required);
+}
+if(!html.includes('0.16.0 canonical Otzaria UI')) throw new Error('Canonical settings/UI stylesheet missing');
+for(const legacyCss of ['0.15.9 comprehensive UX pass','0.15.10 settings overlap hardening','0.15.18 compact inline toggle rows']){
+  if(html.includes(legacyCss)) throw new Error('Legacy settings CSS returned: '+legacyCss);
 }
 console.log('Bottom settings navigation and settings polish audit OK');
 
