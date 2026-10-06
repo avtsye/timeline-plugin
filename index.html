@@ -83,12 +83,6 @@ button{cursor:pointer}
 .snapshotList,.searches,.actions,.sessionTools,.books{display:flex;gap:8px;flex-wrap:wrap}
 .snapshotCard{min-width:180px;max-width:260px;flex:1;text-align:start;background:var(--color-surface-container-low);color:var(--color-on-surface);border:1px solid var(--color-outline-variant);border-radius:var(--radius-md);padding:12px}
 .snapshotCard b,.snapshotCard small{display:block}.snapshotCard small{color:var(--color-on-surface-variant);margin-top:4px}
-.settings-pane.screen.active{display:grid;grid-template-columns:160px minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:0;padding:0}.settings-pane.screen.active>.page-head{grid-column:1/-1;padding:10px 14px;margin:0;border-bottom:1px solid var(--color-outline-variant)}.settings-tabs{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:2px;margin:0;padding:8px 6px;background:var(--color-surface-container-low);border-inline-end:1px solid var(--color-outline-variant);overflow-y:auto}.settingsPane{grid-column:2;grid-row:2;padding:10px 14px;overflow-y:auto}
-.settingsTabBtn{border:0;background:transparent;padding:9px 12px;border-radius:var(--radius-sm);text-align:start;color:var(--color-on-surface-variant)}
-.settingsTabBtn.active{background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-weight:600}
-.settingsPane{display:none}.settingsPane.active{display:block}
-.checkRow{display:flex;align-items:center;gap:9px;margin:10px 0}.checkRow input{width:18px;height:18px}
-.feedbackBox{width:100%;min-height:120px;resize:vertical}
 .timelineRail{position:relative;padding:6px 0 24px}
 .timelineRail::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:var(--color-outline-variant);transform:translateX(50%)}
 .bucket{margin:20px 0}.bucketTitle{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:12px}.bucketTitle h2{margin:0;font-size:1.05em}
@@ -706,7 +700,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* UX audit hardening */
 .srOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.settingsSaveBar{grid-column:2;grid-row:3;z-index:12;display:flex;justify-content:flex-end;padding:10px 14px;background:color-mix(in srgb,var(--color-surface-container-highest) 94%,transparent);border-top:1px solid var(--color-outline-variant);backdrop-filter:blur(8px)}
 .toolbarPopover{max-height:min(70vh,420px);overflow:auto;overscroll-behavior:contain}
 .contextMenu button:focus-visible{outline:2px solid var(--color-primary);outline-offset:-2px;background:color-mix(in srgb,var(--color-on-surface) 8%,transparent)}
 .modalOverlay{overflow:auto;overscroll-behavior:contain}
@@ -720,12 +713,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 
 
-@media(max-width:600px){
-  .settings-pane.screen.active{grid-template-columns:1fr;grid-template-rows:auto auto 1fr auto}
-  .settings-tabs{grid-column:1;grid-row:2}
-  .settingsPane{grid-column:1;grid-row:3}
-  .settingsSaveBar{grid-column:1;grid-row:4}
-}
 
 /* UX audit responsive analytics */
 .yearHeat{
@@ -742,41 +729,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 
 
-/* 0.15.7 simplified settings */
-.settings-pane.screen.active{grid-template-columns:132px minmax(0,1fr)!important}
-.settings-tabs{padding:6px 4px!important}
-.settingsPane{padding:12px 16px!important;max-width:820px;width:100%}
-.settingsGroup{padding:12px 0;border-bottom:1px solid var(--color-outline-variant)}
-.settingsGroup:last-child{border-bottom:0}
-.settingsGroup h3{margin:0 0 10px;font-size:15px}
-.settingsGroupHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.settingsGroupHead h3{margin:0}
-.settingsHint{font-size:11px;color:var(--color-on-surface-variant);margin-top:3px}
-.settingFieldRow{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:42px}
-.settingFieldRow>label{font-size:13px;color:var(--color-on-surface)}
-.settingFieldRow .appDropdown{min-width:180px;max-width:260px}
-.settingsFieldsGrid{display:grid;grid-template-columns:1fr;gap:4px}
-.settingsChecksGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
-.settingsGroup .checkRow{min-height:40px;margin:0;padding:4px 0}
-.settingsCompactActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.settingsCompactActions button,.settingsInlineAction{min-height:32px;padding:4px 10px;border:0;border-radius:var(--otz-radius);background:var(--color-secondary-container);color:var(--color-on-secondary-container)}
-.feedbackCompact{max-width:680px}
-.feedbackToolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.feedbackToolbar .appDropdown{min-width:180px}
-.feedbackToolbar .btn{margin-inline-start:auto}
-.feedbackBox{min-height:84px!important;max-height:180px!important;height:96px;padding:10px 12px;box-sizing:border-box}
-.dangerGroup .danger{flex:0 0 auto}
-.settingsSaveBar{max-width:820px}
-@media(max-width:700px){
-  .settings-pane.screen.active{grid-template-columns:1fr!important}
-  .settingsChecksGrid{grid-template-columns:1fr}
-  .settingFieldRow{align-items:flex-start;flex-direction:column;gap:5px;padding:6px 0}
-  .settingFieldRow .appDropdown{width:100%;max-width:none}
-  .feedbackToolbar{align-items:stretch;flex-direction:column}
-  .feedbackToolbar .appDropdown,.feedbackToolbar .btn{width:100%;margin:0}
-}
-
-
 /* 0.15.7 compact secondary screens */
 .screen.native-page{padding:14px 16px!important}
 .screen.native-page>.page-head{margin-bottom:12px!important}
@@ -788,92 +740,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 #diagnosticsContent .native-section:last-child,
 #analyticsContent .native-section:last-child{margin-bottom:0}
 .snapshotList{gap:4px!important}
-
-
-/* 0.15.8 sidebar-bottom settings + polished settings actions */
-.side-nav{
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-}
-.nav-group{
-  flex:0 1 auto;
-}
-.nav-bottom{
-  margin-top:auto;
-  padding-top:6px;
-  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 70%,transparent);
-  flex:0 0 auto;
-}
-.nav-bottom .nav-item{
-  margin-top:2px;
-}
-
-/* Keep settings controls flat and native instead of boxed HTML defaults */
-.settingsGroup{
-  background:transparent!important;
-}
-.settingsGroup .checkRow{
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-}
-.settingsGroup .checkRow:hover{
-  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
-}
-.settingsGroup .appDropdown{
-  background:transparent!important;
-}
-
-/* Clean action buttons */
-.settingsCompactActions button,
-.settingsInlineAction,
-.dangerGroup .danger,
-.settingsSaveBar .btn{
-  appearance:none;
-  -webkit-appearance:none;
-  border:0!important;
-  outline:0;
-  box-shadow:none!important;
-  min-height:34px;
-  padding:6px 13px;
-  border-radius:var(--radius-pill)!important;
-  font-weight:600;
-}
-.settingsCompactActions button,
-.settingsInlineAction{
-  background:var(--color-secondary-container)!important;
-  color:var(--color-on-secondary-container)!important;
-}
-.dangerGroup .danger{
-  background:var(--color-error-container)!important;
-  color:var(--color-on-error-container)!important;
-}
-.dangerGroup .danger:hover{
-  background:color-mix(in srgb,var(--color-error-container) 86%,var(--color-error))!important;
-}
-.settingsSaveBar{
-  background:transparent!important;
-  border-top:1px solid var(--color-outline-variant)!important;
-  backdrop-filter:none!important;
-  padding:8px 16px!important;
-}
-.settingsSaveBar .btn{
-  min-width:74px;
-  background:var(--color-primary)!important;
-  color:var(--color-on-primary)!important;
-}
-.settingsGroup select,
-.settingsGroup textarea{
-  box-shadow:none!important;
-}
-.settingsGroup textarea{
-  border-radius:var(--otz-radius)!important;
-}
-@media(max-width:700px){
-  .side-nav{overflow-y:auto!important}
-  .nav-bottom{position:sticky;bottom:0;background:var(--color-surface-container-low)}
-}
 
 
 /* UX audit 2: consolidate quick navigation into filters */
@@ -967,21 +833,6 @@ textarea:focus-visible{
   outline:2px solid var(--color-primary)!important;
   outline-offset:2px;
 }
-@media(max-width:700px){
-  .settings-tabs{
-    flex-direction:row!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    border-inline-end:0!important;
-    border-bottom:1px solid var(--color-outline-variant);
-    padding:4px!important;
-    scrollbar-width:thin;
-  }
-  .settingsTabBtn{
-    flex:0 0 auto;
-    white-space:nowrap;
-  }
-}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{
     scroll-behavior:auto!important;
@@ -992,1676 +843,395 @@ textarea:focus-visible{
 }
 
 
-/* ===== 0.15.9 comprehensive UX pass ===== */
-.settings-pane.screen.active{
-  grid-template-columns:124px minmax(0,1fr)!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-  overflow:hidden!important;
-}
-.settings-pane.screen.active>.page-head{
-  padding:12px 18px!important;
-}
-.settings-tabs{
-  min-height:0!important;
-  overflow-y:auto!important;
-  padding:8px 6px!important;
-}
-.settingsPane{
-  width:min(100%,760px)!important;
-  max-width:760px!important;
-  min-height:0!important;
-  padding:14px 20px 18px!important;
-  justify-self:start!important;
-  align-self:start!important;
-  overflow-y:auto!important;
-}
-.settingsGroup{
-  padding:14px 0!important;
-}
-.settingsGroup:first-child{padding-top:4px!important}
-.settingsGroup h3{
-  margin:0 0 8px!important;
-  font-size:15px!important;
-  line-height:1.35!important;
-}
-.settingsGroup .checkRow{
-  width:100%;
-  max-width:680px;
-  min-height:44px!important;
-  margin:0!important;
-  padding:6px 2px!important;
-  gap:18px!important;
-}
-.settingTileContent{gap:12px!important}
-.settingTileText{line-height:1.35}
-.settingFieldRow{
-  width:100%;
-  max-width:680px;
-  min-height:44px!important;
-}
-.settingsChecksGrid{
-  width:100%;
-  max-width:680px;
-}
-.settingsGroupHead{
-  width:100%;
-  max-width:680px;
-  align-items:center!important;
-}
-.settingsCompactActions{
-  width:100%;
-  max-width:680px;
-}
-.feedbackCompact{
-  width:100%;
-  max-width:680px!important;
-}
-.feedbackToolbar{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
-  margin:0 0 8px!important;
-}
-.feedbackToolbar .appDropdown{
-  min-width:190px!important;
-  max-width:280px!important;
-  flex:0 1 280px!important;
-}
-.feedbackToolbar .btn{
-  margin:0!important;
-  flex:0 0 auto!important;
-}
-.feedbackBox{
-  width:100%!important;
-  height:88px!important;
-  min-height:88px!important;
-  max-height:170px!important;
-  resize:vertical!important;
-  padding:10px 12px!important;
-  line-height:1.45!important;
-}
-.dangerGroup{
-  width:100%;
-  max-width:680px;
-  margin-top:6px;
-  padding:12px 14px!important;
-  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
-  border-radius:var(--otz-radius)!important;
-  background:color-mix(in srgb,var(--color-error-container) 24%,transparent)!important;
-}
-.dangerGroup .settingsGroupHead{max-width:none}
-.dangerGroup .settingsHint{max-width:520px}
-.settingsSaveBar{
-  grid-column:2!important;
-  grid-row:3!important;
-  width:min(100%,760px)!important;
-  max-width:760px!important;
-  justify-self:start!important;
-  justify-content:flex-start!important;
-  padding:9px 20px!important;
-  background:color-mix(in srgb,var(--panel-bg) 94%,transparent)!important;
-  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 75%,transparent)!important;
-  backdrop-filter:blur(8px)!important;
-}
-.settingsSaveBar .btn{min-width:88px!important}
 
-/* Sidebar: keep Settings at the bottom without the oversized block seen in compact heights. */
+/* ===== 0.16.0 canonical Otzaria UI ===== */
+.side-nav{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+}
 .side-nav>.nav-group{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  overflow-y:auto!important;
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
 }
 .side-nav>.nav-bottom{
-  flex:0 0 auto!important;
-  margin-top:0!important;
-  padding:4px 0 0!important;
-  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 55%,transparent)!important;
-  background:transparent!important;
+  flex:0 0 auto;
+  margin-top:auto;
+  padding-top:6px;
+  border-top:1px solid color-mix(in srgb,var(--color-outline-variant) 60%,transparent);
+  background:var(--color-surface-container-low);
 }
-.nav-bottom .nav-item{
-  min-height:54px!important;
-  margin:0!important;
-}
+.nav-bottom .nav-item{margin-top:2px}
 
-/* Shared secondary-screen rhythm */
 .screen[data-screen-panel="overview"],
 .screen.native-page{
+  padding:14px 16px;
   scroll-padding-block:12px;
 }
 .screen[data-screen-panel="overview"]>.page-head,
 .screen.native-page>.page-head{
+  margin-bottom:12px;
   padding-bottom:10px;
   border-bottom:1px solid color-mix(in srgb,var(--color-outline-variant) 55%,transparent);
 }
+.native-page-body>.native-section,
+.native-page-body>.native-chart-block{margin-block:0 12px}
+.native-section{margin-bottom:12px}
+.native-section-title{margin-bottom:6px}
+#diagnosticsContent .native-section:last-child,
+#analyticsContent .native-section:last-child{margin-bottom:0}
+.snapshotList{gap:4px}
 .native-row{min-height:48px}
 .native-row-main{min-width:0}
-.native-row-main b,.native-row-main small{
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+.native-row-main b,.native-row-main small{overflow:hidden;text-overflow:ellipsis}
 .snapshotCard{min-height:52px}
 .searchChip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* Prevent controls from feeling detached on wide screens. */
-@media(min-width:1100px){
-  .screen[data-screen-panel="overview"],
-  .screen.native-page{padding-inline:22px!important}
-}
-@media(max-width:700px){
-  .settings-pane.screen.active{
-    grid-template-columns:1fr!important;
-    grid-template-rows:auto auto minmax(0,1fr) auto!important;
-  }
-  .settings-tabs{
-    grid-column:1!important;
-    grid-row:2!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-  }
-  .settingsPane{
-    grid-column:1!important;
-    grid-row:3!important;
-    width:100%!important;
-    max-width:none!important;
-    padding:12px 14px 16px!important;
-  }
-  .settingsSaveBar{
-    grid-column:1!important;
-    grid-row:4!important;
-    width:100%!important;
-    max-width:none!important;
-    padding:8px 14px!important;
-  }
-  .settingsGroup .checkRow,
-  .settingFieldRow,
-  .settingsChecksGrid,
-  .settingsGroupHead,
-  .settingsCompactActions,
-  .feedbackCompact,
-  .dangerGroup{max-width:none!important}
-  .feedbackToolbar{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-  }
-  .feedbackToolbar .appDropdown{
-    width:100%!important;
-    min-width:0!important;
-    max-width:none!important;
-  }
-}
-@media(max-width:480px){
-  .feedbackToolbar{grid-template-columns:1fr!important}
-  .feedbackToolbar .btn{width:100%!important}
-  .settingsGroupHead{align-items:flex-start!important;flex-wrap:wrap}
-  .dangerGroup .danger{width:100%}
-}
-
-
-/* ===== 0.15.10 settings overlap hardening ===== */
-.settings-pane.screen.active{
-  grid-template-columns:128px minmax(0,1fr)!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-  overflow:hidden!important;
-}
-.settingsPane{
-  width:min(100%,780px)!important;
-  max-width:780px!important;
-  min-height:0!important;
-  overflow-y:auto!important;
-  padding:14px 18px 110px!important;
-  box-sizing:border-box!important;
-}
-.settings-tabs{
-  min-height:0!important;
-  overflow-y:auto!important;
-  padding:6px!important;
-}
-.settingsGroup{
-  padding:14px 0!important;
-  border-bottom:1px solid var(--color-outline-variant)!important;
-}
-.settingsGroup:last-child{border-bottom:0!important}
-.settingsGroup h3{
-  margin:0 0 8px!important;
-  line-height:1.35!important;
-}
-.settingsGroupHead{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:10px!important;
-  flex-wrap:wrap!important;
-}
-.settingsCompactActions{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  gap:8px!important;
-  margin-top:8px!important;
-}
-.settingsCompactActions button,
-.settingsInlineAction{
-  max-width:100%!important;
-  white-space:nowrap!important;
-  flex:0 1 auto!important;
-}
-.settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;
-  gap:8px 18px!important;
-  align-items:start!important;
-}
-.settingsChecksGrid .checkRow,
-.settingsGroup .checkRow{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;
-  column-gap:14px!important;
-  row-gap:0!important;
-  min-height:46px!important;
-  margin:0!important;
-  padding:6px 4px!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  background:transparent!important;
-  border:0!important;
-  border-radius:0!important;
-  flex-direction:initial!important;
-  justify-content:initial!important;
-}
-.settingTileContent{
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-width:0!important;
-  overflow:hidden!important;
-}
-.settingTileText{
-  min-width:0!important;
-  white-space:normal!important;
-  overflow-wrap:anywhere!important;
-  line-height:1.35!important;
-}
-.checkRow input[type="checkbox"]{
-  margin:0!important;
-  justify-self:end!important;
-  align-self:center!important;
-  flex:0 0 auto!important;
-}
-.settingsFieldsGrid{
-  display:grid!important;
-  grid-template-columns:1fr!important;
-  gap:8px!important;
-  width:100%!important;
-  max-width:680px!important;
-}
-.settingFieldRow{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) minmax(170px,240px)!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-height:44px!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-}
-.settingFieldRow>label{
-  min-width:0!important;
-  line-height:1.35!important;
-}
-.settingFieldRow .appDropdown{
-  width:100%!important;
-  min-width:0!important;
-  max-width:240px!important;
-  justify-self:start!important;
-}
-.feedbackCompact{max-width:680px!important}
-.feedbackToolbar{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  align-items:center!important;
-  gap:8px!important;
-  margin-bottom:8px!important;
-}
-.feedbackToolbar .appDropdown{
-  min-width:190px!important;
-  max-width:260px!important;
-  flex:0 1 260px!important;
-}
-.feedbackToolbar .btn{
-  flex:0 0 auto!important;
-  margin:0!important;
-}
-.feedbackBox{
-  width:100%!important;
-  min-height:88px!important;
-  max-height:180px!important;
-  height:96px!important;
-  box-sizing:border-box!important;
-}
-.dangerGroup{
-  padding:12px 14px!important;
-  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
-  border-radius:var(--otz-radius)!important;
-  background:color-mix(in srgb,var(--color-error-container) 20%,transparent)!important;
-}
-.settingsSaveBar{
-  grid-column:2!important;
-  grid-row:3!important;
-  position:relative!important;
-  bottom:auto!important;
-  z-index:15!important;
-  display:flex!important;
-  justify-content:flex-start!important;
-  width:min(100%,780px)!important;
-  max-width:780px!important;
-  padding:10px 18px!important;
-  background:color-mix(in srgb,var(--panel-bg) 96%,transparent)!important;
-  border-top:1px solid var(--color-outline-variant)!important;
-  backdrop-filter:blur(8px)!important;
-  box-sizing:border-box!important;
-}
-.settingsSaveBar .btn{min-width:88px!important}
-@media(max-width:980px){
-  .settingsChecksGrid{grid-template-columns:1fr!important}
-  .settingFieldRow{
-    grid-template-columns:1fr!important;
-    align-items:start!important;
-  }
-  .settingFieldRow .appDropdown{
-    max-width:none!important;
-    width:100%!important;
-  }
-}
-@media(max-width:700px){
-  .settings-pane.screen.active{
-    grid-template-columns:1fr!important;
-    grid-template-rows:auto auto minmax(0,1fr) auto!important;
-  }
-  .settings-tabs{
-    grid-column:1!important;
-    grid-row:2!important;
-    display:flex!important;
-    flex-direction:row!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    border-inline-end:0!important;
-    border-bottom:1px solid var(--color-outline-variant)!important;
-  }
-  .settingsPane{
-    grid-column:1!important;
-    grid-row:3!important;
-    width:100%!important;
-    max-width:none!important;
-    padding:12px 14px 104px!important;
-  }
-  .settingsSaveBar{
-    grid-column:1!important;
-    grid-row:4!important;
-    width:100%!important;
-    max-width:none!important;
-    padding:8px 14px!important;
-  }
-  .feedbackToolbar{
-    flex-direction:column!important;
-    align-items:stretch!important;
-  }
-  .feedbackToolbar .appDropdown,
-  .feedbackToolbar .btn{
-    width:100%!important;
-    max-width:none!important;
-  }
-}
-@media(max-width:480px){
-  .settingsGroupHead{align-items:flex-start!important}
-  .dangerGroup .danger{width:100%!important}
-}
-
-
-/* ===== 0.15.11 settings alignment + clipping fix ===== */
-/* Keep the settings content anchored to the physical right edge in RTL. */
-.settingsPane{
-  align-self:stretch!important;
-  height:100%!important;
-  max-height:100%!important;
-  justify-self:stretch!important;
-  margin-right:0!important;
-  margin-left:auto!important;
-  padding-bottom:24px!important;
-}
-.settingsPane>*{
-  margin-right:0;
-  margin-left:auto;
-}
-.settingsSaveBar{
-  align-self:stretch!important;
-  justify-self:stretch!important;
-  margin-right:0!important;
-  margin-left:auto!important;
-}
-
-/* The scrolling pane owns row 2; it may never paint under the save bar in row 3. */
-.settings-pane.screen.active{
-  min-height:0!important;
-}
-.settings-pane.screen.active>.settingsPane{
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-}
-.settingsFieldsGrid,
-.settingsChecksGrid,
-.settingsGroup,
-.feedbackCompact,
-.dangerGroup{
-  box-sizing:border-box!important;
-}
-
-/* Explicit physical-right alignment for labels/content in Hebrew. */
-html[dir="rtl"] .settingsPane,
-html[dir="rtl"] .settingsGroup,
-html[dir="rtl"] .settingFieldRow,
-html[dir="rtl"] .settingsGroupHead{
-  text-align:right!important;
-}
-html[dir="rtl"] .settingFieldRow .appDropdown{
-  justify-self:end!important;
-}
-html[dir="rtl"] .settingsSaveBar{
-  justify-content:flex-start!important;
-}
-
-/* On LTR interfaces the same layout naturally mirrors. */
-html[dir="ltr"] .settingsPane,
-html[dir="ltr"] .settingsGroup,
-html[dir="ltr"] .settingFieldRow,
-html[dir="ltr"] .settingsGroupHead{
-  text-align:left!important;
-}
-
-/* No active settings panel can extend into the footer row. */
-.settingsPane.active{
-  display:block!important;
-  position:relative!important;
-  inset:auto!important;
-}
-@media(max-width:700px){
-  .settingsPane{
-    height:100%!important;
-    max-height:100%!important;
-    padding-bottom:20px!important;
-  }
-}
-
-
-/* ===== 0.15.12 settings right-cluster + footer containment ===== */
-/* The active pane is strictly contained in row 2. The save bar always owns row 3. */
-.settings-pane.screen.active{
-  overflow:hidden!important;
-  grid-template-columns:128px minmax(0,1fr)!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-}
-.settingsPane,
-.settingsPane.active{
-  grid-column:2!important;
-  grid-row:2!important;
-  align-self:stretch!important;
-  justify-self:stretch!important;
-  width:100%!important;
-  max-width:none!important;
-  height:auto!important;
-  max-height:none!important;
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding:12px 18px 24px!important;
-  margin:0!important;
-  box-sizing:border-box!important;
-  overscroll-behavior:contain!important;
-}
-.settingsPane:not(.active){display:none!important}
-.settingsSaveBar{
-  grid-column:2!important;
-  grid-row:3!important;
-  align-self:end!important;
-  justify-self:stretch!important;
-  width:100%!important;
-  max-width:none!important;
-  min-height:54px!important;
-  margin:0!important;
-  padding:9px 18px!important;
-  position:relative!important;
-  z-index:20!important;
-  box-sizing:border-box!important;
-  background:var(--panel-bg)!important;
-  border-top:1px solid var(--color-outline-variant)!important;
-}
-
-/* In Hebrew, controls form a compact cluster from the right instead of stretching apart. */
-html[dir="rtl"] .settingsGroup{
-  width:100%!important;
-  max-width:760px!important;
-  margin-right:0!important;
-  margin-left:auto!important;
-}
-html[dir="rtl"] .settingFieldRow{
-  display:flex!important;
-  flex-direction:row!important;
-  justify-content:flex-start!important;
-  align-items:center!important;
-  gap:18px!important;
-  width:100%!important;
-  max-width:620px!important;
-  min-height:46px!important;
-}
-html[dir="rtl"] .settingFieldRow>label{
-  flex:0 0 155px!important;
-  text-align:right!important;
-}
-html[dir="rtl"] .settingFieldRow .appDropdown{
-  flex:0 0 260px!important;
-  width:260px!important;
-  max-width:260px!important;
-  min-width:0!important;
-  justify-self:auto!important;
-}
-html[dir="rtl"] .settingsGroup .checkRow,
-html[dir="rtl"] .settingsChecksGrid .checkRow{
-  display:flex!important;
-  flex-direction:row-reverse!important;
-  justify-content:flex-end!important;
-  align-items:center!important;
-  gap:12px!important;
-  width:auto!important;
-  max-width:100%!important;
-  min-height:44px!important;
-  padding:5px 2px!important;
-}
-html[dir="rtl"] .settingsGroup .checkRow .settingTileContent,
-html[dir="rtl"] .settingsChecksGrid .checkRow .settingTileContent{
-  flex:0 1 auto!important;
-  min-width:0!important;
-}
-html[dir="rtl"] .settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(220px,300px))!important;
-  justify-content:start!important;
-  gap:4px 22px!important;
-  width:auto!important;
-  max-width:680px!important;
-}
-html[dir="rtl"] .settingsCompactActions,
-html[dir="rtl"] .feedbackCompact,
-html[dir="rtl"] .dangerGroup{
-  margin-right:0!important;
-  margin-left:auto!important;
-}
-html[dir="rtl"] .settingsSaveBar{
-  justify-content:flex-start!important;
-}
-
-/* Mirror cleanly for English. */
-html[dir="ltr"] .settingsGroup{
-  width:100%!important;
-  max-width:760px!important;
-  margin-left:0!important;
-  margin-right:auto!important;
-}
-html[dir="ltr"] .settingFieldRow{
-  display:flex!important;
-  justify-content:flex-start!important;
-  align-items:center!important;
-  gap:18px!important;
-  width:100%!important;
-  max-width:620px!important;
-}
-html[dir="ltr"] .settingFieldRow>label{flex:0 0 155px!important}
-html[dir="ltr"] .settingFieldRow .appDropdown{
-  flex:0 0 260px!important;
-  width:260px!important;
-  max-width:260px!important;
-}
-html[dir="ltr"] .settingsGroup .checkRow,
-html[dir="ltr"] .settingsChecksGrid .checkRow{
-  display:flex!important;
-  flex-direction:row!important;
-  justify-content:flex-start!important;
-  gap:12px!important;
-  width:auto!important;
-}
-html[dir="ltr"] .settingsGroup .checkRow .settingTileContent,
-html[dir="ltr"] .settingsChecksGrid .checkRow .settingTileContent{flex:0 1 auto!important}
-
-@media(max-width:900px){
-  html[dir="rtl"] .settingsChecksGrid{grid-template-columns:minmax(220px,320px)!important}
-}
-@media(max-width:700px){
-  .settingsPane,.settingsPane.active{
-    grid-column:1!important;
-    grid-row:3!important;
-    padding:10px 14px 20px!important;
-  }
-  .settingsSaveBar{
-    grid-column:1!important;
-    grid-row:4!important;
-  }
-  html[dir="rtl"] .settingFieldRow,
-  html[dir="ltr"] .settingFieldRow{
-    flex-direction:column!important;
-    align-items:stretch!important;
-    gap:5px!important;
-    max-width:none!important;
-  }
-  html[dir="rtl"] .settingFieldRow>label,
-  html[dir="ltr"] .settingFieldRow>label{flex:0 0 auto!important}
-  html[dir="rtl"] .settingFieldRow .appDropdown,
-  html[dir="ltr"] .settingFieldRow .appDropdown{
-    flex:0 0 auto!important;
-    width:100%!important;
-    max-width:none!important;
-  }
-}
-
-
-/* ===== 0.15.13 definitive settings layout ===== */
-/* One predictable settings layout: header, top tabs, scrollable pane, footer. */
 #settingsScreen.settings-pane.screen.active{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr)!important;
-  grid-template-rows:auto auto minmax(0,1fr) auto!important;
-  min-height:0!important;
-  overflow:hidden!important;
+  direction:ltr;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 164px;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:0;
+  padding:0;
+  min-height:0;
+  overflow:hidden;
 }
 #settingsScreen>.page-head{
-  grid-column:1!important;
-  grid-row:1!important;
-  width:100%!important;
-  margin:0!important;
+  direction:rtl;
+  grid-column:1/-1;
+  grid-row:1;
+  margin:0;
+  padding:10px 16px;
+  border-bottom:1px solid var(--color-outline-variant);
 }
 #settingsScreen>.settings-tabs{
-  grid-column:1!important;
-  grid-row:2!important;
-  display:flex!important;
-  flex-direction:row!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:4px!important;
-  width:100%!important;
-  min-height:48px!important;
-  padding:5px 18px!important;
-  margin:0!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-  border:0!important;
-  border-bottom:1px solid var(--color-outline-variant)!important;
-  background:var(--panel-bg)!important;
-  box-sizing:border-box!important;
+  direction:rtl;
+  grid-column:2;
+  grid-row:2/4;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  width:164px;
+  min-width:164px;
+  min-height:0;
+  margin:0;
+  padding:8px 7px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:var(--color-surface-container-low);
+  border-inline-start:1px solid var(--color-outline-variant);
 }
 #settingsScreen>.settings-tabs .settingsTabBtn{
-  flex:0 0 auto!important;
-  min-height:36px!important;
-  padding:6px 14px!important;
-  margin:0!important;
-  border-radius:var(--radius-pill)!important;
-}
-#settingsScreen>.settingsPane,
-#settingsScreen>.settingsPane.active{
-  grid-column:1!important;
-  grid-row:3!important;
-  width:min(100%,760px)!important;
-  max-width:760px!important;
-  min-height:0!important;
-  height:auto!important;
-  max-height:none!important;
-  margin:0!important;
-  margin-left:auto!important;
-  margin-right:0!important;
-  padding:14px 18px 28px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  box-sizing:border-box!important;
-  align-self:stretch!important;
-  justify-self:stretch!important;
-}
-#settingsScreen>.settingsPane:not(.active){display:none!important}
-#settingsScreen>.settingsSaveBar{
-  grid-column:1!important;
-  grid-row:4!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  width:100%!important;
-  min-height:56px!important;
-  margin:0!important;
-  padding:9px 18px!important;
-  position:relative!important;
-  inset:auto!important;
-  z-index:30!important;
-  background:var(--panel-bg)!important;
-  border-top:1px solid var(--color-outline-variant)!important;
-  box-sizing:border-box!important;
-}
-
-/* Clean, compact groups instead of controls floating across the screen. */
-#settingsScreen .settingsGroup{
-  width:100%!important;
-  max-width:720px!important;
-  margin:0!important;
-  padding:14px 0!important;
-  border-bottom:1px solid color-mix(in srgb,var(--color-outline-variant) 72%,transparent)!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingsGroup:last-child{border-bottom:0!important}
-#settingsScreen .settingsGroup h3{
-  margin:0 0 10px!important;
-  font-size:16px!important;
-  line-height:1.35!important;
-}
-#settingsScreen .settingFieldRow{
-  display:grid!important;
-  grid-template-columns:170px minmax(220px,280px)!important;
-  align-items:center!important;
-  justify-content:start!important;
-  gap:14px!important;
-  width:100%!important;
-  max-width:520px!important;
-  min-height:48px!important;
-  margin:0!important;
-  padding:4px 0!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingFieldRow>label{
-  min-width:0!important;
-  text-align:right!important;
-}
-#settingsScreen .settingFieldRow .appDropdown{
-  width:100%!important;
-  min-width:0!important;
-  max-width:none!important;
-  margin:0!important;
-}
-#settingsScreen .settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(220px,1fr))!important;
-  gap:4px 16px!important;
-  width:100%!important;
-  max-width:620px!important;
-  margin:0!important;
-}
-#settingsScreen .settingsGroup .checkRow,
-#settingsScreen .settingsChecksGrid .checkRow{
-  display:flex!important;
-  flex-direction:row-reverse!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  gap:10px!important;
-  width:100%!important;
-  min-height:44px!important;
-  margin:0!important;
-  padding:4px 0!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingsGroup .checkRow .settingTileContent,
-#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
-  flex:0 1 auto!important;
-  min-width:0!important;
-}
-#settingsScreen .settingsGroupHead{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  flex-wrap:wrap!important;
-  gap:10px!important;
-  width:100%!important;
-  max-width:620px!important;
-}
-#settingsScreen .settingsCompactActions{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
-  width:100%!important;
-  max-width:620px!important;
-  margin:8px 0 0!important;
-}
-#settingsScreen .feedbackCompact,
-#settingsScreen .dangerGroup{
-  width:100%!important;
-  max-width:620px!important;
-  margin:0!important;
-}
-#settingsScreen .feedbackToolbar{
-  display:grid!important;
-  grid-template-columns:minmax(220px,1fr) auto!important;
-  align-items:center!important;
-  gap:8px!important;
-  width:100%!important;
-}
-#settingsScreen .feedbackToolbar .appDropdown{
-  width:100%!important;
-  min-width:0!important;
-  max-width:none!important;
-}
-#settingsScreen .feedbackToolbar .btn{margin:0!important}
-#settingsScreen .feedbackBox{
-  width:100%!important;
-  box-sizing:border-box!important;
-  margin-top:8px!important;
-}
-#settingsScreen .dangerGroup{
-  padding:12px 14px!important;
-  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant))!important;
-  border-radius:var(--otz-radius)!important;
-  background:color-mix(in srgb,var(--color-error-container) 20%,transparent)!important;
-}
-
-/* English mirrors naturally without changing the physical right anchoring of Hebrew. */
-html[dir="ltr"] #settingsScreen>.settingsPane,
-html[dir="ltr"] #settingsScreen>.settingsPane.active{
-  margin-left:0!important;
-  margin-right:auto!important;
-}
-html[dir="ltr"] #settingsScreen .settingFieldRow>label{text-align:left!important}
-html[dir="ltr"] #settingsScreen .settingsGroup .checkRow,
-html[dir="ltr"] #settingsScreen .settingsChecksGrid .checkRow{
-  flex-direction:row!important;
-}
-
-@media(max-width:760px){
-  #settingsScreen>.settingsPane,
-  #settingsScreen>.settingsPane.active{
-    width:100%!important;
-    max-width:none!important;
-    padding:12px 14px 24px!important;
-  }
-  #settingsScreen>.settings-tabs{padding-inline:14px!important}
-  #settingsScreen .settingsChecksGrid{grid-template-columns:1fr!important}
-  #settingsScreen .settingFieldRow{
-    grid-template-columns:1fr!important;
-    gap:5px!important;
-    max-width:none!important;
-  }
-  #settingsScreen .feedbackToolbar{grid-template-columns:1fr!important}
-  #settingsScreen .feedbackToolbar .btn{width:100%!important}
-}
-
-
-/* ===== 0.15.14 settings: restore right navigation + table layout ===== */
-#settingsScreen.settings-pane.screen.active{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 156px!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-  min-height:0!important;
-  overflow:hidden!important;
-}
-#settingsScreen>.page-head{
-  grid-column:1 / -1!important;
-  grid-row:1!important;
-  margin:0!important;
-  width:100%!important;
-}
-#settingsScreen>.settings-tabs{
-  grid-column:2!important;
-  grid-row:2 / 4!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  justify-content:flex-start!important;
-  gap:3px!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:10px 8px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  border:0!important;
-  border-inline-start:1px solid var(--color-outline-variant)!important;
-  border-bottom:0!important;
-  background:var(--color-surface-container-low)!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen>.settings-tabs .settingsTabBtn{
-  width:100%!important;
-  min-height:40px!important;
-  margin:0!important;
-  padding:8px 12px!important;
-  flex:0 0 auto!important;
-  text-align:start!important;
-  border-radius:var(--radius-sm)!important;
-}
-#settingsScreen>.settingsPane,
-#settingsScreen>.settingsPane.active{
-  grid-column:1!important;
-  grid-row:2!important;
-  width:100%!important;
-  max-width:none!important;
-  min-height:0!important;
-  height:auto!important;
-  margin:0!important;
-  padding:16px 22px 24px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  box-sizing:border-box!important;
-  align-self:stretch!important;
-  justify-self:stretch!important;
-}
-#settingsScreen>.settingsPane:not(.active){display:none!important}
-#settingsScreen>.settingsSaveBar{
-  grid-column:1!important;
-  grid-row:3!important;
-  width:100%!important;
-  min-height:56px!important;
-  margin:0!important;
-  padding:9px 22px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  position:relative!important;
-  z-index:20!important;
-  border-top:1px solid var(--color-outline-variant)!important;
-  background:var(--panel-bg)!important;
-  box-sizing:border-box!important;
-}
-
-/* Content is a normal right-aligned form, not scattered across the page. */
-#settingsScreen .settingsGroup{
-  width:min(100%,760px)!important;
-  max-width:760px!important;
-  margin:0!important;
-  padding:14px 0!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingsGroup h3{
-  margin:0 0 10px!important;
-}
-#settingsScreen .settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(260px,1fr))!important;
-  gap:8px 18px!important;
-  width:100%!important;
-  max-width:680px!important;
-  margin:0!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow,
-#settingsScreen .settingsGroup>.checkRow{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;
-  gap:12px!important;
-  width:100%!important;
-  min-height:48px!important;
-  margin:0!important;
-  padding:6px 8px!important;
-  box-sizing:border-box!important;
-  border-radius:var(--radius-sm)!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow .settingTileContent,
-#settingsScreen .settingsGroup>.checkRow .settingTileContent{
-  grid-column:1!important;
-  min-width:0!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:10px!important;
-  overflow:visible!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow input[type="checkbox"],
-#settingsScreen .settingsGroup>.checkRow input[type="checkbox"]{
-  grid-column:2!important;
-  justify-self:end!important;
-  margin:0!important;
-}
-#settingsScreen .settingsFieldsGrid{
-  display:grid!important;
-  grid-template-columns:1fr!important;
-  gap:8px!important;
-  width:100%!important;
-  max-width:680px!important;
-}
-#settingsScreen .settingFieldRow{
-  display:grid!important;
-  grid-template-columns:minmax(170px,1fr) minmax(240px,320px)!important;
-  align-items:center!important;
-  gap:18px!important;
-  width:100%!important;
-  max-width:680px!important;
-  min-height:52px!important;
-  margin:0!important;
-  padding:5px 8px!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingFieldRow>label{
-  grid-column:1!important;
-  min-width:0!important;
-  text-align:start!important;
-}
-#settingsScreen .settingFieldRow .appDropdown{
-  grid-column:2!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:0!important;
-  margin:0!important;
-}
-#settingsScreen .settingsGroupHead{
-  width:100%!important;
-  max-width:680px!important;
-}
-#settingsScreen .settingsCompactActions{
-  width:100%!important;
-  max-width:680px!important;
-  display:flex!important;
-  flex-wrap:wrap!important;
-  gap:8px!important;
-  justify-content:flex-start!important;
-}
-#settingsScreen .feedbackCompact,
-#settingsScreen .dangerGroup{
-  width:100%!important;
-  max-width:680px!important;
-}
-#settingsScreen .feedbackToolbar{
-  display:grid!important;
-  grid-template-columns:minmax(240px,1fr) auto!important;
-  gap:8px!important;
-  align-items:center!important;
-}
-#settingsScreen .feedbackToolbar .appDropdown{width:100%!important;max-width:none!important}
-#settingsScreen .feedbackToolbar .btn{margin:0!important}
-
-/* RTL order: label/content remains visually on the right, control on the left inside each row. */
-html[dir="rtl"] #settingsScreen .settingsChecksGrid .checkRow,
-html[dir="rtl"] #settingsScreen .settingsGroup>.checkRow{
-  direction:rtl!important;
-}
-html[dir="rtl"] #settingsScreen .settingFieldRow{
-  direction:rtl!important;
-}
-html[dir="rtl"] #settingsScreen .settingFieldRow>label{
-  text-align:right!important;
-}
-
-/* LTR mirror */
-html[dir="ltr"] #settingsScreen.settings-pane.screen.active{
-  grid-template-columns:156px minmax(0,1fr)!important;
-}
-html[dir="ltr"] #settingsScreen>.settings-tabs{
-  grid-column:1!important;
-  border-inline-start:0!important;
-  border-inline-end:1px solid var(--color-outline-variant)!important;
-}
-html[dir="ltr"] #settingsScreen>.settingsPane,
-html[dir="ltr"] #settingsScreen>.settingsPane.active,
-html[dir="ltr"] #settingsScreen>.settingsSaveBar{
-  grid-column:2!important;
-}
-
-@media(max-width:760px){
-  #settingsScreen.settings-pane.screen.active{
-    grid-template-columns:1fr!important;
-    grid-template-rows:auto auto minmax(0,1fr) auto!important;
-  }
-  #settingsScreen>.settings-tabs{
-    grid-column:1!important;
-    grid-row:2!important;
-    flex-direction:row!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    border-inline-start:0!important;
-    border-inline-end:0!important;
-    border-bottom:1px solid var(--color-outline-variant)!important;
-    padding:6px 12px!important;
-  }
-  #settingsScreen>.settings-tabs .settingsTabBtn{width:auto!important}
-  #settingsScreen>.settingsPane,
-  #settingsScreen>.settingsPane.active{
-    grid-column:1!important;
-    grid-row:3!important;
-    padding:12px 14px 20px!important;
-  }
-  #settingsScreen>.settingsSaveBar{
-    grid-column:1!important;
-    grid-row:4!important;
-    padding:8px 14px!important;
-  }
-  #settingsScreen .settingsChecksGrid{grid-template-columns:1fr!important}
-  #settingsScreen .settingFieldRow{
-    grid-template-columns:1fr!important;
-    gap:5px!important;
-  }
-  #settingsScreen .settingFieldRow>label,
-  #settingsScreen .settingFieldRow .appDropdown{
-    grid-column:1!important;
-  }
-  #settingsScreen .feedbackToolbar{grid-template-columns:1fr!important}
-}
-
-
-/* ===== 0.15.15 Otzaria-style settings sidebar, pinned physically right ===== */
-#settingsScreen.settings-pane.screen.active{
-  direction:ltr!important; /* make grid columns physical: col 2 is always the right rail */
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 164px!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-  overflow:hidden!important;
-  min-height:0!important;
-}
-#settingsScreen>.page-head{
-  direction:rtl!important;
-  grid-column:1 / -1!important;
-  grid-row:1!important;
-}
-#settingsScreen>.settings-tabs{
-  direction:rtl!important;
-  grid-column:2!important;
-  grid-row:2 / 4!important;
-  width:164px!important;
-  min-width:164px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  gap:2px!important;
-  margin:0!important;
-  padding:8px 7px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  background:var(--color-surface-container-low)!important;
-  border:0!important;
-  border-inline-start:1px solid var(--color-outline-variant)!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen>.settings-tabs .settingsTabBtn{
-  direction:rtl!important;
-  display:grid!important;
-  grid-template-columns:24px minmax(0,1fr)!important;
-  align-items:center!important;
-  gap:10px!important;
-  width:100%!important;
-  min-height:42px!important;
-  margin:0!important;
-  padding:8px 10px!important;
-  border:0!important;
-  border-radius:var(--radius-sm)!important;
-  background:transparent!important;
-  color:var(--color-on-surface-variant)!important;
-  text-align:right!important;
-  font:inherit!important;
+  direction:rtl;
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  width:100%;
+  min-height:40px;
+  margin:0;
+  padding:7px 10px;
+  border:0;
+  border-radius:var(--otz-radius);
+  background:transparent;
+  color:var(--color-on-surface-variant);
+  text-align:right;
+  font:inherit;
 }
 #settingsScreen>.settings-tabs .settingsTabBtn:hover{
-  background:color-mix(in srgb,var(--color-on-surface) 6%,transparent)!important;
+  background:color-mix(in srgb,var(--color-on-surface) 7%,transparent);
 }
 #settingsScreen>.settings-tabs .settingsTabBtn.active{
-  background:var(--color-secondary-container)!important;
-  color:var(--color-on-secondary-container)!important;
-  font-weight:600!important;
+  background:color-mix(in srgb,var(--color-primary-container) 30%,transparent);
+  color:var(--color-on-surface);
+  font-weight:600;
 }
 #settingsScreen .settingsTabIcon{
-  width:22px!important;
-  height:22px!important;
-  display:grid!important;
-  place-items:center!important;
-  color:currentColor!important;
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  color:currentColor;
 }
-#settingsScreen>.settingsPane,
-#settingsScreen>.settingsPane.active{
-  direction:rtl!important;
-  grid-column:1!important;
-  grid-row:2!important;
+#settingsScreen .settingsTabIcon svg{width:20px;height:20px;fill:currentColor}
+#settingsScreen>.settingsPane{
+  direction:rtl;
+  grid-column:1;
+  grid-row:2;
+  display:none;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:12px 22px 20px;
+  overflow-y:auto;
+  overflow-x:hidden;
 }
+#settingsScreen>.settingsPane.active{display:block}
 #settingsScreen>.settingsSaveBar{
-  direction:rtl!important;
-  grid-column:1!important;
-  grid-row:3!important;
+  direction:rtl;
+  grid-column:1;
+  grid-row:3;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:54px;
+  margin:0;
+  padding:8px 22px;
+  border-top:1px solid var(--color-outline-variant);
+  background:var(--panel-bg);
 }
-
-/* Keep the form visually tabular and aligned. */
-#settingsScreen .settingsChecksGrid{
-  grid-template-columns:repeat(2,minmax(280px,1fr))!important;
-  gap:8px 18px!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow,
-#settingsScreen .settingsGroup>.checkRow{
-  grid-template-columns:minmax(0,1fr) auto!important;
-  padding:7px 10px!important;
-  min-height:50px!important;
-}
-#settingsScreen .settingFieldRow{
-  grid-template-columns:minmax(180px,1fr) minmax(260px,330px)!important;
-  min-height:54px!important;
-  padding:6px 10px!important;
-}
-#settingsScreen .settingFieldRow>label{
-  text-align:right!important;
+#settingsScreen .settingsSaveBar .btn{
+  min-width:78px;
+  min-height:34px;
+  padding:5px 14px;
+  border:0;
+  border-radius:var(--radius-pill);
+  background:var(--color-primary);
+  color:var(--color-on-primary);
+  font-weight:600;
 }
 #settingsScreen .settingsGroup{
-  margin-right:0!important;
-  margin-left:auto!important;
+  width:min(100%,650px);
+  margin:0;
+  padding:10px 0;
+  border-bottom:1px solid color-mix(in srgb,var(--color-outline-variant) 72%,transparent);
+  background:transparent;
 }
-
-@media(max-width:760px){
-  #settingsScreen.settings-pane.screen.active{
-    direction:rtl!important;
-    grid-template-columns:1fr!important;
-    grid-template-rows:auto auto minmax(0,1fr) auto!important;
-  }
-  #settingsScreen>.settings-tabs{
-    grid-column:1!important;
-    grid-row:2!important;
-    width:100%!important;
-    min-width:0!important;
-    flex-direction:row!important;
-    border-inline-start:0!important;
-    border-bottom:1px solid var(--color-outline-variant)!important;
-  }
-  #settingsScreen>.settings-tabs .settingsTabBtn{
-    width:auto!important;
-    grid-template-columns:20px auto!important;
-    white-space:nowrap!important;
-  }
-  #settingsScreen>.settingsPane,
-  #settingsScreen>.settingsPane.active{
-    grid-column:1!important;
-    grid-row:3!important;
-  }
-  #settingsScreen>.settingsSaveBar{
-    grid-column:1!important;
-    grid-row:4!important;
-  }
-}
-
-
-/* ===== 0.15.16 compact settings rows ===== */
-#settingsScreen .settingsGroup{
-  padding:10px 0!important;
-}
+#settingsScreen .settingsGroup:last-child{border-bottom:0}
 #settingsScreen .settingsGroup h3{
-  margin:0 0 8px!important;
+  margin:0 0 8px;
+  font-size:15px;
+  line-height:1.35;
+}
+#settingsScreen .settingsGroupHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  width:100%;
+  max-width:620px;
+}
+#settingsScreen .settingsGroupHead h3{margin:0}
+#settingsScreen .settingsHint{
+  margin-top:3px;
+  font-size:11px;
+  color:var(--color-on-surface-variant);
 }
 #settingsScreen .settingsChecksGrid{
-  grid-template-columns:repeat(2,minmax(220px,280px))!important;
-  justify-content:start!important;
-  gap:4px 14px!important;
-  max-width:590px!important;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,300px));
+  grid-auto-rows:42px;
+  justify-content:start;
+  align-items:start;
+  gap:8px 18px;
+  width:auto;
+  max-width:630px;
 }
 #settingsScreen .settingsChecksGrid .checkRow,
 #settingsScreen .settingsGroup>.checkRow{
-  min-height:40px!important;
-  height:auto!important;
-  padding:3px 4px!important;
-  border-radius:8px!important;
-  background:transparent!important;
+  display:flex;
+  flex-direction:row-reverse;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+  min-height:42px;
+  margin:0;
+  padding:4px 8px;
+  border:0;
+  border-radius:var(--otz-radius);
+  background:transparent;
 }
+#settingsScreen .settingsChecksGrid .checkRow{width:300px;height:42px}
+#settingsScreen .settingsGroup>.checkRow{width:min(100%,380px);height:42px;margin-block:3px}
 #settingsScreen .settingsChecksGrid .checkRow:hover,
 #settingsScreen .settingsGroup>.checkRow:hover{
-  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
+  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent);
 }
 #settingsScreen .settingTileContent{
-  gap:8px!important;
-  flex:0 1 auto!important;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
 }
 #settingsScreen .settingTileIcon{
-  width:20px!important;
-  height:20px!important;
-  flex-basis:20px!important;
+  width:18px;
+  height:18px;
+  display:grid;
+  place-items:center;
+  flex:0 0 18px;
+  color:var(--color-on-surface-variant);
 }
-#settingsScreen .settingTileIcon svg{
-  width:18px!important;
-  height:18px!important;
-}
+#settingsScreen .settingTileIcon svg{width:17px;height:17px;fill:currentColor}
 #settingsScreen .settingTileText{
-  font-size:13px!important;
-  line-height:1.3!important;
+  min-width:0;
+  font-size:13px;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 #settingsScreen .checkRow input[type="checkbox"]{
-  transform:scale(.92);
+  flex:0 0 auto;
+  margin:0;
+  transform:scale(.84);
   transform-origin:center;
 }
+#settingsScreen .settingsFieldsGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:4px;
+  width:440px;
+  max-width:100%;
+}
 #settingsScreen .settingFieldRow{
-  grid-template-columns:150px 230px!important;
-  gap:12px!important;
-  min-height:44px!important;
-  padding:3px 4px!important;
-  max-width:430px!important;
+  display:grid;
+  grid-template-columns:150px 230px;
+  align-items:center;
+  gap:12px;
+  width:440px;
+  max-width:100%;
+  min-height:44px;
+  padding:3px 6px;
+}
+#settingsScreen .settingFieldRow>label{
+  min-width:0;
+  text-align:right;
+  font-size:13px;
 }
 #settingsScreen .settingFieldRow .appDropdown{
-  width:230px!important;
+  width:230px;
+  min-width:0;
+  max-width:none;
 }
-#settingsScreen .settingsFieldsGrid{
-  max-width:430px!important;
-  gap:4px!important;
+#settingsScreen .settingsPane select,
+#settingsScreen .settingsPane textarea{box-shadow:none}
+#settingsScreen .settingsCompactActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  width:100%;
+  max-width:620px;
+  margin-top:8px;
 }
-#settingsScreen .settingsGroupHead,
-#settingsScreen .settingsCompactActions,
-#settingsScreen .feedbackCompact,
-#settingsScreen .dangerGroup{
-  max-width:590px!important;
+#settingsScreen .settingsCompactActions button,
+#settingsScreen .settingsInlineAction,
+#settingsScreen .dangerGroup .danger{
+  appearance:none;
+  border:0;
+  min-height:32px;
+  padding:5px 11px;
+  border-radius:var(--radius-pill);
+  font-weight:600;
 }
 #settingsScreen .settingsCompactActions button,
 #settingsScreen .settingsInlineAction{
-  min-height:30px!important;
-  padding:4px 10px!important;
+  background:var(--color-secondary-container);
+  color:var(--color-on-secondary-container);
+}
+#settingsScreen .feedbackCompact,
+#settingsScreen .dangerGroup{
+  width:100%;
+  max-width:620px;
 }
 #settingsScreen .feedbackToolbar{
-  grid-template-columns:220px auto!important;
-  max-width:590px!important;
+  display:grid;
+  grid-template-columns:220px auto;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
 }
+#settingsScreen .feedbackToolbar .appDropdown{width:220px;min-width:0;max-width:none}
+#settingsScreen .feedbackToolbar .btn{margin:0}
 #settingsScreen .feedbackBox{
-  min-height:76px!important;
-  height:82px!important;
+  width:100%;
+  min-height:78px;
+  height:84px;
+  max-height:180px;
+  padding:10px 12px;
+  resize:vertical;
 }
-#settingsScreen>.settingsPane,
-#settingsScreen>.settingsPane.active{
-  padding-top:10px!important;
-  padding-bottom:18px!important;
+#settingsScreen .dangerGroup{
+  padding:12px 14px;
+  border:1px solid color-mix(in srgb,var(--color-error) 22%,var(--color-outline-variant));
+  border-radius:var(--otz-radius);
+  background:color-mix(in srgb,var(--color-error-container) 20%,transparent);
+}
+#settingsScreen .dangerGroup .danger{
+  background:var(--color-error-container);
+  color:var(--color-on-error-container);
 }
 
-@media(max-width:760px){
+@media(max-width:800px){
+  .side-nav{overflow-y:auto}
+  .nav-bottom{position:sticky;bottom:0}
+  #settingsScreen.settings-pane.screen.active{
+    direction:rtl;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto minmax(0,1fr) auto;
+  }
+  #settingsScreen>.settings-tabs{
+    grid-column:1;
+    grid-row:2;
+    width:100%;
+    min-width:0;
+    flex-direction:row;
+    overflow-x:auto;
+    overflow-y:hidden;
+    border-inline-start:0;
+    border-bottom:1px solid var(--color-outline-variant);
+    padding:6px 12px;
+  }
+  #settingsScreen>.settings-tabs .settingsTabBtn{
+    width:auto;
+    grid-template-columns:20px auto;
+    white-space:nowrap;
+  }
+  #settingsScreen>.settingsPane{
+    grid-column:1;
+    grid-row:3;
+    padding:12px 14px 18px;
+  }
+  #settingsScreen>.settingsSaveBar{
+    grid-column:1;
+    grid-row:4;
+    padding:8px 14px;
+  }
   #settingsScreen .settingsChecksGrid{
-    grid-template-columns:1fr!important;
-    max-width:none!important;
+    grid-template-columns:1fr;
+    width:100%;
+    max-width:none;
   }
-  #settingsScreen .settingFieldRow{
-    grid-template-columns:1fr!important;
-    max-width:none!important;
-  }
-  #settingsScreen .settingFieldRow .appDropdown{
-    width:100%!important;
-  }
-}
-
-
-/* ===== 0.15.17 truly compact settings controls ===== */
-/* Previous compact patch still allowed each item to stretch with the grid track.
-   Lock each option to a compact control width instead of filling half the pane. */
-#settingsScreen .settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(2,260px)!important;
-  grid-auto-rows:min-content!important;
-  justify-content:start!important;
-  align-items:start!important;
-  gap:6px 16px!important;
-  width:max-content!important;
-  max-width:100%!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow{
-  width:260px!important;
-  max-width:260px!important;
-  min-width:0!important;
-  min-height:38px!important;
-  height:38px!important;
-  padding:2px 6px!important;
-  margin:0!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;
-  gap:8px!important;
-  background:transparent!important;
-  border:0!important;
-  border-radius:7px!important;
-  box-sizing:border-box!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
-  grid-column:1!important;
-  min-width:0!important;
-  width:auto!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:7px!important;
-  overflow:hidden!important;
-}
-#settingsScreen .settingsChecksGrid .checkRow input[type="checkbox"]{
-  grid-column:2!important;
-  justify-self:end!important;
-  margin:0!important;
-  transform:scale(.86)!important;
-  transform-origin:center!important;
-}
-#settingsScreen .settingsChecksGrid .settingTileIcon{
-  width:18px!important;
-  height:18px!important;
-  flex:0 0 18px!important;
-}
-#settingsScreen .settingsChecksGrid .settingTileIcon svg{
-  width:17px!important;
-  height:17px!important;
-}
-#settingsScreen .settingsChecksGrid .settingTileText{
-  font-size:12.5px!important;
-  line-height:1.2!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-
-/* Single toggle rows in General/Advanced should also stay compact. */
-#settingsScreen .settingsGroup>.checkRow{
-  width:min(100%,520px)!important;
-  max-width:520px!important;
-  min-height:40px!important;
-  height:auto!important;
-  padding:3px 6px!important;
-  margin:2px 0!important;
-}
-
-/* Make the storage rows compact and visually aligned. */
-#settingsScreen .settingsFieldsGrid{
-  width:max-content!important;
-  max-width:100%!important;
-}
-#settingsScreen .settingFieldRow{
-  width:430px!important;
-  max-width:430px!important;
-  min-height:42px!important;
-  height:42px!important;
-  padding:2px 4px!important;
-  grid-template-columns:150px 220px!important;
-  gap:12px!important;
-}
-#settingsScreen .settingFieldRow .appDropdown{
-  width:220px!important;
-  height:36px!important;
-}
-#settingsScreen .settingFieldRow .appDropdown select{
-  height:36px!important;
-  min-height:36px!important;
-}
-
-/* Keep section spacing tight. */
-#settingsScreen .settingsGroup{
-  padding:9px 0!important;
-}
-#settingsScreen .settingsGroup h3{
-  margin-bottom:7px!important;
-}
-#settingsScreen .settingsPane{
-  padding-top:8px!important;
-}
-
-@media(max-width:700px){
-  #settingsScreen .settingsChecksGrid{
-    grid-template-columns:1fr!important;
-    width:100%!important;
-  }
-  #settingsScreen .settingsChecksGrid .checkRow{
-    width:100%!important;
-    max-width:none!important;
+  #settingsScreen .settingsChecksGrid .checkRow,
+  #settingsScreen .settingsGroup>.checkRow{
+    width:100%;
+    max-width:none;
   }
   #settingsScreen .settingsFieldsGrid,
   #settingsScreen .settingFieldRow{
-    width:100%!important;
-    max-width:none!important;
+    width:100%;
+    max-width:none;
   }
   #settingsScreen .settingFieldRow{
-    height:auto!important;
-    grid-template-columns:1fr!important;
-    gap:4px!important;
+    grid-template-columns:1fr;
+    gap:4px;
   }
-  #settingsScreen .settingFieldRow .appDropdown{
-    width:100%!important;
-  }
+  #settingsScreen .settingFieldRow .appDropdown,
+  #settingsScreen .feedbackToolbar .appDropdown{width:100%}
+  #settingsScreen .feedbackToolbar{grid-template-columns:1fr}
 }
-
-
-/* ===== 0.15.18 compact inline toggle rows ===== */
-/* Keep each toggle visually attached to its label. */
-#settingsScreen .settingsChecksGrid{
-  display:grid!important;
-  grid-template-columns:repeat(2, minmax(0, 300px))!important;
-  grid-auto-rows:42px!important;
-  justify-content:start!important;
-  align-items:start!important;
-  gap:8px 18px!important;
-  width:auto!important;
-  max-width:630px!important;
-  margin:0!important;
+@media(min-width:1100px){
+  .screen[data-screen-panel="overview"],
+  .screen.native-page{padding-inline:22px}
 }
-
-#settingsScreen .settingsChecksGrid .checkRow{
-  display:flex!important;
-  flex-direction:row!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-  width:300px!important;
-  max-width:300px!important;
-  min-width:0!important;
-  height:42px!important;
-  min-height:42px!important;
-  margin:0!important;
-  padding:4px 8px!important;
-  box-sizing:border-box!important;
-  background:transparent!important;
-  border:0!important;
-  border-radius:8px!important;
-}
-
-html[dir="rtl"] #settingsScreen .settingsChecksGrid .checkRow{
-  flex-direction:row-reverse!important;
-}
-
-#settingsScreen .settingsChecksGrid .checkRow:hover{
-  background:color-mix(in srgb,var(--color-on-surface) 4%,transparent)!important;
-}
-
-#settingsScreen .settingsChecksGrid .checkRow .settingTileContent{
-  display:flex!important;
-  align-items:center!important;
-  gap:8px!important;
-  flex:1 1 auto!important;
-  min-width:0!important;
-  width:auto!important;
-  overflow:hidden!important;
-}
-
-#settingsScreen .settingsChecksGrid .checkRow input[type="checkbox"]{
-  flex:0 0 auto!important;
-  margin:0!important;
-  transform:scale(.84)!important;
-  transform-origin:center!important;
-}
-
-#settingsScreen .settingsChecksGrid .settingTileIcon{
-  width:18px!important;
-  height:18px!important;
-  flex:0 0 18px!important;
-}
-#settingsScreen .settingsChecksGrid .settingTileIcon svg{
-  width:17px!important;
-  height:17px!important;
-}
-#settingsScreen .settingsChecksGrid .settingTileText{
-  min-width:0!important;
-  font-size:13px!important;
-  line-height:1.2!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-
-/* General / Advanced single toggle rows: same compact visual language. */
-#settingsScreen .settingsGroup > .checkRow{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-  width:360px!important;
-  max-width:100%!important;
-  min-height:42px!important;
-  height:42px!important;
-  margin:4px 0!important;
-  padding:4px 8px!important;
-  box-sizing:border-box!important;
-  border:0!important;
-  border-radius:8px!important;
-  background:transparent!important;
-}
-html[dir="rtl"] #settingsScreen .settingsGroup > .checkRow{
-  flex-direction:row-reverse!important;
-}
-#settingsScreen .settingsGroup > .checkRow .settingTileContent{
-  flex:1 1 auto!important;
-  min-width:0!important;
-  width:auto!important;
-}
-#settingsScreen .settingsGroup > .checkRow input[type="checkbox"]{
-  flex:0 0 auto!important;
-  margin:0!important;
-  transform:scale(.84)!important;
-}
-
-/* Keep the form cluster compact on the right. */
-#settingsScreen .settingsGroup{
-  width:min(100%,650px)!important;
-  max-width:650px!important;
-}
-#settingsScreen .settingsFieldsGrid{
-  width:440px!important;
-  max-width:100%!important;
-}
-#settingsScreen .settingFieldRow{
-  width:440px!important;
-  max-width:100%!important;
-  grid-template-columns:150px 230px!important;
-  min-height:44px!important;
-  height:44px!important;
-  padding:3px 6px!important;
-}
-#settingsScreen .settingFieldRow .appDropdown{
-  width:230px!important;
-}
-
-/* Remove any inherited oversized background block on toggle rows. */
-#settingsScreen .checkRow[data-native-enhanced="1"]{
-  background:transparent!important;
-  box-shadow:none!important;
-}
-
-@media(max-width:760px){
-  #settingsScreen .settingsChecksGrid{
-    grid-template-columns:1fr!important;
-    width:100%!important;
-    max-width:none!important;
-  }
-  #settingsScreen .settingsChecksGrid .checkRow{
-    width:100%!important;
-    max-width:none!important;
-  }
-  #settingsScreen .settingsGroup > .checkRow,
-  #settingsScreen .settingsFieldsGrid,
-  #settingsScreen .settingFieldRow{
-    width:100%!important;
-    max-width:none!important;
-  }
-  #settingsScreen .settingFieldRow{
-    grid-template-columns:1fr!important;
-    height:auto!important;
-    min-height:0!important;
-    gap:4px!important;
-  }
-  #settingsScreen .settingFieldRow .appDropdown{
-    width:100%!important;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -2720,7 +1290,7 @@ html[dir="rtl"] #settingsScreen .settingsGroup > .checkRow{
         </div>
       </section>
 
-      <section class="screen" data-screen-panel="overview">
+      <section class="screen native-page" data-screen-panel="overview">
         <div class="page-head"><div><h2 data-i18n="screen_overview">סקירה</h2><div class="page-subtitle" data-i18n="overview_subtitle">סיכום הפעילות האחרונה</div></div></div>
         <section class="native-section">
           <div class="native-list">
