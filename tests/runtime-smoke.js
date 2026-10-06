@@ -197,16 +197,19 @@ console.log('Newest-first day timeline ordering audit OK');
 
 
 
-/* 0.16.4 canonical symmetric-center guard */
-if(!app.includes("rail.style.removeProperty('--timeline-axis-x')")) throw new Error('Timeline runtime must leave desktop centering to CSS');
+
+
+/* 0.16.5 restored centered-rail guard */
 for(const required of [
-  '0.16.4 canonical centered timeline geometry',
-  '#content .trueDayRail .timelineEventNode.right .timelineEventCard{',
-  '#content .trueDayRail .timelineEventNode.left .timelineEventCard{',
-  'left:calc(50% + 38px)',
-  'right:calc(50% + 38px)',
-  'width:calc(50% - 54px)'
+  '.timelineEventNode.right .timelineEventCard{',
+  'inset-inline-start:calc(50% + 38px)',
+  '.timelineEventNode.left .timelineEventCard{',
+  'inset-inline-end:calc(50% + 38px)',
+  '0.16.5 legacy centered rail + exact marker alignment',
+  '.trueDayRail .timelineEventAnchor{',
+  'left:50%'
 ]){
-  if(!html.includes(required)) throw new Error('Canonical centered timeline CSS missing: '+required);
+  if(!html.includes(required)) throw new Error('Restored centered timeline layout missing: '+required);
 }
-console.log('Canonical symmetric center audit OK');
+if(app.includes('syncTimelineAxisCenter(')) throw new Error('Runtime axis recentering must stay removed');
+console.log('Legacy centered rail marker alignment audit OK');
