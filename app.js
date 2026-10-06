@@ -16,7 +16,7 @@ const HEALTH='timeline.health.v1';
 
 const $=id=>document.getElementById(id);
 let events=[],snaps=[],searches=[],installed=[];
-let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto',dateCalendar:'auto',focusMode:false,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,pauseUntil:0,pauseUntilRestart:false,summaryArchiveEnabled:true};
+let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:true,compactMode:false,timelineZoom:1,newTabIntegration:false,homepageIntegration:true,language:'auto',dateCalendar:'auto',focusMode:false,trackBooks:true,trackRefs:true,trackPlugins:true,trackTools:true,trackWorkspaces:true,trackNavigation:true,trackFind:true,trackSearches:true,trackSettingsChanges:true,pauseUntil:0,pauseUntilRestart:false,summaryArchiveEnabled:true};
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
@@ -39,7 +39,7 @@ estimated_plugin_time:'זמן תוספים/כלים משוער',quick_navigation
 today:'היום',yesterday:'אתמול',this_week:'השבוע',all:'הכול',favorites:'מועדפים',last_35_days:'35 הימים האחרונים',
 activity_intensity:'עוצמת פעילות',recent_snapshots:'נקודות שחזור אחרונות',recent_searches:'חיפושים אחרונים',timeline_view:'תצוגת ציר הזמן',
 day:'יום',week:'שבוע',month:'חודש',search_placeholder:'חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…',all_types:'כל הסוגים',
-book:'ספר',reading_position:'מיקום קריאה',workspace:'סביבת עבודה',plugin:'תוסף',built_in_tool:'כלי מובנה',navigation:'ניווט',
+book:'ספר',reading_position:'מיקום קריאה',workspace:'סביבת עבודה',plugin:'תוסף',built_in_tool:'כלי מובנה',navigation:'ניווט',find_screen:'איתור',search_activity:'חיפוש',settings_activity:'שינוי הגדרה',track_find:'מסך האיתור',track_searches:'חיפושים',track_settings_changes:'שינויי הגדרות',
 all_plugins:'כל התוספים',days_7:'7 ימים',days_30:'30 ימים',days_90:'90 ימים',newest_first:'חדש לישן',oldest_first:'ישן לחדש',
 pause_tracking:'השהה תיעוד',resume_tracking:'המשך תיעוד',active:'פעיל',partial:'חלקי',limited:'מוגבל',
 tracking_active:'מעקב רציף אחר ספרים, תוספים וכלים פתוחים',
@@ -84,7 +84,7 @@ estimated_plugin_time:'Estimated plugin/tool time',quick_navigation:'Quick navig
 today:'Today',yesterday:'Yesterday',this_week:'This week',all:'All',favorites:'Favorites',last_35_days:'Last 35 days',
 activity_intensity:'Activity intensity',recent_snapshots:'Recent restore points',recent_searches:'Recent searches',timeline_view:'Timeline view',
 day:'Day',week:'Week',month:'Month',search_placeholder:'Search by book, plugin, workspace, or event…',all_types:'All types',
-book:'Book',reading_position:'Reading position',workspace:'Workspace',plugin:'Plugin',built_in_tool:'Built-in tool',navigation:'Navigation',
+book:'Book',reading_position:'Reading position',workspace:'Workspace',plugin:'Plugin',built_in_tool:'Built-in tool',navigation:'Navigation',find_screen:'Find',search_activity:'Search',settings_activity:'Setting change',track_find:'Find screen',track_searches:'Searches',track_settings_changes:'Settings changes',
 all_plugins:'All plugins',days_7:'7 days',days_30:'30 days',days_90:'90 days',newest_first:'Newest first',oldest_first:'Oldest first',
 pause_tracking:'Pause tracking',resume_tracking:'Resume tracking',active:'Active',partial:'Partial',limited:'Limited',
 tracking_active:'Continuous tracking of books, plugins, and open tools',
@@ -372,7 +372,7 @@ function eventSearchText(e){
   const d=e.data||{};
   return [
     e.label,e.type,e.sessionId,d.currentBook,d.book,d.currentBookId,d.bookId,d.currentRef,d.ref,d.screen,
-    d.toolId,d.workspaceId,pluginName(d.toolId||''),names[e.sessionId],sessionNotes[e.sessionId]
+    d.toolId,d.workspaceId,d.query,d.key,d.newValue,pluginName(d.toolId||''),names[e.sessionId],sessionNotes[e.sessionId]
   ].filter(Boolean).join(' ').toLowerCase();
 }
 function rebuildEventIndex(){
@@ -601,7 +601,10 @@ function eventIconName(type){
     plugin:'puzzle_piece_24_regular',
     tool:'wrench_24_regular',
     workspace:'window_multiple_24_regular',
-    navigation:'arrow_routing_24_regular'
+    navigation:'arrow_routing_24_regular',
+    find:'search_24_regular',
+    search:'search_24_regular',
+    setting:'settings_24_regular'
   }[type]||'history_24_regular';
 }
 function createMenuButton(className,iconName,label){
@@ -1023,10 +1026,14 @@ function timelineEventTitle(ev){
   const d=ev.data||{};
   if(ev.type==='plugin')return pluginName(d.toolId);
   if(ev.type==='book'||ev.type==='ref')return d.currentBook||d.book||d.currentBookId||d.bookId||ev.label;
+  if(ev.type==='search')return d.query?tr('search_activity')+': '+d.query:tr('search_activity');
+  if(ev.type==='setting')return tr('settings_activity')+(d.key?': '+d.key:'');
+  if(ev.type==='find')return tr('find_screen');
   return ev.label||d.title||d.screen||d.toolId||ev.type;
 }
 function timelineEventSubtitle(ev){
   const d=ev.data||{};
+  if(ev.type==='setting'&&d.newValue!=null)return String(d.newValue);
   return d.currentRef||d.ref||d.screen||d.toolId||d.workspaceName||'';
 }
 function createTimelineEventNode(ev,index,pxPerMinute=1,cardShift=0){
@@ -1542,6 +1549,9 @@ function sync(){
   $('trackTools').checked=settings.trackTools!==false;
   $('trackWorkspaces').checked=settings.trackWorkspaces!==false;
   $('trackNavigation').checked=settings.trackNavigation!==false;
+  $('trackFind').checked=settings.trackFind!==false;
+  $('trackSearches').checked=settings.trackSearches!==false;
+  $('trackSettingsChanges').checked=settings.trackSettingsChanges!==false;
   $('summaryArchiveEnabled').checked=settings.summaryArchiveEnabled!==false;
   document.body.classList.toggle('focus-mode',!!settings.focusMode);
   if($('focusModeBtn')){$('focusModeBtn').title=settings.focusMode?tr('exit_focus'):tr('focus_mode');$('focusModeBtn').setAttribute('aria-label',$('focusModeBtn').title)}
@@ -1607,6 +1617,9 @@ const SETTINGS_ICON_MAP={
   trackTools:'wrench_24_regular',
   trackWorkspaces:'window_multiple_24_regular',
   trackNavigation:'arrow_routing_24_regular',
+  trackFind:'search_24_regular',
+  trackSearches:'search_24_regular',
+  trackSettingsChanges:'settings_24_regular',
   notificationsEnabled:'alert_24_regular',
   summaryArchiveEnabled:'archive_24_regular',
   newTabIntegration:'add_square_24_regular',
@@ -1759,6 +1772,9 @@ $('saveSettings').onclick=async()=>{
     settings.trackTools=$('trackTools').checked;
     settings.trackWorkspaces=$('trackWorkspaces').checked;
     settings.trackNavigation=$('trackNavigation').checked;
+    settings.trackFind=$('trackFind').checked;
+    settings.trackSearches=$('trackSearches').checked;
+    settings.trackSettingsChanges=$('trackSettingsChanges').checked;
     settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
 
     const saved=await set(SETTINGS,settings);
