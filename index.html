@@ -1254,6 +1254,27 @@ textarea:focus-visible{
     transform:translateX(-50%)!important;
   }
 }
+
+/* ===== 0.16.6 marker containing-block fix ===== */
+/* Keep the restored legacy two-sided layout. The event node itself must span the
+   full physical rail; otherwise 50% can resolve against a collapsed/right-edge box in RTL. */
+@media(min-width:801px){
+  .trueDayRail .timelineEventNode{
+    left:0!important;
+    right:0!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    width:auto!important;
+  }
+  .trueDayRail .timelineEventAnchor{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    transform:translate(-50%,-50%)!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1291,7 +1312,7 @@ textarea:focus-visible{
               <button id="focusModeBtn" class="icon-btn toolbarIcon" data-i18n-title="focus_mode" title="מצב פוקוס"><span data-icon="full_screen_maximize_24_regular"></span></button>
             </div>
             <div id="filtersPopover" class="toolbarPopover" hidden>
-              <label><span data-i18n="all_types">סוג פעילות</span><select id="type" aria-label="סוג פעילות"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option></select></label>
+              <label><span data-i18n="all_types">סוג פעילות</span><select id="type" aria-label="סוג פעילות"><option value="" data-i18n="all_types">כל הסוגים</option><option value="book" data-i18n="book">ספר</option><option value="ref" data-i18n="reading_position">מיקום קריאה</option><option value="workspace" data-i18n="workspace">סביבת עבודה</option><option value="plugin" data-i18n="plugin">תוסף</option><option value="tool" data-i18n="built_in_tool">כלי מובנה</option><option value="navigation" data-i18n="navigation">ניווט</option><option value="find" data-i18n="find_screen">איתור</option><option value="search" data-i18n="search_activity">חיפוש</option><option value="setting" data-i18n="settings_activity">שינוי הגדרה</option></select></label>
               <label><span data-i18n="plugins">תוסף</span><select id="pluginFilter" aria-label="תוסף"><option value="" data-i18n="all_plugins">כל התוספים</option></select></label>
               <label><span data-i18n="days">טווח</span><select id="range" aria-label="טווח"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select></label>
               <label><span data-i18n="sort">מיון</span><select id="sort" aria-label="מיון"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select></label>
@@ -1427,6 +1448,9 @@ textarea:focus-visible{
               <label class="checkRow"><input id="trackTools" type="checkbox"><span data-i18n="track_tools">כלים מובנים</span></label>
               <label class="checkRow"><input id="trackWorkspaces" type="checkbox"><span data-i18n="track_workspaces">סביבות עבודה</span></label>
               <label class="checkRow"><input id="trackNavigation" type="checkbox"><span data-i18n="track_navigation">ניווט</span></label>
+              <label class="checkRow"><input id="trackFind" type="checkbox"><span data-i18n="track_find">מסך האיתור</span></label>
+              <label class="checkRow"><input id="trackSearches" type="checkbox"><span data-i18n="track_searches">חיפושים</span></label>
+              <label class="checkRow"><input id="trackSettingsChanges" type="checkbox"><span data-i18n="track_settings_changes">שינויי הגדרות</span></label>
             </div>
           </section>
 
