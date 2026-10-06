@@ -1362,6 +1362,97 @@ textarea:focus-visible{
   }
 }
 
+
+/* ===== 0.16.4 fixed center-axis geometry ===== */
+/* Desktop: the timeline axis is always the physical center of the rail.
+   Do not derive it from RTL logical coordinates or runtime measurements. */
+@media(min-width:801px){
+  #content .trueDayRail{
+    --timeline-axis-x:50%!important;
+    position:relative!important;
+    width:100%!important;
+  }
+  #content .trueDayRail::before{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    transform:translateX(-50%)!important;
+  }
+  #content .trueDayRail .timelineEventAnchor,
+  #content .trueDayRail .timelineEventConnectorV,
+  #content .trueDayRail .timelineEventDuration{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .timelineEventAnchor{
+    transform:translate(-50%,-50%)!important;
+  }
+  #content .trueDayRail .timelineEventConnectorV,
+  #content .trueDayRail .timelineEventDuration{
+    transform:translateX(-50%)!important;
+  }
+
+  #content .trueDayRail .timelineEventNode.right .timelineEventCard{
+    left:calc(50% + 38px)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    width:calc(50% - 54px)!important;
+  }
+  #content .trueDayRail .timelineEventNode.left .timelineEventCard{
+    right:calc(50% + 38px)!important;
+    left:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    width:calc(50% - 54px)!important;
+  }
+  #content .trueDayRail .timelineEventNode.right .timelineEventConnectorH{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .timelineEventNode.left .timelineEventConnectorH{
+    right:50%!important;
+    left:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+
+  #content .trueDayRail .dayNowLine::before,
+  #content .trueDayRail .adaptiveGapMarker::before,
+  #content .trueDayRail .idleBreak::before,
+  #content .trueDayRail .idleBreak::after,
+  #content .trueDayRail .idleBreakGlyph{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .dayNowLine>span{
+    left:calc(50% + 12px)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .idleBreakLabel{
+    left:calc(50% + 22px)!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+  }
+  #content .trueDayRail .timelineTooltip{
+    left:50%!important;
+    right:auto!important;
+    inset-inline-start:auto!important;
+    inset-inline-end:auto!important;
+    transform:translateX(-50%)!important;
+  }
+}
+
 </style>
 </head>
 <body>
