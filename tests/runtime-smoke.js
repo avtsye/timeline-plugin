@@ -191,31 +191,22 @@ console.log('Newest-first day timeline ordering audit OK');
 
 
 
-/* 0.16.2 canonical timeline-axis guard */
+
+
+
+
+
+
+/* 0.16.4 canonical symmetric-center guard */
+if(!app.includes("rail.style.removeProperty('--timeline-axis-x')")) throw new Error('Timeline runtime must leave desktop centering to CSS');
 for(const required of [
-  '0.16.2 canonical timeline axis geometry',
-  '--timeline-axis-x:50%',
-  '.timelineEventNode.right .timelineEventCard{',
-  'left:calc(var(--timeline-axis-x) + 38px)',
-  'right:calc(100% - var(--timeline-axis-x) + 38px)',
-  '.trueDayRail{--timeline-axis-x:20px}'
+  '0.16.4 canonical centered timeline geometry',
+  '#content .trueDayRail .timelineEventNode.right .timelineEventCard{',
+  '#content .trueDayRail .timelineEventNode.left .timelineEventCard{',
+  'left:calc(50% + 38px)',
+  'right:calc(50% + 38px)',
+  'width:calc(50% - 54px)'
 ]){
-  if(!html.includes(required)) throw new Error('Canonical timeline geometry missing: '+required);
+  if(!html.includes(required)) throw new Error('Canonical centered timeline CSS missing: '+required);
 }
-console.log('Canonical centered timeline axis audit OK');
-
-
-
-
-/* 0.16.4 fixed physical-center timeline guard */
-if(!app.includes("rail.style.removeProperty('--timeline-axis-x')")) throw new Error('Timeline runtime must not inject a drifting axis coordinate');
-for(const required of [
-  '0.16.4 fixed center-axis geometry',
-  '--timeline-axis-x:50%!important',
-  'left:calc(50% + 38px)!important',
-  'right:calc(50% + 38px)!important',
-  'width:calc(50% - 54px)!important'
-]){
-  if(!html.includes(required)) throw new Error('Fixed centered timeline geometry missing: '+required);
-}
-console.log('Fixed physical-center timeline audit OK');
+console.log('Canonical symmetric center audit OK');
