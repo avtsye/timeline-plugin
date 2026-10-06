@@ -179,3 +179,9 @@ for(const required of [
   if(!html.includes(required)) throw new Error('UX audit 2 capability missing: '+required);
 }
 console.log('UX audit 2 interaction/layout guards OK');
+
+
+/* 0.16.0 chronological direction guard */
+if(!app.includes("const eventsForDay=[...unique.values()].sort((a,b)=>b.time-a.time)")) throw new Error('Day timeline must render newest events first, matching day bucket order');
+if(!app.includes("Math.abs(cur.time-prev.time)")) throw new Error('Adaptive timeline gaps must support descending chronological order');
+console.log('Newest-first day timeline ordering audit OK');
