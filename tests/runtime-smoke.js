@@ -237,3 +237,15 @@ for(const required of [
 }
 if(!manifest.permissions.includes('events.subscribe:settings.changed')) throw new Error('settings.changed permission missing');
 console.log('Extended optional tracking audit OK');
+
+
+// Regression checks for the October UX revision.
+for(const id of ['settingsCategorySelect','overviewUsageChart','closeSettingsDialog']){
+  if(!html.includes('id="'+id+'"'))throw new Error('UX regression: missing '+id);
+}
+if(!app.includes('function buildOverviewCurve')||!app.includes("path.setAttribute('d',curve)"))throw new Error('Overview curve renderer missing');
+if(!app.includes("if(name==='overview')renderOverviewUsageChart()"))throw new Error('Overview must refresh its usage chart');
+if(!app.includes("activateSettingsTab($('settingsCategorySelect').value)"))throw new Error('Settings category selector is disconnected');
+if(!html.includes('settingsCategoryPicker')||!html.includes('overviewCurveLine'))throw new Error('Settings or curve styling is missing');
+if(!background.includes("record('find',normalized)"))throw new Error('Find monitoring listener missing');
+console.log('October settings, curve and Find tracking regression guards OK');
