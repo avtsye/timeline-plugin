@@ -1306,31 +1306,31 @@ async function createSnapshot(renderAfter=true,showNotice=true){
 }
 async function performRestoreSnapshot(s,selectedBookKeys=null){
   const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
+  const targets=(s.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId&&(!keys||keys.has(String(tb.bookUid||tb.bookId))));
+  if(!targets.length){await notify(currentLang==='he'?'לא נבחרו ספרים לשחזור':'No books selected','error');return}
+  const undo=await createSnapshot(false,false);
+  let switched=false,restoredCount=0,failed=[];
   if(s.workspace&&s.workspace.id){
     const wl=await call('workspace.list');
-    if(wl.success&&(wl.data||[]).some(w=>w.id===s.workspace.id))await call('workspace.switch',{id:s.workspace.id});
-  }
-  const undo=await createSnapshot(false,false);
-  const st=await call('reader.getCurrentState');
-  if(st.success&&st.data&&(!keys||keys.size)){
-    const tabs=st.data.openTabs||[];
-    for(let i=tabs.length-1;i>=0;i--){
-      const tb=tabs[i],identity=String(tb.bookUid||tb.bookId||'');
-      if(!tb.isSelf&&tb.bookId&&!tb.toolId&&(!keys||keys.has(identity)))await call('reader.closeTab',{index:i});
+    if(wl.success&&Array.isArray(wl.data)&&wl.data.some(w=>String(w.id)===String(s.workspace.id))){
+      const sw=await call('workspace.switch',{id:s.workspace.id});switched=!!sw.success;
     }
   }
-  let restoredCount=0;
-  for(const tb of (s.tabs||[]).filter(t=>t.bookId&&!t.toolId)){
-    const identity=String(tb.bookUid||tb.bookId);
-    if(keys&&!keys.has(identity))continue;
-    const p={};for(const k of ['bookUid','id','bookId','type','source'])if(tb[k]!=null)p[k]=tb[k];
-    if(tb.index!=null)p.index=tb.index;p.navigateToPositionIfReused=true;
-    const opened=await call('reader.openBook',p);if(opened.success)restoredCount++;
+  // Open the requested books before closing anything: failed restores must not destroy active tabs.
+  for(const tb of targets){
+    const p={};
+    for(const k of ['bookUid','id','bookId','type','source'])if(tb[k]!=null)p[k]=tb[k];
+    if(tb.index!=null)p.index=tb.index;
+    p.navigateToPositionIfReused=true;
+    const opened=await call('reader.openBook',p);
+    if(opened.success)restoredCount++;else failed.push(tb.book||tb.bookId||tb.bookUid);
   }
-  await call('navigation.goTo',{target:'reading'});
-  settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;await set(SETTINGS,settings);
-  if(!restoredCount){await notify(currentLang==='he'?'השחזור לא פתח אף ספר. בדוק הרשאות וזמינות ספרים.':'No books were restored. Check permissions and book availability.','error');return}
-  await notify(tr('snapshot_restored')+' ('+restoredCount+')','success');
+  if(restoredCount)await call('navigation.goTo',{target:'reading'});
+  settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;
+  await set(SETTINGS,settings);
+  const summary=(currentLang==='he'?'שוחזרו ':'Restored ')+restoredCount+'/'+targets.length+
+    (switched?(currentLang==='he'?' · שולחן העבודה הופעל':' · workspace activated'):'');
+  await notify(summary+(failed.length?' · '+(currentLang==='he'?'נכשלו: ':'Failed: ')+failed.slice(0,4).join(', '):''),failed.length?'error':'success');
 }
 function restoreSnapshot(s){
   if(!s)return;
@@ -1464,7 +1464,11 @@ function showMigrationManager(){
     for(const oldId of missing){
       const row=document.createElement('div');row.className='native-row pluginMapRow';
       const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='puzzle_piece_24_regular';
-      const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');sub.textContent=tr('choose_replacement');main.append(b,sub);
+      const main=document.createElement('div');main.className='native-row-main';const b=document.createElement('b');b.textContent=oldId;const sub=document.createElement('small');
+      const normalize=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+      const matches=installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>({p,score:normalize(p.pluginId).includes(normalize(oldId))||normalize(oldId).includes(normalize(p.pluginId))?2:normalize(p.pluginId).split('').filter(ch=>normalize(oldId).includes(ch)).length/Math.max(1,normalize(p.pluginId).length)})).filter(x=>x.score>=0.65).sort((a,b)=>b.score-a.score).slice(0,3);
+      sub.textContent=matches.length?(currentLang==='he'?'מזהים דומים (בדוק לפני מיפוי): ':'Similar installed IDs (verify): ')+matches.map(x=>x.p.pluginId).join(', '):(currentLang==='he'?'לא נמצאה התאמה מקומית. אפשר לחפש את מזהה התוסף בחנות אוצריא: ':'No local match. Search this ID in Otzaria plugin store: ')+oldId;
+      main.append(b,sub);
       const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.setAttribute('aria-label',tr('choose_replacement'));sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
       const btn=document.createElement('button');btn.className='actionRecommended';btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
       btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);close();render();await notify(tr('mapping_saved'),'success')};
