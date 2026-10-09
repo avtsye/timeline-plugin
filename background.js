@@ -304,9 +304,10 @@ function wire(){
   });
   Otzaria.on('reader.current_book_changed',p=>{record('book',p);detectToolTabs()});
   Otzaria.on('reader.current_ref_changed',p=>record('ref',p));
-  Otzaria.on('workspace.changed',p=>{record('workspace',p);detectToolTabs()});
+  Otzaria.on('workspace.changed',p=>{record('workspace',p);detectToolTabs();snapshot(true)});
+  // Workspace changes can affect the active book even without a book-change notification.
+  Otzaria.on('plugin.resumed',()=>{detectToolTabs();snapshot(false)});
   Otzaria.on('settings.changed',p=>record('setting',p));
-  Otzaria.on('plugin.resumed',()=>detectToolTabs());
   Otzaria.on('app.command',async p=>{
     if(!p)return;
     if(p.command==='openTimeline')await call('plugin.openSelf',{param:{view:'timeline'}});
