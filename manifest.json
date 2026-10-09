@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "timeline-plugin",
   "name": "ציר זמן",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "ציר זמן חכם לאוצריא המתעד פעילות מקומית, מציג היסטוריה לפי ימים ושעות, וכולל חיפוש, סינון, שחזור, סטטיסטיקות ומעקב מותאם אישית.",
   "author": "אברהם",
   "homepage": "https://github.com/avtsye/timeline-plugin",
