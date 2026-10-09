@@ -466,10 +466,30 @@ function heatClass(n,max){if(!n)return '';const ratio=Math.log1p(n)/Math.log1p(M
 function renderOverviewUsageChart(){
   const box=$('overviewUsageChart');if(!box)return;
   box.replaceChildren();
-  const chart=buildBarChart(aggregateDaily(14),x=>formatDate(x.time,{day:'numeric',month:'numeric'}));
+  const chart=buildOverviewCurve(aggregateDaily(14));
   chart.setAttribute('role','img');
   chart.setAttribute('aria-label',currentLang==='he'?'מספר אירועים לכל יום בארבעה עשר הימים האחרונים':'Event counts by day over the last fourteen days');
   box.appendChild(chart);
+}
+function buildOverviewCurve(data){
+  const ns='http://www.w3.org/2000/svg',width=720,height=230,left=38,right=20,top=18,bottom=40;
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 '+width+' '+height);
+  svg.setAttribute('role','img');
+  svg.setAttribute('aria-label',currentLang==='he'?'מגמת אירועים בארבעה עשר הימים האחרונים':'Fourteen day activity trend');
+  svg.classList.add('overviewCurve');
+  const max=Math.max(1,...data.map(d=>Number(d.count)||0)),areaHeight=height-top-bottom;
+  const pts=data.map((d,i)=>({x:left+i*(width-left-right)/Math.max(1,data.length-1),y:top+areaHeight*(1-(Number(d.count)||0)/max),count:d.count,date:d.time}));
+  for(let i=0;i<=4;i++){const line=document.createElementNS(ns,'line');const y=top+areaHeight*i/4;line.setAttribute('x1',left);line.setAttribute('x2',width-right);line.setAttribute('y1',y);line.setAttribute('y2',y);line.classList.add('overviewCurveGrid');svg.appendChild(line)}
+  const path=document.createElementNS(ns,'path');
+  path.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' '));
+  path.classList.add('overviewCurveLine');svg.appendChild(path);
+  pts.forEach((p,i)=>{
+    const c=document.createElementNS(ns,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',4);c.classList.add('overviewCurveDot');
+    const tip=document.createElementNS(ns,'title');tip.textContent=formatDate(p.date,{day:'numeric',month:'short'})+' · '+p.count+' '+tr('events');c.appendChild(tip);svg.appendChild(c);
+    if(i%3===0||i===pts.length-1){const t=document.createElementNS(ns,'text');t.setAttribute('x',p.x);t.setAttribute('y',height-10);t.setAttribute('text-anchor','middle');t.classList.add('overviewCurveLabel');t.textContent=formatDate(p.date,{day:'numeric',month:'numeric'});svg.appendChild(t)}
+  });
+  return svg;
 }
 function renderHeatmap(){
   const box=$('heatmap');box.innerHTML='';
@@ -1552,6 +1572,8 @@ function syncSettingsPaneBottomInset(){
   pane.scrollTop=Math.max(0,pane.scrollTop);
 }
 function activateSettingsTab(name){
+  const picker=$('settingsCategorySelect');
+  if(picker&&picker.value!==name)picker.value=name;
   document.querySelectorAll('.settingsTabBtn').forEach(b=>{
     const active=b.dataset.settingsTab===name;
     b.classList.toggle('active',active);
@@ -1781,6 +1803,7 @@ function closeFilterPopover({focus=false}={}){
 window.addEventListener('resize',syncSettingsPaneBottomInset);
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
 if($('closeSettingsDialog'))$('closeSettingsDialog').onclick=closeSettingsDialog;
+if($('settingsCategorySelect'))$('settingsCategorySelect').onchange=()=>activateSettingsTab($('settingsCategorySelect').value);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('settingsScreen')?.classList.contains('settingsDialogOpen')){e.preventDefault();closeSettingsDialog()}});
 
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
