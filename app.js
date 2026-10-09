@@ -463,6 +463,14 @@ function estimateTimes(list){
   return{books:Math.round(books/60000),tools:Math.round(tools/60000)};
 }
 function heatClass(n,max){if(!n)return '';const ratio=Math.log1p(n)/Math.log1p(Math.max(1,max));return 'h'+Math.max(1,Math.min(4,Math.ceil(ratio*4)))}
+function renderOverviewUsageChart(){
+  const box=$('overviewUsageChart');if(!box)return;
+  box.replaceChildren();
+  const chart=buildBarChart(aggregateDaily(14),x=>formatDate(x.time,{day:'numeric',month:'numeric'}));
+  chart.setAttribute('role','img');
+  chart.setAttribute('aria-label',currentLang==='he'?'מספר אירועים לכל יום בארבעה עשר הימים האחרונים':'Event counts by day over the last fourteen days');
+  box.appendChild(chart);
+}
 function renderHeatmap(){
   const box=$('heatmap');box.innerHTML='';
   const days=Array.from({length:35},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-(34-i));return d.getTime()});
@@ -1272,7 +1280,7 @@ function render(){
   const list=filtered(),visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*300,virtualPage*300):list.slice(0,virtualLimit);
   // Group by the calendar day of each event, not the start date of a long-running session.
   const allSessions=sessions(list),ss=viewMode==='day'?sessions(visible.map(e=>({...e,sessionId:(e.sessionId||'unknown')+'@'+dk(e.time)}))):sessions(visible);
-  renderStats(list,allSessions);renderHeatmap();renderSearches();renderSnapshots();
+  renderStats(list,allSessions);renderHeatmap();renderOverviewUsageChart();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
   if(!allSessions.length){cont.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="history_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();updateContinue();return}
   const buckets=new Map();
@@ -1760,6 +1768,7 @@ function switchScreen(name){
   settings.lastScreen=name;set(SETTINGS,settings);
   if(name==='settings')$('settingsScreen').classList.add('settingsDialogOpen');
   if(name==='timeline')setTimeout(()=>{const q=$('search');if(q)q.focus()},0);
+  if(name==='overview')renderOverviewUsageChart();
   if(name==='analytics')renderAnalyticsScreen();
   if(name==='diagnostics'){updateTrackingStatus();renderDiagnosticsScreen();}
 }
