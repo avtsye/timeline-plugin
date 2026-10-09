@@ -719,7 +719,7 @@ function createSessionCard(s){
     const d=ev.data||{},row=document.createElement('div');row.className='event';row.tabIndex=0;
     const lead=document.createElement('span');lead.className='eventLeading';lead.dataset.icon=eventIconName(ev.type);
     const main=document.createElement('div');main.className='eventMain';
-    const evTitle=document.createElement('b');evTitle.textContent=ev.type==='plugin'?pluginName(d.toolId):ev.label;
+    const evTitle=document.createElement('b');evTitle.textContent=localizedEventLabel(ev);
     const sub=document.createElement('small');sub.textContent=(d.currentRef||d.ref||d.screen||d.toolId||'')+(ev.count>1?' · '+ev.count:'');
     main.append(evTitle,sub);main.onclick=()=>openEvent(ev);
     const fav=document.createElement('button');fav.className='eventFav icon-btn';fav.title=tr('favorites');fav.setAttribute('aria-label',tr('favorites'));
@@ -1055,7 +1055,7 @@ function eventContextItems(ev){
   const d=ev.data||{},items=[
     {icon:'open_24_regular',label:tr('open'),action:()=>openEvent(ev)},
     {icon:favorites.has(ev.id)?'star_off_24_regular':'star_24_regular',label:favorites.has(ev.id)?tr('remove_favorite'):tr('add_favorite'),action:async()=>{favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()}},
-    {icon:'copy_24_regular',label:tr('copy_details'),action:()=>copyText([ev.label,d.currentRef||d.ref||d.toolId||'',fmtDate(ev.time)+' '+fmt(ev.time)].filter(Boolean).join('\n'))}
+    {icon:'copy_24_regular',label:tr('copy_details'),action:()=>copyText([localizedEventLabel(ev),d.currentRef||d.ref||d.toolId||'',fmtDate(ev.time)+' '+fmt(ev.time)].filter(Boolean).join('\n'))}
   ];
   if(['book','ref'].includes(ev.type)&&bookKeyFromEvent(ev))items.splice(2,0,{icon:'history_24_regular',label:tr('open_history'),action:()=>showBookHistory(bookKeyFromEvent(ev))});
   if(ev.type==='plugin'&&d.toolId)items.splice(2,0,{icon:'history_24_regular',label:tr('open_history'),action:()=>showPluginHistory(d.toolId)});
@@ -1082,6 +1082,19 @@ function scheduleLiveRefresh(){
 function minuteOfDay(ts){
   const d=new Date(ts);return d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
 }
+function localizedEventLabel(ev){
+  const d=ev.data||{};
+  switch(ev.type){
+    case 'find':return tr('find_screen');
+    case 'navigation':return tr('navigation')+(d.screen?' · '+d.screen:'');
+    case 'workspace':return tr('workspace')+(d.workspaceName?' · '+d.workspaceName:'');
+    case 'setting':return tr('settings_activity')+(d.key?' · '+d.key:'');
+    case 'search':return tr('search_activity')+(d.query?' · '+d.query:'');
+    case 'tool':return tr('built_in_tool')+(d.toolId?' · '+String(d.toolId).replace(/^builtin\\./,''):'');
+    case 'plugin':return pluginName(d.toolId);
+    default:return ev.label||d.title||ev.type;
+  }
+}
 function timelineEventTitle(ev){
   const d=ev.data||{};
   if(ev.type==='plugin')return pluginName(d.toolId);
@@ -1089,7 +1102,7 @@ function timelineEventTitle(ev){
   if(ev.type==='search')return d.query?tr('search_activity')+': '+d.query:tr('search_activity');
   if(ev.type==='setting')return tr('settings_activity')+(d.key?': '+d.key:'');
   if(ev.type==='find')return tr('find_screen');
-  return ev.label||d.title||d.screen||d.toolId||ev.type;
+  return localizedEventLabel(ev);
 }
 function timelineEventSubtitle(ev){
   const d=ev.data||{};
