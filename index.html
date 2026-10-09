@@ -1285,9 +1285,9 @@ textarea:focus-visible{
 }
 
 .timelinePaging{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:18px}
-.permission-critical{border-inline-start:4px solid #d32f2f!important}
-.permission-medium{border-inline-start:4px solid #ed8c16!important}
-.permission-low{border-inline-start:4px solid #d4b500!important}
+.permission-critical{border-inline-start:4px solid var(--color-error)!important}
+.permission-medium{border-inline-start:4px solid var(--color-tertiary, var(--color-primary))!important}
+.permission-low{border-inline-start:4px solid var(--color-secondary)!important}
 /* Native-style settings sheet. Preserve the existing settings forms and scroll panes. */
 #settingsScreen.settingsDialogOpen{position:fixed;inset:5vh 5vw;width:90vw;height:90vh;max-height:90vh;z-index:450;display:grid;overflow:hidden;background:var(--color-surface);border:1px solid var(--color-outline-variant);border-radius:var(--radius-lg);box-shadow:0 0 0 100vmax color-mix(in srgb,var(--color-scrim) 44%,transparent),0 12px 35px color-mix(in srgb,var(--color-shadow) 24%,transparent)}
 .settingsDialogClose{display:none}
@@ -1337,7 +1337,7 @@ textarea:focus-visible{
 .overviewCurveGrid{stroke:var(--color-outline-variant);stroke-width:1}
 .overviewCurveLine{fill:none;stroke:var(--color-primary);stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round}
 .overviewCurveDot{fill:var(--color-primary);stroke:var(--color-surface);stroke-width:2}
-.overviewCurveLabel{fill:var(--color-on-surface-variant);font-size:12px}
+.overviewCurveLabel{fill:var(--color-on-surface-variant);font-size:0.75rem}
 
 
 /* 0.20 settings: right-anchored sheet with internal vertical navigation. */
