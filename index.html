@@ -1627,6 +1627,28 @@ textarea:focus-visible{
   }
 }
 
+
+/* Dock the settings sheet immediately beside the application's primary navigation. */
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+  position:fixed;
+  inset:0 var(--timeline-main-nav-width,68px) 0 auto;
+  right:var(--timeline-main-nav-width,68px);
+  left:auto;
+  width:min(405px,calc(100vw - var(--timeline-main-nav-width,68px)));
+  max-width:calc(100vw - var(--timeline-main-nav-width,68px));
+  box-shadow:-8px 0 20px color-mix(in srgb,var(--color-shadow) 18%,transparent);
+}
+body.settings-sheet-visible .side-nav{
+  position:relative;
+  z-index:451;
+  pointer-events:auto;
+}
+@media(max-width:440px){
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+    width:calc(100vw - var(--timeline-main-nav-width,60px));
+  }
+}
+
 </style>
 </head>
 <body>
