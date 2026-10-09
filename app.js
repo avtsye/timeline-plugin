@@ -482,7 +482,13 @@ function buildOverviewCurve(data){
   const pts=data.map((d,i)=>({x:left+i*(width-left-right)/Math.max(1,data.length-1),y:top+areaHeight*(1-(Number(d.count)||0)/max),count:d.count,date:d.time}));
   for(let i=0;i<=4;i++){const line=document.createElementNS(ns,'line');const y=top+areaHeight*i/4;line.setAttribute('x1',left);line.setAttribute('x2',width-right);line.setAttribute('y1',y);line.setAttribute('y2',y);line.classList.add('overviewCurveGrid');svg.appendChild(line)}
   const path=document.createElementNS(ns,'path');
-  path.setAttribute('d',pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' '));
+  // Monotone in X: smooth cubic segments without a misleading overshoot in event counts.
+  const curve=pts.map((p,i)=>{
+    if(!i)return 'M'+p.x.toFixed(1)+' '+p.y.toFixed(1);
+    const prev=pts[i-1],dx=(p.x-prev.x)/3;
+    return 'C'+(prev.x+dx).toFixed(1)+' '+prev.y.toFixed(1)+' '+(p.x-dx).toFixed(1)+' '+p.y.toFixed(1)+' '+p.x.toFixed(1)+' '+p.y.toFixed(1);
+  }).join(' ');
+  path.setAttribute('d',curve);
   path.classList.add('overviewCurveLine');svg.appendChild(path);
   pts.forEach((p,i)=>{
     const c=document.createElementNS(ns,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',4);c.classList.add('overviewCurveDot');
