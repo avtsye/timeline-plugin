@@ -998,16 +998,16 @@ function renderSignature(){
   return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang,settings.timelinePaging]);
 }
 function resetVirtualWindow(){
-  virtualLimit=300;virtualPage=1;
+  virtualLimit=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));virtualPage=1;
   if(virtualObserver){virtualObserver.disconnect();virtualObserver=null}
 }
 function armVirtualSentinel(total){
   if(virtualLimit>=total&&settings.timelinePaging!=='pages')return;
   const cont=$('content');
   const footer=document.createElement('div');footer.className='timelinePaging';
-  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*300+1)+'–'+Math.min(total,virtualPage*300)):Math.min(total,virtualLimit))+' / '+total;
+  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*(Number(settings.timelinePageSize)||300)+1)+'–'+Math.min(total,virtualPage*(Number(settings.timelinePageSize)||300))):Math.min(total,virtualLimit))+' / '+total;
   footer.appendChild(info);
-  const size=300;
+  const size=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));
   if(settings.timelinePaging==='pages'){
     const pages=Math.ceil(total/size),current=virtualPage;
     for(let p of [...new Set([1,current-1,current,current+1,pages])].filter(p=>p>=1&&p<=pages).sort((a,b)=>a-b)){
@@ -1016,7 +1016,7 @@ function armVirtualSentinel(total){
       footer.appendChild(b);
     }
   }else{
-    const b=document.createElement('button');b.className='actionRecommended';b.textContent=(currentLang==='he'?'טען עוד 300 אירועים':'Load 300 more events');
+    const b=document.createElement('button');b.className='actionRecommended';b.textContent=(currentLang==='he'?'טען עוד '+size+' אירועים':'Load '+size+' more events');
     b.onclick=()=>{virtualLimit=Math.min(total,virtualLimit+size);render()};footer.appendChild(b);
   }
   cont.appendChild(footer);
@@ -1324,7 +1324,7 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
 function render(){
   const sig=renderSignature();
   if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
-  const list=filtered(),visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*300,virtualPage*300):list.slice(0,virtualLimit);
+  const list=filtered(),visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*(Number(settings.timelinePageSize)||300),virtualPage*(Number(settings.timelinePageSize)||300)):list.slice(0,virtualLimit);
   // Group by the calendar day of each event, not the start date of a long-running session.
   const allSessions=sessions(list),ss=viewMode==='day'?sessions(visible.map(e=>({...e,sessionId:(e.sessionId||'unknown')+'@'+dk(e.time)}))):sessions(visible);
   renderStats(list,allSessions);renderHeatmap();renderOverviewUsageChart();renderSearches();renderSnapshots();
@@ -1668,6 +1668,7 @@ async function updateTrackingStatus(){
 function sync(){
   $('pauseBtn').textContent=settings.paused?tr('resume_tracking'):tr('pause_tracking');
   $('maxEvents').value=String(settings.maxEvents||5000);
+  if($('timelinePageSize'))$('timelinePageSize').value=String(settings.timelinePageSize||300);
   $('retentionDays').value=String(settings.retentionDays??180);
   $('notificationsEnabled').checked=settings.inAppNotifications!==false;
   $('compactMode').checked=!!settings.compactMode;
@@ -1703,6 +1704,7 @@ async function load(){
   snaps=values[0];settings=Object.assign(settings,values[1]);
   settings.maxEvents=Math.max(500,Math.min(50000,Number(settings.maxEvents)||5000));
   settings.timelinePaging=['more','pages'].includes(settings.timelinePaging)?settings.timelinePaging:'more';
+  settings.timelinePageSize=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));
    settings.retentionDays=Number.isFinite(Number(settings.retentionDays))?Math.max(0,Number(settings.retentionDays)):180;
   pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
   savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
@@ -1928,6 +1930,7 @@ $('saveSettings').onclick=async()=>{
     settings.trackSettingsChanges=$('trackSettingsChanges').checked;
     settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
     settings.timelinePaging=$('timelinePaging')?.value||'more';
+    settings.timelinePageSize=Math.max(25,Math.min(2000,Number($('timelinePageSize')?.value)||300));
 
     const saved=await set(SETTINGS,settings);
     if(saved&&saved.success===false)throw new Error('settings storage write failed');
@@ -1942,13 +1945,15 @@ $('saveSettings').onclick=async()=>{
       settings.retentionDays=Number.isFinite(Number(verify.retentionDays))?Math.max(0,Number(verify.retentionDays)):settings.retentionDays;
     }
 
-    await resolveLanguage();applyTranslations();sync();
-    await applyNewTabIntegration();await publishHomepageState();
-    render();renderSnapshots();updateContinue();renderOverview();
-    if(document.querySelector('[data-screen-panel="analytics"].active'))renderAnalyticsScreen();
-    if(document.querySelector('[data-screen-panel="diagnostics"].active'))await renderDiagnosticsScreen();
-    await updateTrackingStatus();
     await notify(tr('settings_saved'),'success');
+    try{
+      await resolveLanguage();applyTranslations();sync();
+      await applyNewTabIntegration();await publishHomepageState();
+      lastRenderSignature='';render();renderSnapshots();updateContinue();renderOverviewUsageChart();
+      if(document.querySelector('[data-screen-panel="analytics"].active'))renderAnalyticsScreen();
+      if(document.querySelector('[data-screen-panel="diagnostics"].active'))await renderDiagnosticsScreen();
+      await updateTrackingStatus();
+    }catch(refreshErr){console.error('[Timeline] post-save refresh failed',refreshErr)}
   }catch(err){
     try{console.error('[Timeline] settings save failed',err)}catch(_){}
     await notify(tr('settings_save_failed'),'error');
