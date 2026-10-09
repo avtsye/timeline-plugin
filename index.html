@@ -1282,6 +1282,10 @@ textarea:focus-visible{
   color:var(--color-on-secondary-container)!important;
 }
 
+.timelinePaging{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:18px}
+.permission-critical{border-inline-start:4px solid #d32f2f!important}
+.permission-medium{border-inline-start:4px solid #ed8c16!important}
+.permission-low{border-inline-start:4px solid #d4b500!important}
 </style>
 </head>
 <body>
@@ -1465,7 +1469,7 @@ textarea:focus-visible{
             <h3 data-i18n="data_storage">שמירת נתונים</h3>
             <div class="settingsFieldsGrid">
               <div class="settingFieldRow"><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select></div>
-              <div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
+              <div class="settingFieldRow"><label for="timelinePaging">אופן טעינת ציר הזמן</label><select id="timelinePaging"><option value="more">טען עוד 300</option><option value="pages">דפדוף בין עמודים</option></select></div><div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
             </div>
           </section>
         </div>
