@@ -250,21 +250,18 @@ if(!html.includes('settingsCategoryPicker')||!html.includes('overviewCurveLine')
 if(!background.includes("record('find',normalized)"))throw new Error('Find monitoring listener missing');
 console.log('October settings, curve and Find tracking regression guards OK');
 
-// Translation coverage: both languages must supply every dictionary key and
-// every explicitly localized HTML element must have a dictionary entry.
-const intlStart=app.indexOf('const I18N={'),intlEnd=app.indexOf('const tr=',intlStart);
-const intl=app.slice(intlStart,intlEnd);
-const nativeHe=intl.slice(intl.indexOf('he:{')+4,intl.indexOf('en:{'));
-const nativeEn=intl.slice(intl.indexOf('en:{')+4,intl.indexOf('}};'));
-const extractKeys=text=>new Set([...text.matchAll(/(?:^|[,\\n])\\s*([a-z][a-z0-9_]*):/g)].map(m=>m[1]));
-const heKeys=extractKeys(nativeHe),enKeys=extractKeys(nativeEn);
+// Translation regression audit.
+const i18nBlock=app.slice(app.indexOf('const I18N={'),app.indexOf('const I18N_EXTENSION='));
+const hePart=i18nBlock.split('he:{')[1].split('en:{')[0];
+const enPart=i18nBlock.split('en:{')[1];
+const keySet=section=>new Set(section.split(',').map(x=>x.trim().split(':')[0]).filter(x=>/^[a-z][a-z0-9_]*$/.test(x)));
+const heKeys=keySet(hePart),enKeys=keySet(enPart);
 for(const key of heKeys)if(!enKeys.has(key))throw new Error('Missing English translation: '+key);
 for(const key of enKeys)if(!heKeys.has(key))throw new Error('Missing Hebrew translation: '+key);
-const ext=/const I18N_EXTENSION=([\\s\\S]*?);\\nfor\\(const lang/.exec(app);
-if(!ext)throw new Error('Translation extension missing');
+const extension=app.slice(app.indexOf('const I18N_EXTENSION='),app.indexOf('for(const lang of',app.indexOf('const I18N_EXTENSION=')));
 for(const key of [...html.matchAll(/data-i18n(?:-placeholder|-title|-aria-label)?="([a-z0-9_]+)"/g)].map(m=>m[1])){
- if(!heKeys.has(key)&&!ext[1].includes(key+':'))throw new Error('Undeclared UI translation: '+key);
+ if(!heKeys.has(key)&&!extension.includes(key+':'))throw new Error('Undeclared UI translation: '+key);
 }
 if(!app.includes('data-i18n-aria-label'))throw new Error('ARIA labels must be localized');
 if(!app.includes('function localizedEventLabel'))throw new Error('Background event labels must be localized at display time');
-console.log('English/Hebrew translations and dynamic event labels audited');
+console.log('English/Hebrew translations and event labels audited');
