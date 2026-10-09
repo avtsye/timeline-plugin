@@ -1334,29 +1334,53 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
 }
 function restoreSnapshot(s){
   if(!s)return;
-  const books=(s.tabs||[]).filter(t=>t.bookId&&!t.toolId),plugins=(s.tabs||[]).filter(t=>t.toolId&&!t.isSelf);
+  const books=(Array.isArray(s.tabs)?s.tabs:[]).filter(t=>t&&(t.bookId||t.bookUid)&&!t.toolId);
+  const plugins=(Array.isArray(s.tabs)?s.tabs:[]).filter(t=>t&&t.toolId&&!t.isSelf);
   showModal(tr('restore_preview'),(body,close)=>{
     const summary=document.createElement('div');summary.className='dialogSummary';
-    summary.textContent=fmtDate(s.time)+' · '+fmt(s.time)+' — '+tr('select_books_restore');body.appendChild(summary);
-    const list=document.createElement('div');list.className='native-list restoreSelectionList',checks=[];
-    for(const tb of books){
-      const id=String(tb.bookUid||tb.bookId),row=document.createElement('label');row.className='native-row restoreChoice';
-      const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='book_open_24_regular';
-      const main=document.createElement('div');main.className='native-row-main';
-      const b=document.createElement('b');b.textContent=tb.book||tb.bookId||id;
-      const sub=document.createElement('small');sub.textContent=tb.currentRef||String(tb.index??'');
-      main.append(b,sub);
-      const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='restoreCheck';
-      checks.push({id,input});row.append(icon,main,input);list.appendChild(row);
+    summary.textContent=fmtDate(s.time)+' · '+fmt(s.time)+' — '+tr('select_books_restore');
+    const list=document.createElement('div');list.className='native-list restoreSelectionList';
+    const actions=document.createElement('div');actions.className='dialogActions restoreActions';
+    const checks=[];
+    const all=document.createElement('button');all.className='actionGhost';all.textContent=tr('select_all');
+    const none=document.createElement('button');none.className='actionGhost';none.textContent=tr('clear_selection');
+    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');
+    actions.append(all,none,go);
+    // Mount the controls first; a malformed old snapshot must never leave a text-only modal.
+    body.append(summary,list,actions);
+    try{
+      for(const tb of books){
+        const id=String(tb.bookUid||tb.bookId||'');
+        if(!id)continue;
+        const row=document.createElement('label');row.className='native-row restoreChoice';
+        const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='book_open_24_regular';
+        const main=document.createElement('div');main.className='native-row-main';
+        const title=document.createElement('b');title.textContent=String(tb.book||tb.bookId||tb.bookUid||id);
+        const subtitle=document.createElement('small');subtitle.textContent=String(tb.currentRef||tb.index??'');
+        main.append(title,subtitle);
+        const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='restoreCheck';
+        checks.push({id,input});row.append(icon,main,input);list.appendChild(row);
+      }
+    }catch(err){
+      console.error('[Timeline] Restore preview failed',err);
+      const error=document.createElement('p');error.className='dialogSummary';error.textContent=currentLang==='he'?'חלק מפרטי נקודת השחזור לא נטענו':'Some restore point details could not be loaded';list.appendChild(error);
     }
-    if(!books.length){list.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="book_open_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>'}
-    body.appendChild(list);
-    if(plugins.length){const info=document.createElement('div');info.className='dialogSummary';info.textContent=plugins.length+' '+tr('plugins')+'/'+tr('built_in_tool');body.appendChild(info)}
-    const actions=document.createElement('div');actions.className='dialogActions';
-    const all=document.createElement('button');all.className='actionGhost';all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
-    const none=document.createElement('button');none.className='actionGhost';none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.disabled=!books.length;go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);if(!sel.length)return;close();await performRestoreSnapshot(s,sel)};
-    actions.append(all,none,go);body.appendChild(actions);applyShellIcons();
+    if(!checks.length){
+      const p=document.createElement('p');p.className='dialogSummary';p.textContent=currentLang==='he'?'אין בנקודת השחזור ספרים עם מזהים תקינים':'No restorable books in this snapshot';list.appendChild(p);
+    }
+    if(plugins.length){const info=document.createElement('p');info.className='dialogSummary';info.textContent=plugins.length+' '+tr('plugins')+'/'+tr('built_in_tool');body.insertBefore(info,actions)}
+    const syncButtons=()=>{go.disabled=!checks.some(x=>x.input.checked)};
+    all.onclick=()=>{checks.forEach(x=>x.input.checked=true);syncButtons()};
+    none.onclick=()=>{checks.forEach(x=>x.input.checked=false);syncButtons()};
+    checks.forEach(x=>x.input.onchange=syncButtons);
+    go.onclick=async()=>{
+      const selected=checks.filter(x=>x.input.checked).map(x=>x.id);
+      if(!selected.length)return;
+      go.disabled=true;
+      close();
+      await performRestoreSnapshot(s,selected);
+    };
+    syncButtons();applyShellIcons();
   });
 }
 function showSnapshotBrowser(){
