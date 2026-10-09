@@ -1517,6 +1517,57 @@ textarea:focus-visible{
   }
 }
 
+
+/* Otzaria SDK guide: theme-derived colors, UI font, intrinsic field sizing. */
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+  width:min(510px,96vw);
+  grid-template-columns:minmax(84px,98px) minmax(0,1fr);
+  font-family:var(--font-ui);
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .appDropdown{
+  position:relative;
+  display:block;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .appDropdownChevron{
+  position:absolute;
+  top:50%;
+  inset-inline-end:12px;
+  inset-inline-start:auto;
+  transform:translateY(-50%);
+  display:grid;
+  width:18px;
+  height:18px;
+  pointer-events:none;
+  margin:0;
+  padding:0;
+  line-height:1;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .appDropdown select{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  padding-inline-end:36px;
+  font-family:var(--font-ui);
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow>label{
+  font-size:0.875rem;
+  overflow-wrap:anywhere;
+}
+@media(max-width:520px){
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+    width:100vw;
+    grid-template-columns:80px minmax(0,1fr);
+  }
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs .settingsTabBtn{
+    font-size:0.75rem;
+    padding:8px 4px;
+  }
+}
 </style>
 </head>
 <body>
