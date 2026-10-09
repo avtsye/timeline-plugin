@@ -1807,6 +1807,12 @@ async function refreshThemeFromHost(){
   const r=await call('app.getTheme');
   if(r&&r.success&&r.data)theme(r.data);
 }
+function syncSettingsDock(){
+  const nav=document.querySelector('.side-nav');
+  const width=nav?Math.ceil(nav.getBoundingClientRect().width):68;
+  document.documentElement.style.setProperty('--timeline-main-nav-width',width+'px');
+}
+window.addEventListener('resize',syncSettingsDock);
 function closeSettingsDialog(){
   const pane=$('settingsScreen');if(!pane||!pane.classList.contains('settingsDialogOpen'))return;
   pane.classList.remove('settingsDialogOpen');
@@ -1831,7 +1837,8 @@ function switchScreen(name){
   const titleKeys={timeline:'screen_timeline',overview:'screen_overview',restore:'screen_restore',analytics:'screen_analytics',diagnostics:'screen_diagnostics',settings:'settings'};
   const title=$('currentScreenTitle');if(title)title.textContent=tr(titleKeys[name]||'screen_timeline');
   settings.lastScreen=name;set(SETTINGS,settings);
-  if(name==='settings')$('settingsScreen').classList.add('settingsDialogOpen');
+  document.body.classList.toggle('settings-sheet-visible',name==='settings');
+  if(name==='settings'){syncSettingsDock();$('settingsScreen').classList.add('settingsDialogOpen')}
   if(name==='timeline')setTimeout(()=>{const q=$('search');if(q)q.focus()},0);
   if(name==='overview')renderOverviewUsageChart();
   if(name==='analytics')renderAnalyticsScreen();
