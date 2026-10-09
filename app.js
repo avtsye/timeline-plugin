@@ -1306,13 +1306,14 @@ async function createSnapshot(renderAfter=true,showNotice=true){
 }
 async function performRestoreSnapshot(s,selectedBookKeys=null){
   const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
-  const targets=(s.tabs||[]).filter(tb=>tb.bookId&&!tb.toolId&&(!keys||keys.has(String(tb.bookUid||tb.bookId))));
+  const targets=(s.tabs||[]).filter(tb=>(tb.bookId||tb.bookUid)&&!tb.toolId&&(!keys||keys.has(String(tb.bookUid||tb.bookId))));
   if(!targets.length){await notify(currentLang==='he'?'לא נבחרו ספרים לשחזור':'No books selected','error');return}
   const undo=await createSnapshot(false,false);
   let switched=false,restoredCount=0,failed=[];
   if(s.workspace&&s.workspace.id){
     const wl=await call('workspace.list');
-    if(wl.success&&Array.isArray(wl.data)&&wl.data.some(w=>String(w.id)===String(s.workspace.id))){
+    const workspaces=Array.isArray(wl.data)?wl.data:Array.isArray(wl.data?.workspaces)?wl.data.workspaces:[];
+    if(wl.success&&workspaces.some(w=>String(w.id)===String(s.workspace.id))){
       const sw=await call('workspace.switch',{id:s.workspace.id});switched=!!sw.success;
     }
   }
@@ -1494,9 +1495,20 @@ function showMigrationManager(){
       sub.textContent=matches.length?(currentLang==='he'?'מזהים דומים (בדוק לפני מיפוי): ':'Similar installed IDs (verify): ')+matches.map(x=>x.p.pluginId).join(', '):(currentLang==='he'?'לא נמצאה התאמה מקומית. אפשר לחפש את מזהה התוסף בחנות אוצריא: ':'No local match. Search this ID in Otzaria plugin store: ')+oldId;
       main.append(b,sub);
       const sel=document.createElement('select');sel.className='nativeInlineSelect';sel.setAttribute('aria-label',tr('choose_replacement'));sel.innerHTML='<option value="">'+esc(tr('choose_replacement'))+'</option>'+installed.filter(p=>p.pluginId!=='timeline-plugin').map(p=>'<option value="'+esc(p.pluginId)+'">'+esc(p.name)+' ('+esc(p.pluginId)+')</option>').join('');
+      const store=document.createElement('button');store.className='actionGhost';
+      store.textContent=currentLang==='he'?'חפש מזהה בחנות':'Find in plugin store';
+      store.onclick=async()=>{
+        // Open the host's own plugin store instead of guessing external store URLs.
+        // If unsupported, offer a copyable ID for manual store search.
+        const opened=await call('navigation.goTo',{target:'plugins'});
+        if(!opened.success){
+          const copied=await call('app.copyToClipboard',{text:oldId});
+          await notify(currentLang==='he'?'פתח את חנות התוספים וחפש: '+oldId:'Open the plugin store and search: '+oldId,'info');
+        }else await notify(currentLang==='he'?'בחנות התוספים חפש: '+oldId:'Search in plugin store for: '+oldId,'info');
+      };
       const btn=document.createElement('button');btn.className='actionRecommended';btn.textContent=tr('save_mapping');btn.disabled=true;sel.onchange=()=>btn.disabled=!sel.value;
       btn.onclick=async()=>{if(!sel.value)return;pluginMigrations[oldId]=sel.value;await set(MIGRATIONS,pluginMigrations);close();render();await notify(tr('mapping_saved'),'success')};
-      row.append(icon,main,sel,btn);list.appendChild(row);
+      row.append(icon,main,sel,store,btn);list.appendChild(row);
     }
     body.appendChild(list);applyShellIcons();
   });
@@ -1710,7 +1722,18 @@ async function refreshThemeFromHost(){
   const r=await call('app.getTheme');
   if(r&&r.success&&r.data)theme(r.data);
 }
+function closeSettingsDialog(){
+  const pane=$('settingsScreen');if(!pane||!pane.classList.contains('settingsDialogOpen'))return;
+  pane.classList.remove('settingsDialogOpen');
+  const fallback=settingsScreenReturn&&settingsScreenReturn!=='settings'?settingsScreenReturn:'timeline';
+  settingsScreenReturn='timeline';
+  switchScreen(fallback);
+}
+let settingsScreenReturn='timeline';
 function switchScreen(name){
+  const current=document.querySelector('[data-screen-panel].active');
+  if(name==='settings'&&current&&current.dataset.screenPanel!=='settings')settingsScreenReturn=current.dataset.screenPanel;
+  if(name!=='settings'&&$('settingsScreen'))$('settingsScreen').classList.remove('settingsDialogOpen');
   const valid=['timeline','overview','restore','analytics','diagnostics','settings'];
   if(!valid.includes(name))name='timeline';
   document.querySelectorAll('[data-screen-panel]').forEach(p=>{const active=p.dataset.screenPanel===name;p.classList.toggle('active',active);p.setAttribute('aria-hidden',active?'false':'true')});
@@ -1723,6 +1746,7 @@ function switchScreen(name){
   const titleKeys={timeline:'screen_timeline',overview:'screen_overview',restore:'screen_restore',analytics:'screen_analytics',diagnostics:'screen_diagnostics',settings:'settings'};
   const title=$('currentScreenTitle');if(title)title.textContent=tr(titleKeys[name]||'screen_timeline');
   settings.lastScreen=name;set(SETTINGS,settings);
+  if(name==='settings')$('settingsScreen').classList.add('settingsDialogOpen');
   if(name==='timeline')setTimeout(()=>{const q=$('search');if(q)q.focus()},0);
   if(name==='analytics')renderAnalyticsScreen();
   if(name==='diagnostics'){updateTrackingStatus();renderDiagnosticsScreen();}
@@ -1735,6 +1759,9 @@ function closeFilterPopover({focus=false}={}){
 }
 window.addEventListener('resize',syncSettingsPaneBottomInset);
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>btn.onclick=()=>switchScreen(btn.dataset.screen));
+if($('closeSettingsDialog'))$('closeSettingsDialog').onclick=closeSettingsDialog;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('settingsScreen')?.classList.contains('settingsDialogOpen')){e.preventDefault();closeSettingsDialog()}});
+
 $('search').oninput=()=>{const box=$('searchBox');box.classList.toggle('has-text',!!$('search').value);clearTimeout(searchTimer);searchTimer=setTimeout(render,120)};
 $('searchClear').onclick=()=>{$('search').value='';$('searchBox').classList.remove('has-text');$('search').focus();render()};$('type').onchange=render;$('pluginFilter').onchange=render;$('sort').onchange=render;
 $('range').onchange=()=>{datePreset='all';selectedDayKey='';updateQuickButtons();render()};
