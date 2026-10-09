@@ -1015,6 +1015,20 @@ function armVirtualSentinel(total){
       b.onclick=()=>{virtualPage=p;render();const sc=document.querySelector('.timeline-scroll');if(sc)sc.scrollTop=0};
       footer.appendChild(b);
     }
+    const jump=document.createElement('form');jump.className='timelinePageJump';
+    const field=document.createElement('input');field.type='number';field.min='1';field.max=String(pages);field.step='1';field.required=true;field.value=String(current);
+    field.setAttribute('aria-label',currentLang==='he'?'מספר עמוד למעבר':'Page number');
+    const go=document.createElement('button');go.type='submit';go.className='actionRecommended';go.textContent=currentLang==='he'?'עבור לעמוד':'Go to page';
+    jump.append(field,go);
+    jump.onsubmit=e=>{
+      e.preventDefault();
+      const requested=Number(field.value);
+      if(!Number.isInteger(requested)||requested<1||requested>pages){field.setCustomValidity(currentLang==='he'?'יש להזין מספר בין 1 ל־'+pages:'Enter a page between 1 and '+pages);field.reportValidity();return}
+      field.setCustomValidity('');virtualPage=requested;render();
+      const sc=document.querySelector('.timeline-scroll');if(sc)sc.scrollTop=0;
+    };
+    field.oninput=()=>field.setCustomValidity('');
+    footer.appendChild(jump);
   }else{
     const b=document.createElement('button');b.className='actionRecommended';b.textContent=(currentLang==='he'?'טען עוד '+size+' אירועים':'Load '+size+' more events');
     b.onclick=()=>{virtualLimit=Math.min(total,virtualLimit+size);render()};footer.appendChild(b);
