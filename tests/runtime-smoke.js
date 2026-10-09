@@ -265,3 +265,18 @@ for(const key of [...html.matchAll(/data-i18n(?:-placeholder|-title|-aria-label)
 if(!app.includes('data-i18n-aria-label'))throw new Error('ARIA labels must be localized');
 if(!app.includes('function localizedEventLabel'))throw new Error('Background event labels must be localized at display time');
 console.log('English/Hebrew translations and event labels audited');
+
+
+// Settings layout regression: dropdowns must be constrained to the narrow side sheet.
+const scopedSettings='#settingsScreen.settings-pane.screen.active.settingsDialogOpen';
+for(const required of [
+ scopedSettings+' .settingFieldRow>.appDropdown',
+ scopedSettings+' .settingFieldRow>.appDropdown select',
+ scopedSettings+' .settingsFieldsGrid',
+ 'grid-template-columns:minmax(0,1fr)',
+ 'max-width:100%'
+]){
+ if(!html.includes(required))throw new Error('Settings containment rule missing: '+required);
+}
+if(!html.includes('var(--radius-lg)')||!html.includes('var(--color-surface-container-low)'))throw new Error('Otzaria design tokens absent');
+console.log('Narrow settings panel containment regression OK');
