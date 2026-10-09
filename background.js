@@ -297,9 +297,12 @@ async function startPolling(){
 function wire(){
   if(wired)return;wired=true;
   Otzaria.on('navigation.changed',p=>{
-    const screen=String((p&&(p.screen||p.target||p.route||p.page))||'').toLowerCase();
-    if(/(^|[./_-])(find|locate|locator)([./_-]|$)/.test(screen)||screen==='איתור')record('find',p);
-    else record('navigation',p);
+    const values=['screen','target','route','page','path','name','title','view','section'].map(k=>p&&p[k]).filter(v=>typeof v==='string');
+    const screen=values.join(' ').toLowerCase();
+    const isFind=/(^|[^a-z])(find|locator|locate)([^a-z]|$)/.test(screen)||screen.includes('איתור');
+    const normalized={...(p&&typeof p==='object'?p:{}),screen:values[0]||''};
+    if(isFind)record('find',normalized);
+    else record('navigation',normalized);
     detectToolTabs();
   });
   Otzaria.on('reader.current_book_changed',p=>{record('book',p);detectToolTabs()});
