@@ -249,3 +249,22 @@ if(!app.includes("activateSettingsTab($('settingsCategorySelect').value)"))throw
 if(!html.includes('settingsCategoryPicker')||!html.includes('overviewCurveLine'))throw new Error('Settings or curve styling is missing');
 if(!background.includes("record('find',normalized)"))throw new Error('Find monitoring listener missing');
 console.log('October settings, curve and Find tracking regression guards OK');
+
+// Translation coverage: both languages must supply every dictionary key and
+// every explicitly localized HTML element must have a dictionary entry.
+const intlStart=app.indexOf('const I18N={'),intlEnd=app.indexOf('const tr=',intlStart);
+const intl=app.slice(intlStart,intlEnd);
+const nativeHe=intl.slice(intl.indexOf('he:{')+4,intl.indexOf('en:{'));
+const nativeEn=intl.slice(intl.indexOf('en:{')+4,intl.indexOf('}};'));
+const extractKeys=text=>new Set([...text.matchAll(/(?:^|[,\\n])\\s*([a-z][a-z0-9_]*):/g)].map(m=>m[1]));
+const heKeys=extractKeys(nativeHe),enKeys=extractKeys(nativeEn);
+for(const key of heKeys)if(!enKeys.has(key))throw new Error('Missing English translation: '+key);
+for(const key of enKeys)if(!heKeys.has(key))throw new Error('Missing Hebrew translation: '+key);
+const ext=/const I18N_EXTENSION=([\\s\\S]*?);\\nfor\\(const lang/.exec(app);
+if(!ext)throw new Error('Translation extension missing');
+for(const key of [...html.matchAll(/data-i18n(?:-placeholder|-title|-aria-label)?="([a-z0-9_]+)"/g)].map(m=>m[1])){
+ if(!heKeys.has(key)&&!ext[1].includes(key+':'))throw new Error('Undeclared UI translation: '+key);
+}
+if(!app.includes('data-i18n-aria-label'))throw new Error('ARIA labels must be localized');
+if(!app.includes('function localizedEventLabel'))throw new Error('Background event labels must be localized at display time');
+console.log('English/Hebrew translations and dynamic event labels audited');
