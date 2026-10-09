@@ -1320,6 +1320,23 @@ textarea:focus-visible{
 .overviewUsageChart .chart{height:190px}
 .overviewUsageChart .bar{min-width:5px}
 
+
+/* Settings navigation: dropdown replaces narrow horizontal tabs while retaining tab semantics for keyboard and compatibility. */
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs{display:none}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsCategoryPicker{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding:12px 18px;border-bottom:1px solid var(--color-outline-variant);width:100%;min-width:0}
+.settingsCategoryPicker{display:none}
+.settingsCategoryPicker label{font-size:0.875rem;color:var(--color-on-surface-variant);font-weight:600}
+.settingsCategoryPicker select{width:100%;max-width:100%;min-width:0;height:44px;border:1px solid var(--color-outline-variant);border-radius:var(--radius-pill);background:var(--color-surface-container-high);color:var(--color-on-surface);padding-inline:14px;font:inherit}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingsPane{overflow-x:hidden}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow{max-width:100%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow select{width:100%;min-width:0}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingsChecksGrid .checkRow{min-width:0}
+.overviewCurve{display:block;width:100%;height:220px;overflow:visible}
+.overviewCurveGrid{stroke:var(--color-outline-variant);stroke-width:1}
+.overviewCurveLine{fill:none;stroke:var(--color-primary);stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round}
+.overviewCurveDot{fill:var(--color-primary);stroke:var(--color-surface);stroke-width:2}
+.overviewCurveLabel{fill:var(--color-on-surface-variant);font-size:12px}
+
 </style>
 </head>
 <body>
@@ -1443,6 +1460,14 @@ textarea:focus-visible{
         <button type="button" id="closeSettingsDialog" class="settingsDialogClose" aria-label="סגור הגדרות" title="סגור הגדרות">×</button>
         <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">העדפות בסיסיות, מעקב ותחזוקה</div></div></div>
 
+        <div class="settingsCategoryPicker">
+          <label for="settingsCategorySelect">קטגוריית הגדרות</label>
+          <select id="settingsCategorySelect" aria-label="בחירת קטגוריית הגדרות">
+            <option value="general">כללי</option>
+            <option value="tracking">מעקב</option>
+            <option value="advanced">מתקדם ותחזוקה</option>
+          </select>
+        </div>
         <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
           <button class="settingsTabBtn active" role="tab" aria-selected="true" tabindex="0" data-settings-tab="general"><span class="settingsTabIcon" data-icon="settings_24_regular"></span><span data-i18n="settings_general">כללי</span></button>
           <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="tracking"><span class="settingsTabIcon" data-icon="pulse_24_regular"></span><span data-i18n="settings_tracking">מעקב</span></button>
