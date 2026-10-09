@@ -1025,8 +1025,8 @@ textarea:focus-visible{
 }
 #settingsScreen .settingsChecksGrid{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,300px));
-  grid-auto-rows:42px;
+  grid-template-columns:minmax(0,1fr);
+  grid-auto-rows:auto;
   justify-content:start;
   align-items:start;
   gap:8px 18px;
@@ -1048,7 +1048,7 @@ textarea:focus-visible{
   border-radius:var(--otz-radius);
   background:transparent;
 }
-#settingsScreen .settingsChecksGrid .checkRow{width:300px;height:42px}
+#settingsScreen .settingsChecksGrid .checkRow{width:100%;min-height:42px;height:auto}
 #settingsScreen .settingsGroup>.checkRow{width:min(100%,380px);height:42px;margin-block:3px}
 #settingsScreen .settingsChecksGrid .checkRow:hover,
 #settingsScreen .settingsGroup>.checkRow:hover{
@@ -1089,15 +1089,17 @@ textarea:focus-visible{
   display:grid;
   grid-template-columns:1fr;
   gap:4px;
-  width:440px;
+  width:100%;
+  min-width:0;
   max-width:100%;
 }
 #settingsScreen .settingFieldRow{
   display:grid;
-  grid-template-columns:150px 230px;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   align-items:center;
   gap:12px;
-  width:440px;
+  width:100%;
+  min-width:0;
   max-width:100%;
   min-height:44px;
   padding:3px 6px;
@@ -1107,10 +1109,10 @@ textarea:focus-visible{
   text-align:right;
   font-size:0.8125rem;
 }
-#settingsScreen .settingFieldRow .appDropdown{
-  width:230px;
+ #settingsScreen .settingFieldRow .appDropdown{
+  width:100%;
   min-width:0;
-  max-width:none;
+  max-width:100%;
 }
 #settingsScreen .settingsPane select,
 #settingsScreen .settingsPane textarea{box-shadow:none}
@@ -1144,12 +1146,12 @@ textarea:focus-visible{
 }
 #settingsScreen .feedbackToolbar{
   display:grid;
-  grid-template-columns:220px auto;
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   gap:8px;
   margin-bottom:8px;
 }
-#settingsScreen .feedbackToolbar .appDropdown{width:220px;min-width:0;max-width:none}
+#settingsScreen .feedbackToolbar .appDropdown{width:100%;min-width:0;max-width:100%}
 #settingsScreen .feedbackToolbar .btn{margin:0}
 #settingsScreen .feedbackBox{
   width:100%;
@@ -1403,8 +1405,8 @@ textarea:focus-visible{
 /* Stable Otzaria-style settings layout: all controls stay inside their cards.
    Uses host colors and radius tokens, and avoids fixed input widths. */
 #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
-  grid-template-columns:minmax(118px,138px) minmax(0,1fr);
-  width:min(620px,96vw);
+  grid-template-columns:minmax(92px,108px) minmax(0,1fr);
+  width:min(580px,96vw);
   max-width:100vw;
 }
 #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{
@@ -1456,6 +1458,63 @@ textarea:focus-visible{
     grid-template-columns:minmax(0,1fr);
   }
   #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{padding:8px}
+}
+
+
+/* Final settings containment: layout and controls share one intrinsic sizing model. */
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+  width:min(580px,96vw);
+  grid-template-columns:minmax(92px,108px) minmax(0,1fr);
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs{
+  box-sizing:border-box;width:100%;min-width:0;max-width:100%;grid-column:1;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{
+  box-sizing:border-box;grid-column:2;min-width:0;width:auto;max-width:100%;
+  overflow-x:clip;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane .settingsGroup,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane .settingsFieldsGrid,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane .settingFieldRow,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane .feedbackToolbar,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane .settingsChecksGrid{
+  box-sizing:border-box;width:100%;max-width:100%;min-width:0;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingsChecksGrid{
+  display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:auto;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingsChecksGrid .checkRow,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingsGroup>.checkRow{
+  box-sizing:border-box;width:100%;height:auto;min-height:42px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:4px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow>.appDropdown,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .feedbackToolbar .appDropdown{
+  display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .appDropdown select,
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .feedbackBox{
+  box-sizing:border-box;max-width:100%;width:100%;min-width:0;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .feedbackToolbar{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:8px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .feedbackToolbar .btn{
+  max-width:100%;justify-self:start;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingTileText{
+  white-space:normal;overflow-wrap:anywhere;text-overflow:clip;
+}
+@media(max-width:500px){
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+    width:100vw;grid-template-columns:84px minmax(0,1fr);
+  }
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{padding:8px}
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs .settingsTabBtn{
+    padding:8px 3px;gap:4px;font-size:0.8125rem;
+  }
 }
 
 </style>
