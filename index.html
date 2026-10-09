@@ -1337,6 +1337,64 @@ textarea:focus-visible{
 .overviewCurveDot{fill:var(--color-primary);stroke:var(--color-surface);stroke-width:2}
 .overviewCurveLabel{fill:var(--color-on-surface-variant);font-size:12px}
 
+
+/* 0.20 settings: right-anchored sheet with internal vertical navigation. */
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+  inset:0 0 0 auto;
+  right:0;left:auto;
+  width:min(780px,98vw);height:100dvh;max-height:100dvh;
+  display:grid;
+  grid-template-columns:minmax(155px,210px) minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr) auto;
+  direction:rtl;
+  border-inline-start:1px solid var(--color-outline-variant);
+  border-inline-end:0;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.page-head{
+  grid-column:1 / -1;grid-row:1;
+  padding:18px 64px 18px 20px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsCategoryPicker{display:none}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs{
+  grid-column:1;grid-row:2;
+  display:flex;flex-direction:column;align-items:stretch;
+  overflow-y:auto;overflow-x:hidden;
+  gap:6px;padding:14px 10px;
+  border-inline-end:1px solid var(--color-outline-variant);
+  border-bottom:0;
+  background:var(--color-surface-container-low);
+  min-width:0;min-height:0;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs .settingsTabBtn{
+  width:100%;display:flex;align-items:center;justify-content:flex-start;
+  gap:10px;min-height:46px;white-space:normal;text-align:start;
+  border-radius:var(--radius-md);padding:10px 12px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{
+  grid-column:2;grid-row:2;min-width:0;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding:16px 18px;
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane:not(.active){display:none}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsSaveBar{
+  grid-column:1 / -1;grid-row:3;margin:0;min-width:0;
+  padding:12px 18px;background:var(--color-surface);
+}
+#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsDialogClose{
+  inset-inline-start:auto;inset-inline-end:16px;top:14px;
+}
+@media(max-width:560px){
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
+    width:100vw;grid-template-columns:minmax(90px,120px) minmax(0,1fr);
+  }
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs{padding:8px 4px}
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs .settingsTabBtn{
+    flex-direction:column;gap:4px;padding:8px 4px;font-size:0.8rem;
+  }
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{padding:10px}
+  #settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow{grid-template-columns:minmax(0,1fr)}
+}
+
 </style>
 </head>
 <body>
