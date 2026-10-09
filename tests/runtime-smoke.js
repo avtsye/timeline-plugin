@@ -254,7 +254,7 @@ console.log('October settings, curve and Find tracking regression guards OK');
 const i18nBlock=app.slice(app.indexOf('const I18N={'),app.indexOf('const I18N_EXTENSION='));
 const hePart=i18nBlock.split('he:{')[1].split('en:{')[0];
 const enPart=i18nBlock.split('en:{')[1];
-const keySet=section=>new Set(section.split(',').map(x=>x.trim().split(':')[0]).filter(x=>/^[a-z][a-z0-9_]*$/.test(x)));
+const keySet=section=>new Set([...section.matchAll(/(?:^|,|\n)\s*([a-z][a-z0-9_]*):\s*['\"]/g)].map(m=>m[1]));
 const heKeys=keySet(hePart),enKeys=keySet(enPart);
 for(const key of heKeys)if(!enKeys.has(key))throw new Error('Missing English translation: '+key);
 for(const key of enKeys)if(!heKeys.has(key))throw new Error('Missing Hebrew translation: '+key);
