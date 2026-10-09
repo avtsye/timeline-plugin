@@ -20,6 +20,14 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Official Otzaria plugin validator (strict)
+        uses: Otzaria/otzaria-plugin-validator@v1
+        with:
+          path: .
+          app-version: '0.9.97'
+          fail-on-warnings: 'true'
+          publish: 'false'
+
       - name: Validate manifest JSON
         run: node -e "const m=JSON.parse(require('fs').readFileSync('manifest.json','utf8')); if(m.minAppVersion!=='0.9.97') throw new Error('minAppVersion must stay 0.9.97'); console.log('manifest OK, Otzaria >= 0.9.97')"
 
