@@ -20,7 +20,7 @@ let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:t
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
-let virtualLimit=300,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
+let virtualLimit=300,virtualPage=1,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
 let eventIndex={byBook:new Map(),byPlugin:new Map(),byDay:new Map(),bySession:new Map(),search:new Map(),sortedDesc:[]};
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
@@ -956,21 +956,21 @@ function renderSignature(){
   return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang,settings.timelinePaging]);
 }
 function resetVirtualWindow(){
-  virtualLimit=300;
+  virtualLimit=300;virtualPage=1;
   if(virtualObserver){virtualObserver.disconnect();virtualObserver=null}
 }
 function armVirtualSentinel(total){
-  if(virtualLimit>=total)return;
+  if(virtualLimit>=total&&settings.timelinePaging!=='pages')return;
   const cont=$('content');
   const footer=document.createElement('div');footer.className='timelinePaging';
-  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+Math.min(total,virtualLimit)+' / '+total;
+  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*300+1)+'–'+Math.min(total,virtualPage*300)):Math.min(total,virtualLimit))+' / '+total;
   footer.appendChild(info);
   const size=300;
   if(settings.timelinePaging==='pages'){
-    const pages=Math.ceil(total/size),current=Math.max(1,Math.ceil(virtualLimit/size));
+    const pages=Math.ceil(total/size),current=virtualPage;
     for(let p of [...new Set([1,current-1,current,current+1,pages])].filter(p=>p>=1&&p<=pages).sort((a,b)=>a-b)){
       const b=document.createElement('button');b.textContent=String(p);b.className='actionGhost';b.disabled=p===current;
-      b.onclick=()=>{virtualLimit=p*size;render();const sc=document.querySelector('.timeline-scroll');if(sc)sc.scrollTop=0};
+      b.onclick=()=>{virtualPage=p;render();const sc=document.querySelector('.timeline-scroll');if(sc)sc.scrollTop=0};
       footer.appendChild(b);
     }
   }else{
@@ -1269,7 +1269,7 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
 function render(){
   const sig=renderSignature();
   if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
-  const list=filtered(),visible=list.slice(0,virtualLimit);
+  const list=filtered(),visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*300,virtualPage*300):list.slice(0,virtualLimit);
   // Group by the calendar day of each event, not the start date of a long-running session.
   const allSessions=sessions(list),ss=viewMode==='day'?sessions(visible.map(e=>({...e,sessionId:(e.sessionId||'unknown')+'@'+dk(e.time)}))):sessions(visible);
   renderStats(list,allSessions);renderHeatmap();renderSearches();renderSnapshots();
