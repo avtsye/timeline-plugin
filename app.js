@@ -920,14 +920,22 @@ async function renderDiagnosticsScreen(){
   const host=$('diagnosticsContent');if(!host)return;host.innerHTML='';
   const perms=await call('app.getGrantedPermissions'),backups=await call('fs.listDir',{path:'backups'});
   const ps=perms.success&&perms.data&&Array.isArray(perms.data.permissions)?perms.data.permissions:[];
-  const required=['app.run_on_startup','app.background_keep_alive','reader.open','workspace.manage','notifications.send'];
+  const required=['app.info.read','app.shortcuts','app.run_on_startup','app.background_keep_alive','app.startup_contributions','history.read','reader.open','workspace.read','workspace.manage','navigation.write','plugin.open_other','notifications.send','fs.user_files.read','fs.user_files.write','published_data.write','plugin.storage.read','plugin.storage.write','events.subscribe:navigation.changed','events.subscribe:reader.current_book_changed','events.subscribe:reader.current_ref_changed','events.subscribe:workspace.changed','events.subscribe:theme.changed','ui.feedback','events.subscribe:settings.changed'];
+  const permissionsHe={'app.info.read':'קריאת מידע על אוצריא','app.shortcuts':'קיצורי מקלדת','app.run_on_startup':'הפעלה עם אוצריא','app.background_keep_alive':'פעילות רציפה ברקע','app.startup_contributions':'שירותי אתחול','history.read':'קריאת היסטוריה','reader.open':'פתיחת ספרים','workspace.read':'קריאת שולחנות עבודה','workspace.manage':'ניהול שולחנות עבודה','navigation.write':'ניווט במערכת','plugin.open_other':'פתיחת תוספים אחרים','notifications.send':'שליחת התראות','fs.user_files.read':'קריאת קובצי משתמש','fs.user_files.write':'שמירת קובצי משתמש','published_data.write':'פרסום נתונים לתוספים','plugin.storage.read':'קריאת אחסון התוסף','plugin.storage.write':'שמירת נתוני התוסף','events.subscribe:navigation.changed':'מעקב אחר ניווט','events.subscribe:reader.current_book_changed':'מעקב אחר החלפת ספר','events.subscribe:reader.current_ref_changed':'מעקב אחר מיקום הקריאה','events.subscribe:workspace.changed':'מעקב אחר שולחנות עבודה','events.subscribe:theme.changed':'מעקב אחר שינוי ערכת נושא','ui.feedback':'שליחת משוב','events.subscribe:settings.changed':'מעקב אחר הגדרות'};
+  const permissionSeverity=id=>['reader.open','workspace.manage','plugin.storage.read','plugin.storage.write','app.run_on_startup','app.background_keep_alive'].includes(id)?'critical':['history.read','workspace.read','plugin.open_other','navigation.write','events.subscribe:reader.current_book_changed','events.subscribe:reader.current_ref_changed','events.subscribe:workspace.changed'].includes(id)?'medium':'low';
   const missing=required.filter(x=>!ps.includes(x));
   const bytes=new Blob([JSON.stringify({events,snaps,names,sessionNotes,savedFilters})]).size;
   const backupEntries=backups.success&&backups.data&&Array.isArray(backups.data.entries)?backups.data.entries.filter(x=>x.type==='file').sort((a,b)=>String(b.name).localeCompare(String(a.name))):[];
   const now=Date.now(),lastSnap=snaps.length?snaps[snaps.length-1].time:0;
 
   const healthSec=makeNativeSection(tr('health'));
-  healthSec.list.appendChild(makeNativeRow({icon:missing.length?'warning_24_regular':'checkmark_circle_24_regular',title:missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'),subtitle:missing.join(', '),trailing:missing.length?'!':'✓'}));
+  healthSec.list.appendChild(makeNativeRow({icon:missing.length?'warning_24_regular':'checkmark_circle_24_regular',title:missing.length?tr('missing_permissions')+': '+missing.length:tr('permissions_ok'),subtitle:missing.map(id=>permissionsHe[id]||id).join(' · '),trailing:missing.length?'!':'✓'}));
+  for(const id of missing){
+    const label=currentLang==='he'?(permissionsHe[id]||id):id;
+    const row=makeNativeRow({icon:'warning_24_regular',title:label,subtitle:id});
+    const severity=permissionSeverity(id);row.classList.add('permission-'+severity);
+    healthSec.list.appendChild(row);
+  }
   healthSec.list.appendChild(makeNativeRow({icon:'database_24_regular',title:tr('storage'),subtitle:events.length+' '+tr('events')+' · '+snaps.length+' '+tr('recent_snapshots'),trailing:'~'+Math.round(bytes/1024)+' KB'}));
   healthSec.list.appendChild(makeNativeRow({icon:'history_24_regular',title:tr('last_snapshot'),subtitle:lastSnap?fmtDate(lastSnap)+' '+fmt(lastSnap):tr('no_data'),trailing:lastSnap&&now-lastSnap<35*60000?'✓':'!'}));
   healthSec.list.appendChild(makeNativeRow({icon:'archive_24_regular',title:tr('internal_backups'),subtitle:backupEntries.length+' '+tr('versions'),trailing:health.lastBackupAt?fmtDate(health.lastBackupAt)+' · '+fmt(health.lastBackupAt):''}));
@@ -1311,15 +1319,18 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
       if(!tb.isSelf&&tb.bookId&&!tb.toolId&&(!keys||keys.has(identity)))await call('reader.closeTab',{index:i});
     }
   }
+  let restoredCount=0;
   for(const tb of (s.tabs||[]).filter(t=>t.bookId&&!t.toolId)){
     const identity=String(tb.bookUid||tb.bookId);
     if(keys&&!keys.has(identity))continue;
     const p={};for(const k of ['bookUid','id','bookId','type','source'])if(tb[k]!=null)p[k]=tb[k];
-    if(tb.index!=null)p.index=tb.index;p.navigateToPositionIfReused=true;await call('reader.openBook',p);
+    if(tb.index!=null)p.index=tb.index;p.navigateToPositionIfReused=true;
+    const opened=await call('reader.openBook',p);if(opened.success)restoredCount++;
   }
   await call('navigation.goTo',{target:'reading'});
   settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;await set(SETTINGS,settings);
-  await notify(tr('snapshot_restored'),'success');
+  if(!restoredCount){await notify(currentLang==='he'?'השחזור לא פתח אף ספר. בדוק הרשאות וזמינות ספרים.':'No books were restored. Check permissions and book availability.','error');return}
+  await notify(tr('snapshot_restored')+' ('+restoredCount+')','success');
 }
 function restoreSnapshot(s){
   if(!s)return;
@@ -1344,7 +1355,7 @@ function restoreSnapshot(s){
     const actions=document.createElement('div');actions.className='dialogActions';
     const all=document.createElement('button');all.className='actionGhost';all.textContent=tr('select_all');all.onclick=()=>checks.forEach(x=>x.input.checked=true);
     const none=document.createElement('button');none.className='actionGhost';none.textContent=tr('clear_selection');none.onclick=()=>checks.forEach(x=>x.input.checked=false);
-    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);close();await performRestoreSnapshot(s,sel)};
+    const go=document.createElement('button');go.className='actionRecommended';go.textContent=tr('restore_selected');go.disabled=!books.length;go.onclick=async()=>{const sel=checks.filter(x=>x.input.checked).map(x=>x.id);if(!sel.length)return;close();await performRestoreSnapshot(s,sel)};
     actions.append(all,none,go);body.appendChild(actions);applyShellIcons();
   });
 }
@@ -1559,6 +1570,7 @@ function sync(){
   $('trackRefs').checked=settings.trackRefs!==false;
   $('trackPlugins').checked=settings.trackPlugins!==false;
   $('trackTools').checked=settings.trackTools!==false;
+  if($('timelinePaging'))$('timelinePaging').value=settings.timelinePaging||'more';
   $('trackWorkspaces').checked=settings.trackWorkspaces!==false;
   $('trackNavigation').checked=settings.trackNavigation!==false;
   $('trackFind').checked=settings.trackFind!==false;
@@ -1581,7 +1593,8 @@ async function load(){
   ]);
   snaps=values[0];settings=Object.assign(settings,values[1]);
   settings.maxEvents=Math.max(500,Math.min(50000,Number(settings.maxEvents)||5000));
-  settings.retentionDays=Number.isFinite(Number(settings.retentionDays))?Math.max(0,Number(settings.retentionDays)):180;
+  settings.timelinePaging=['more','pages'].includes(settings.timelinePaging)?settings.timelinePaging:'more';
+   settings.retentionDays=Number.isFinite(Number(settings.retentionDays))?Math.max(0,Number(settings.retentionDays)):180;
   pinned=new Set(values[2]||[]);collapsed=new Set(values[3]||[]);favorites=new Set(values[4]||[]);names=values[5]||{};
   savedFilters=Array.isArray(values[6])?values[6]:[];pluginMigrations=values[7]||{};sessionNotes=values[8]||{};health=values[9]||{};
   await resolveLanguage();
@@ -1788,6 +1801,7 @@ $('saveSettings').onclick=async()=>{
     settings.trackSearches=$('trackSearches').checked;
     settings.trackSettingsChanges=$('trackSettingsChanges').checked;
     settings.summaryArchiveEnabled=$('summaryArchiveEnabled').checked;
+    settings.timelinePaging=$('timelinePaging')?.value||'more';
 
     const saved=await set(SETTINGS,settings);
     if(saved&&saved.success===false)throw new Error('settings storage write failed');
