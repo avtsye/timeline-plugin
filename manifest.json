@@ -10,7 +10,6 @@
   "minAppVersion": "0.9.97",
   "sdkVersion": "1.x",
   "permissions": [
-    "app.info.read",
     "app.shortcuts",
     "app.run_on_startup",
     "app.background_keep_alive",
@@ -21,18 +20,13 @@
     "workspace.manage",
     "navigation.write",
     "plugin.open_other",
-    "notifications.send",
     "fs.user_files.read",
     "fs.user_files.write",
     "published_data.write",
-    "plugin.storage.read",
-    "plugin.storage.write",
     "events.subscribe:navigation.changed",
     "events.subscribe:reader.current_book_changed",
     "events.subscribe:reader.current_ref_changed",
     "events.subscribe:workspace.changed",
-    "events.subscribe:theme.changed",
-    "ui.feedback",
     "events.subscribe:settings.changed"
   ],
   "network": {
