@@ -247,7 +247,7 @@ function record(type,p){
     const d=clean(p),raw=await get(EVENTS,[]),list=Array.isArray(raw)?raw:[];
     const prev=list[list.length-1];
     const same=prev&&prev.type===type&&bookKey(prev.data||{})===bookKey(d)&&now-(prev.endTime||prev.time)<MERGE_GAP;
-    if(same&&['book','ref','navigation'].includes(type)){
+    if(same&&new Date(prev.time).toDateString()===new Date(now).toDateString()&&['book','ref','navigation'].includes(type)){
       prev.endTime=now;prev.count=(prev.count||1)+1;prev.data=Object.assign({},prev.data,d);prev.label=label(type,prev.data);
     }else{
       const sid=prev&&now-(prev.endTime||prev.time)<SESSION_GAP?prev.sessionId:'s-'+now.toString(36);
@@ -296,7 +296,12 @@ async function startPolling(){
 }
 function wire(){
   if(wired)return;wired=true;
-  Otzaria.on('navigation.changed',p=>{if(p&&p.screen==='find')record('find',p);else record('navigation',p);detectToolTabs();});
+  Otzaria.on('navigation.changed',p=>{
+    const screen=String((p&&(p.screen||p.target||p.route||p.page))||'').toLowerCase();
+    if(/(^|[./_-])(find|locate|locator)([./_-]|$)/.test(screen)||screen==='איתור')record('find',p);
+    else record('navigation',p);
+    detectToolTabs();
+  });
   Otzaria.on('reader.current_book_changed',p=>{record('book',p);detectToolTabs()});
   Otzaria.on('reader.current_ref_changed',p=>record('ref',p));
   Otzaria.on('workspace.changed',p=>{record('workspace',p);detectToolTabs()});
