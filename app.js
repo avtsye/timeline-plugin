@@ -20,7 +20,7 @@ let settings={paused:false,maxEvents:5000,retentionDays:180,inAppNotifications:t
 let pinned=new Set(),collapsed=new Set(),favorites=new Set(),names={},savedFilters=[],pluginMigrations={},sessionNotes={};
 let viewMode='day',datePreset='all',selectedDayKey='',favoritesOnly=false;
 let pluginMap=new Map(),health={},currentLang='he';
-let virtualLimit=80,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
+let virtualLimit=300,virtualObserver=null,lastRenderSignature='',searchTimer=null,liveRefreshTimer=null;
 let eventIndex={byBook:new Map(),byPlugin:new Map(),byDay:new Map(),bySession:new Map(),search:new Map(),sortedDesc:[]};
 
 const call=async(m,p={})=>{try{return await Otzaria.call(m,p)}catch(_){return{success:false,data:null,error:_}}};
@@ -334,7 +334,7 @@ function recentPlaces(limit=12){
 function dayTitle(ts){
   const k=dk(ts),now=Date.now();
   if(k===dk(now))return tr('today');
-  if(k===dk(now-86400000))return tr('yesterday');
+  if(k===dk(new Date(new Date(now).setDate(new Date(now).getDate()-1))))return tr('yesterday');
   return formatDate(ts,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 }
 function startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
@@ -354,7 +354,7 @@ function matchesPreset(e){
   if(selectedDayKey)return dk(e.time)===selectedDayKey;
   const now=Date.now(),today=startOfDay(now);
   if(datePreset==='today')return e.time>=today;
-  if(datePreset==='yesterday')return e.time>=today-86400000&&e.time<today;
+  if(datePreset==='yesterday'){const d=new Date(today);d.setDate(d.getDate()-1);return e.time>=d.getTime()&&e.time<today;}
   if(datePreset==='week')return e.time>=startOfWeek(now);
   return true;
 }
@@ -462,11 +462,14 @@ function estimateTimes(list){
   }
   return{books:Math.round(books/60000),tools:Math.round(tools/60000)};
 }
+function heatClass(n,max){if(!n)return '';const ratio=Math.log1p(n)/Math.log1p(Math.max(1,max));return 'h'+Math.max(1,Math.min(4,Math.ceil(ratio*4)))}
 function renderHeatmap(){
   const box=$('heatmap');box.innerHTML='';
-  for(let i=34;i>=0;i--){
-    const t=Date.now()-i*86400000,k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
-    b.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');
+  const days=Array.from({length:35},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-(34-i));return d.getTime()});
+  const max=Math.max(1,...days.map(t=>(eventIndex.byDay.get(dk(t))||[]).length));
+  for(const t of days){
+    const k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
+    b.className='heat '+heatClass(n,max);
     b.title=formatDate(t,{day:'numeric',month:'long',year:'numeric'})+' · '+n+' '+tr('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();switchScreen('timeline');render()};
     box.appendChild(b);
@@ -902,7 +905,9 @@ function renderAnalyticsScreen(){
   const heatSection=document.createElement('section');heatSection.className='native-section';
   const hh=document.createElement('div');hh.className='native-section-title';hh.textContent=tr('year_heatmap');
   const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
-  for(let i=364;i>=0;i--){const tm=Date.now()-i*86400000,n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+(n>15?'h4':n>8?'h3':n>3?'h2':n?'h1':'');cell.title=formatDate(tm,{day:'numeric',month:'long',year:'numeric'})+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
+  const yearDays=Array.from({length:365},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-(364-i));return d.getTime()});
+  const yearMax=Math.max(1,...yearDays.map(t=>counts[dk(t)]||0));
+  for(const tm of yearDays){const n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+heatClass(n,yearMax);cell.title=formatDate(tm,{day:'numeric',month:'long',year:'numeric'})+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
   heatSection.append(hh,year);host.appendChild(heatSection);
 
   const tops=document.createElement('div');tops.className='topLists';
@@ -940,26 +945,31 @@ async function renderDiagnosticsScreen(){
 function showDashboard(){switchScreen('analytics');renderAnalyticsScreen()}
 
 function renderSignature(){
-  return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang]);
+  return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang,settings.timelinePaging]);
 }
 function resetVirtualWindow(){
-  virtualLimit=80;
+  virtualLimit=300;
   if(virtualObserver){virtualObserver.disconnect();virtualObserver=null}
 }
 function armVirtualSentinel(total){
   if(virtualLimit>=total)return;
   const cont=$('content');
-  const sentinel=document.createElement('div');sentinel.className='virtualSentinel';sentinel.setAttribute('aria-hidden','true');
-  const loading=document.createElement('div');loading.className='loadingMore';loading.textContent='…';
-  cont.appendChild(loading);cont.appendChild(sentinel);
-  virtualObserver=new IntersectionObserver(entries=>{
-    if(entries.some(e=>e.isIntersecting)){
-      virtualObserver.disconnect();virtualObserver=null;
-      virtualLimit=Math.min(total,virtualLimit+80);
-      render();
+  const footer=document.createElement('div');footer.className='timelinePaging';
+  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+Math.min(total,virtualLimit)+' / '+total;
+  footer.appendChild(info);
+  const size=300;
+  if(settings.timelinePaging==='pages'){
+    const pages=Math.ceil(total/size),current=Math.max(1,Math.ceil(virtualLimit/size));
+    for(let p of [...new Set([1,current-1,current,current+1,pages])].filter(p=>p>=1&&p<=pages).sort((a,b)=>a-b)){
+      const b=document.createElement('button');b.textContent=String(p);b.className='actionGhost';b.disabled=p===current;
+      b.onclick=()=>{virtualLimit=p*size;render();const sc=document.querySelector('.timeline-scroll');if(sc)sc.scrollTop=0};
+      footer.appendChild(b);
     }
-  },{root:document.querySelector('.timeline-scroll'),rootMargin:'600px'});
-  virtualObserver.observe(sentinel);
+  }else{
+    const b=document.createElement('button');b.className='actionRecommended';b.textContent=(currentLang==='he'?'טען עוד 300 אירועים':'Load 300 more events');
+    b.onclick=()=>{virtualLimit=Math.min(total,virtualLimit+size);render()};footer.appendChild(b);
+  }
+  cont.appendChild(footer);
 }
 function closeContextMenu(){
   const host=$('contextMenuHost');if(host)host.innerHTML='';
@@ -1251,7 +1261,9 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
 function render(){
   const sig=renderSignature();
   if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
-  const list=filtered(),allSessions=sessions(list),ss=allSessions.slice(0,virtualLimit);
+  const list=filtered(),visible=list.slice(0,virtualLimit);
+  // Group by the calendar day of each event, not the start date of a long-running session.
+  const allSessions=sessions(list),ss=viewMode==='day'?sessions(visible.map(e=>({...e,sessionId:(e.sessionId||'unknown')+'@'+dk(e.time)}))):sessions(visible);
   renderStats(list,allSessions);renderHeatmap();renderSearches();renderSnapshots();
   const cont=$('content');cont.innerHTML='';
   if(!allSessions.length){cont.innerHTML='<div class="empty nativeEmpty"><div class="emptyIcon" data-icon="history_24_regular"></div><div class="emptyTitle">'+esc(tr('no_activity'))+'</div></div>';applyShellIcons();updateContinue();return}
@@ -1269,7 +1281,7 @@ function render(){
     }
     cont.appendChild(wrap);
   }
-  armVirtualSentinel(allSessions.length);
+  armVirtualSentinel(list.length);
   applyShellIcons();
   updateContinue();
 }
