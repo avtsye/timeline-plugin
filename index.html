@@ -1348,7 +1348,7 @@ textarea:focus-visible{
   </header>
 
   <div class="shell-body">
-    <aside class="side-nav" aria-label="ניווט">
+    <aside class="side-nav" aria-label="ניווט" data-i18n-aria-label="nav_label">
       <nav class="nav-group">
         <button class="nav-item active" data-screen="timeline"><span class="nav-icon" data-icon="history_24_regular" data-icon-active="history_24_filled">◷</span><span class="nav-label" data-i18n="screen_timeline">ציר הזמן</span></button>
         <button class="nav-item" data-screen="overview"><span class="nav-icon" data-icon="home_24_regular" data-icon-active="home_24_filled">▦</span><span class="nav-label" data-i18n="screen_overview">סקירה</span></button>
@@ -1357,7 +1357,7 @@ textarea:focus-visible{
         <button class="nav-item" data-screen="diagnostics"><span class="nav-icon" data-icon="pulse_24_regular" data-icon-active="pulse_24_filled">✓</span><span class="nav-label" data-i18n="screen_diagnostics">אבחון</span></button>
 
       </nav>
-      <nav class="nav-bottom" aria-label="הגדרות">
+      <nav class="nav-bottom" aria-label="הגדרות" data-i18n-aria-label="settings">
         <button class="nav-item" data-screen="settings"><span class="nav-icon" data-icon="settings_24_regular" data-icon-active="settings_24_filled">⚙</span><span class="nav-label" data-i18n="settings">הגדרות</span></button>
       </nav>
     </aside>
@@ -1368,8 +1368,8 @@ textarea:focus-visible{
           <div class="timeline-controls">
             <div id="searchBox" class="searchBox"><span id="searchIcon" data-icon="search_24_regular">⌕</span><input id="search" class="timeline-search" autofocus data-i18n-placeholder="search_placeholder" placeholder="חיפוש לפי ספר, תוסף, סביבת עבודה או אירוע…"><button id="searchClear" class="searchClear" aria-label="נקה">×</button></div>
             <div class="toolbarActions">
-              <button id="filterToggleBtn" class="icon-btn toolbarIcon" title="מסננים" aria-label="מסננים" aria-expanded="false" aria-controls="filtersPopover"><span data-icon="filter_24_regular"></span></button>
-              <div class="zoomCtl"><button id="zoomOut" class="icon-btn toolbarIcon" title="הקטן"><span data-icon="subtract_24_regular">−</span></button><span id="zoomLabel">100%</span><button id="zoomIn" class="icon-btn toolbarIcon" title="הגדל"><span data-icon="add_24_regular">+</span></button></div>
+              <button id="filterToggleBtn" class="icon-btn toolbarIcon" title="מסננים" aria-label="מסננים" data-i18n-title="filters" aria-expanded="false" aria-controls="filtersPopover"><span data-icon="filter_24_regular"></span></button>
+              <div class="zoomCtl"><button id="zoomOut" class="icon-btn toolbarIcon" title="הקטן" data-i18n-title="zoom_out"><span data-icon="subtract_24_regular">−</span></button><span id="zoomLabel">100%</span><button id="zoomIn" class="icon-btn toolbarIcon" title="הגדל" data-i18n-title="zoom_in"><span data-icon="add_24_regular">+</span></button></div>
               <div class="segmented" role="group" aria-label="תצוגת ציר הזמן"><button data-view="day" class="active" aria-pressed="true" data-i18n="day">יום</button><button data-view="week" aria-pressed="false" data-i18n="week">שבוע</button><button data-view="month" aria-pressed="false" data-i18n="month">חודש</button></div>
               <button id="focusModeBtn" class="icon-btn toolbarIcon" data-i18n-title="focus_mode" title="מצב פוקוס"><span data-icon="full_screen_maximize_24_regular"></span></button>
             </div>
@@ -1378,7 +1378,7 @@ textarea:focus-visible{
               <label><span data-i18n="plugins">תוסף</span><select id="pluginFilter" aria-label="תוסף"><option value="" data-i18n="all_plugins">כל התוספים</option></select></label>
               <label><span data-i18n="days">טווח</span><select id="range" aria-label="טווח"><option value="7" data-i18n="days_7">7 ימים</option><option value="30" selected data-i18n="days_30">30 ימים</option><option value="90" data-i18n="days_90">90 ימים</option><option value="0" data-i18n="all">הכול</option></select></label>
               <label><span data-i18n="sort">מיון</span><select id="sort" aria-label="מיון"><option value="newest" data-i18n="newest_first">חדש לישן</option><option value="oldest" data-i18n="oldest_first">ישן לחדש</option></select></label>
-              <div class="filterQuickRow" role="group" aria-label="טווחים מהירים">
+              <div class="filterQuickRow" role="group" aria-label="טווחים מהירים" data-i18n-aria-label="quick_ranges">
                 <button data-preset="today" data-i18n="today">היום</button>
                 <button data-preset="yesterday" data-i18n="yesterday">אתמול</button>
                 <button data-preset="week" data-i18n="this_week">השבוע</button>
@@ -1422,7 +1422,7 @@ textarea:focus-visible{
           <div id="heatmap" class="heatmap"></div>
         </section>
         <section class="native-section overviewBlock overviewUsage">
-          <div class="native-section-title">גרף שימוש · 14 ימים אחרונים</div>
+          <div class="native-section-title" data-i18n="usage_curve_14">גרף שימוש · 14 ימים אחרונים</div>
           <div id="overviewUsageChart" class="overviewUsageChart"></div>
         </section>
         <section class="native-section overviewBlock">
@@ -1457,18 +1457,18 @@ textarea:focus-visible{
         </section>
 
       <section id="settingsScreen" class="screen settings-pane" data-screen-panel="settings">
-        <button type="button" id="closeSettingsDialog" class="settingsDialogClose" aria-label="סגור הגדרות" title="סגור הגדרות">×</button>
+        <button type="button" id="closeSettingsDialog" class="settingsDialogClose" aria-label="סגור הגדרות" title="סגור הגדרות" data-i18n-title="close_settings">×</button>
         <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">העדפות בסיסיות, מעקב ותחזוקה</div></div></div>
 
         <div class="settingsCategoryPicker">
-          <label for="settingsCategorySelect">קטגוריית הגדרות</label>
-          <select id="settingsCategorySelect" aria-label="בחירת קטגוריית הגדרות">
-            <option value="general">כללי</option>
-            <option value="tracking">מעקב</option>
-            <option value="advanced">מתקדם ותחזוקה</option>
+          <label for="settingsCategorySelect" data-i18n="settings_category">קטגוריית הגדרות</label>
+          <select id="settingsCategorySelect" aria-label="בחירת קטגוריית הגדרות" data-i18n-aria-label="settings_category">
+            <option value="general" data-i18n="settings_general">כללי</option>
+            <option value="tracking" data-i18n="settings_tracking">מעקב</option>
+            <option value="advanced" data-i18n="settings_advanced_maintenance">מתקדם ותחזוקה</option>
           </select>
         </div>
-        <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
+        <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות" data-i18n-aria-label="settings_category">
           <button class="settingsTabBtn active" role="tab" aria-selected="true" tabindex="0" data-settings-tab="general"><span class="settingsTabIcon" data-icon="settings_24_regular"></span><span data-i18n="settings_general">כללי</span></button>
           <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="tracking"><span class="settingsTabIcon" data-icon="pulse_24_regular"></span><span data-i18n="settings_tracking">מעקב</span></button>
           <button class="settingsTabBtn" role="tab" aria-selected="false" tabindex="-1" data-settings-tab="advanced"><span class="settingsTabIcon" data-icon="wrench_24_regular"></span><span data-i18n="settings_advanced">מתקדם</span></button>
@@ -1533,7 +1533,7 @@ textarea:focus-visible{
             <h3 data-i18n="data_storage">שמירת נתונים</h3>
             <div class="settingsFieldsGrid">
               <div class="settingFieldRow"><label for="retentionDays" data-i18n="retention_period">שמירת היסטוריה</label><select id="retentionDays"><option value="30" data-i18n="retention_30">30 ימים</option><option value="90" data-i18n="retention_90">90 ימים</option><option value="180" selected data-i18n="retention_180">180 ימים</option><option value="365" data-i18n="retention_365">שנה</option><option value="0" data-i18n="retention_forever">ללא הגבלה</option></select></div>
-              <div class="settingFieldRow"><label for="timelinePaging">אופן טעינת ציר הזמן</label><select id="timelinePaging"><option value="more">טען עוד 300</option><option value="pages">דפדוף בין עמודים</option></select></div><div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
+              <div class="settingFieldRow"><label for="timelinePaging" data-i18n="timeline_paging">אופן טעינת ציר הזמן</label><select id="timelinePaging"><option value="more" data-i18n="paging_more">טען עוד 300</option><option value="pages" data-i18n="paging_pages">דפדוף בין עמודים</option></select></div><div class="settingFieldRow"><label for="maxEvents" data-i18n="max_events">מספר אירועים מרבי</label><select id="maxEvents"><option>1000</option><option>2500</option><option selected>5000</option><option>10000</option><option>20000</option><option>50000</option></select></div>
             </div>
           </section>
         </div>
