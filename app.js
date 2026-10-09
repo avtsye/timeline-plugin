@@ -1356,7 +1356,7 @@ function restoreSnapshot(s){
         const icon=document.createElement('span');icon.className='native-row-icon';icon.dataset.icon='book_open_24_regular';
         const main=document.createElement('div');main.className='native-row-main';
         const title=document.createElement('b');title.textContent=String(tb.book||tb.bookId||tb.bookUid||id);
-        const subtitle=document.createElement('small');subtitle.textContent=String(tb.currentRef||tb.index??'');
+        const subtitle=document.createElement('small');subtitle.textContent=String(tb.currentRef??tb.index??'');
         main.append(title,subtitle);
         const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='restoreCheck';
         checks.push({id,input});row.append(icon,main,input);list.appendChild(row);
