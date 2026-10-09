@@ -1286,6 +1286,12 @@ textarea:focus-visible{
 .permission-critical{border-inline-start:4px solid #d32f2f!important}
 .permission-medium{border-inline-start:4px solid #ed8c16!important}
 .permission-low{border-inline-start:4px solid #d4b500!important}
+/* Native-style settings sheet. Preserve the existing settings forms and scroll panes. */
+#settingsScreen.settingsDialogOpen{position:fixed!important;inset:5vh 5vw!important;width:90vw!important;height:90vh!important;max-height:90vh!important;z-index:450!important;display:grid!important;overflow:hidden!important;background:var(--color-surface)!important;border:1px solid var(--color-outline-variant);border-radius:var(--radius-lg)!important;box-shadow:0 0 0 100vmax color-mix(in srgb,var(--color-scrim) 44%,transparent),0 12px 35px color-mix(in srgb,var(--color-shadow) 24%,transparent)}
+.settingsDialogClose{display:none}
+#settingsScreen.settingsDialogOpen>.settingsDialogClose{display:grid;position:absolute;inset-inline-end:16px;top:10px;z-index:5;place-items:center;width:36px;height:36px;border:0;border-radius:var(--radius-pill);background:var(--color-surface-container-high);color:var(--color-on-surface);font-size:1.5rem;cursor:pointer}
+#settingsScreen.settingsDialogOpen>.page-head{padding-inline-end:55px}
+@media(max-width:650px){#settingsScreen.settingsDialogOpen{inset:2vh 2vw!important;width:96vw!important;height:96vh!important;max-height:96vh!important}}
 </style>
 </head>
 <body>
@@ -1402,6 +1408,7 @@ textarea:focus-visible{
         </section>
 
       <section id="settingsScreen" class="screen settings-pane" data-screen-panel="settings">
+        <button type="button" id="closeSettingsDialog" class="settingsDialogClose" aria-label="סגור הגדרות" title="סגור הגדרות">×</button>
         <div class="page-head"><div><h2 data-i18n="settings">הגדרות</h2><div class="page-subtitle" data-i18n="settings_subtitle">העדפות בסיסיות, מעקב ותחזוקה</div></div></div>
 
         <div class="settings-tabs" role="tablist" aria-label="קטגוריות הגדרות">
