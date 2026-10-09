@@ -1306,7 +1306,7 @@ async function createSnapshot(renderAfter=true,showNotice=true){
 }
 async function performRestoreSnapshot(s,selectedBookKeys=null){
   const keys=selectedBookKeys?new Set(selectedBookKeys.map(String)):null;
-  const targets=(s.tabs||[]).filter(tb=>(tb.bookId||tb.bookUid)&&!tb.toolId&&(!keys||keys.has(String(tb.bookUid||tb.bookId))));
+  const targets=(s.tabs||[]).filter(tb=>tb&&(tb.bookId||tb.bookUid)&&!tb.toolId&&(!keys||keys.has(String(tb.bookUid||tb.bookId))));
   if(!targets.length){await notify(currentLang==='he'?'לא נבחרו ספרים לשחזור':'No books selected','error');return}
   const undo=await createSnapshot(false,false);
   let switched=false,restoredCount=0,failed=[];
@@ -1326,7 +1326,19 @@ async function performRestoreSnapshot(s,selectedBookKeys=null){
     const opened=await call('reader.openBook',p);
     if(opened.success)restoredCount++;else failed.push(tb.book||tb.bookId||tb.bookUid);
   }
-  if(restoredCount)await call('navigation.goTo',{target:'reading'});
+  if(restoredCount){
+    const active=s.active||{};
+    const activeKey=String(active.bookUid||active.bookId||'');
+    const candidate=targets.find(tb=>String(tb.bookUid||tb.bookId||'')===activeKey);
+    if(candidate&&Number.isInteger(Number(active.index))&&Number(active.index)>=0){
+      const position={};
+      for(const k of ['bookUid','bookId','id','type','source'])if(candidate[k]!=null)position[k]=candidate[k];
+      position.index=Number(active.index);position.navigateToPositionIfReused=true;
+      const moved=await call('reader.openBook',position);
+      if(!moved.success)failed.push(currentLang==='he'?'מיקום הספר הפעיל':'active book position');
+    }
+    await call('navigation.goTo',{target:'reading'});
+  }
   settings.lastUndoSnapshotId=undo&&undo.id?undo.id:null;
   await set(SETTINGS,settings);
   const summary=(currentLang==='he'?'שוחזרו ':'Restored ')+restoredCount+'/'+targets.length+
