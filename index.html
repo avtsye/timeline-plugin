@@ -1520,8 +1520,8 @@ textarea:focus-visible{
 
 /* Otzaria SDK guide: theme-derived colors, UI font, intrinsic field sizing. */
 #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
-  width:min(510px,96vw);
-  grid-template-columns:minmax(84px,98px) minmax(0,1fr);
+  width:min(440px,96vw);
+  grid-template-columns:78px minmax(0,1fr);
   font-family:var(--font-ui);
 }
 #settingsScreen.settings-pane.screen.active.settingsDialogOpen .appDropdown{
@@ -1558,10 +1558,10 @@ textarea:focus-visible{
   font-size:0.875rem;
   overflow-wrap:anywhere;
 }
-@media(max-width:520px){
+@media(max-width:460px){
   #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
     width:100vw;
-    grid-template-columns:80px minmax(0,1fr);
+    grid-template-columns:70px minmax(0,1fr);
   }
   #settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settings-tabs .settingsTabBtn{
     font-size:0.75rem;
