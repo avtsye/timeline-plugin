@@ -1342,9 +1342,9 @@ textarea:focus-visible{
 #settingsScreen.settings-pane.screen.active.settingsDialogOpen{
   inset:0 0 0 auto;
   right:0;left:auto;
-  width:min(780px,98vw);height:100dvh;max-height:100dvh;
+  width:min(580px,96vw);height:100dvh;max-height:100dvh;
   display:grid;
-  grid-template-columns:minmax(155px,210px) minmax(0,1fr);
+  grid-template-columns:minmax(120px,150px) minmax(0,1fr);
   grid-template-rows:auto minmax(0,1fr) auto;
   direction:rtl;
   border-inline-start:1px solid var(--color-outline-variant);
@@ -1395,6 +1395,10 @@ textarea:focus-visible{
   #settingsScreen.settings-pane.screen.active.settingsDialogOpen .settingFieldRow{grid-template-columns:minmax(0,1fr)}
 }
 
+.timelinePageJump{display:inline-flex;align-items:center;gap:8px;direction:ltr}
+.timelinePageJump input{width:75px;max-width:25vw;height:38px;border:1px solid var(--color-outline-variant);border-radius:var(--radius-sm);background:var(--color-surface);color:var(--color-on-surface);text-align:center;font:inherit}
+.timelinePageJump button{min-height:38px}
+@media(max-width:700px){#settingsScreen.settings-pane.screen.active.settingsDialogOpen>.settingsPane{padding:10px}}
 </style>
 </head>
 <body>
