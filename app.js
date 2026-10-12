@@ -570,6 +570,7 @@ async function openPlugin(id){
 async function openEvent(e){
   const d=e.data||{};
   if(e.type==='plugin'&&d.toolId){await openPlugin(d.toolId);return}
+  if(e.type==='search'){const query=String(d.query||'').trim();if(!query){await notify(currentLang==='he'?'לא נשמר נוסח החיפוש':'Search query is unavailable','info');return}const r=await call('reader.openSearchTab',{query,autoSearch:true});if(!r.success)await notify(currentLang==='he'?'לא ניתן לפתוח את החיפוש':'Could not reopen the search','error');return}
   if(e.type==='tool'){await notify(tr('builtin_open_unavailable'),'info');return}
   if(!['book','ref'].includes(e.type))return;
   const p={};const map={bookUid:d.bookUid,id:d.id,bookId:d.currentBookId||d.bookId||d.currentBook||d.book,type:d.type,source:d.source,index:d.currentIndex??d.index};
@@ -583,6 +584,44 @@ async function renameSession(s){
   if(next===null)return;
   if(next.trim())names[s.id]=next.trim();else delete names[s.id];
   await set(NAMES,names);render();
+}
+async function removeHistoryEvents(predicate){
+  const removed=events.filter(predicate);
+  if(!removed.length)return 0;
+  const next=events.filter(e=>!predicate(e));
+  const result=await set(EVENTS,next);
+  if(result&&result.success===false){await notify(currentLang==='he'?'שמירת המחיקה נכשלה':'Could not save deletion','error');return 0}
+  events=next;
+  removed.forEach(e=>favorites.delete(e.id));
+  const remainingSessions=new Set(events.map(e=>e.sessionId));
+  for(const id of [...pinned])if(!remainingSessions.has(id))pinned.delete(id);
+  for(const id of [...collapsed])if(!remainingSessions.has(id))collapsed.delete(id);
+  for(const id of Object.keys(names))if(!remainingSessions.has(id))delete names[id];
+  for(const id of Object.keys(sessionNotes))if(!remainingSessions.has(id))delete sessionNotes[id];
+  await Promise.all([set(NOTES,sessionNotes),persistMeta()]);
+  rebuildEventIndex();lastRenderSignature='';render();
+  await publishHomepageState();
+  return removed.length;
+}
+async function deleteSingleEvent(ev){
+  if(!await askConfirm(currentLang==='he'?'למחוק אירוע זה מציר הזמן?':'Delete this event from Timeline?',{danger:true}))return;
+  const count=await removeHistoryEvents(e=>e.id===ev.id);
+  if(count)await notify(currentLang==='he'?'האירוע נמחק':'Event deleted','success');
+}
+async function deleteDateRange(){
+  const he=currentLang==='he';
+  const start=await askText(he?'מתאריך ושעה (YYYY-MM-DD HH:mm)':'From (YYYY-MM-DD HH:mm)','');
+  if(start===null)return;
+  const end=await askText(he?'עד תאריך ושעה (YYYY-MM-DD HH:mm)':'To (YYYY-MM-DD HH:mm)','');
+  if(end===null)return;
+  const parse=x=>{const t=String(x).trim().replace(' ','T');if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t))return NaN;return new Date(t).getTime()};
+  const from=parse(start),to=parse(end);
+  if(!Number.isFinite(from)||!Number.isFinite(to)||from>to){await notify(he?'טווח תאריכים לא תקין':'Invalid date range','error');return}
+  const count=events.filter(e=>Number(e.time)>=from&&Number(e.time)<=to).length;
+  if(!count){await notify(he?'אין אירועים בטווח המבוקש':'No events in this range','info');return}
+  if(!await askConfirm((he?'למחוק ':'Delete ')+count+(he?' אירועים בטווח שנבחר? שים לב: גיבויים ישנים עשויים עדיין להכיל אותם.':' events in this range? Older backups may still contain them.'),{danger:true}))return;
+  const removed=await removeHistoryEvents(e=>Number(e.time)>=from&&Number(e.time)<=to);
+  if(removed)await notify(he?'נמחקו '+removed+' אירועים':'Deleted '+removed+' events','success');
 }
 async function deleteSession(s){
   if(!await askConfirm(tr('delete_session_confirm'),{danger:true}))return;
@@ -1002,12 +1041,12 @@ function resetVirtualWindow(){
   if(virtualObserver){virtualObserver.disconnect();virtualObserver=null}
 }
 function armVirtualSentinel(total){
-  if(virtualLimit>=total&&settings.timelinePaging!=='pages')return;
+  const size=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));
+  if(!total||(settings.timelinePaging==='pages'&&total<=size)||(settings.timelinePaging!=='pages'&&virtualLimit>=total))return;
   const cont=$('content');
   const footer=document.createElement('div');footer.className='timelinePaging';
-  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*(Number(settings.timelinePageSize)||300)+1)+'–'+Math.min(total,virtualPage*(Number(settings.timelinePageSize)||300))):Math.min(total,virtualLimit))+' / '+total;
+  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*(size+1)+'–'+Math.min(total,virtualPage*size)):Math.min(total,virtualLimit))+' / '+total;
   footer.appendChild(info);
-  const size=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));
   if(settings.timelinePaging==='pages'){
     const pages=Math.ceil(total/size),current=virtualPage;
     for(let p of [...new Set([1,current-1,current,current+1,pages])].filter(p=>p>=1&&p<=pages).sort((a,b)=>a-b)){
@@ -1069,7 +1108,8 @@ function eventContextItems(ev){
   const d=ev.data||{},items=[
     {icon:'open_24_regular',label:tr('open'),action:()=>openEvent(ev)},
     {icon:favorites.has(ev.id)?'star_off_24_regular':'star_24_regular',label:favorites.has(ev.id)?tr('remove_favorite'):tr('add_favorite'),action:async()=>{favorites.has(ev.id)?favorites.delete(ev.id):favorites.add(ev.id);await set(FAVORITES,[...favorites]);render()}},
-    {icon:'copy_24_regular',label:tr('copy_details'),action:()=>copyText([localizedEventLabel(ev),d.currentRef||d.ref||d.toolId||'',fmtDate(ev.time)+' '+fmt(ev.time)].filter(Boolean).join('\n'))}
+    {icon:'copy_24_regular',label:tr('copy_details'),action:()=>copyText([localizedEventLabel(ev),d.currentRef||d.ref||d.toolId||'',fmtDate(ev.time)+' '+fmt(ev.time)].filter(Boolean).join('\n'))},
+    {icon:'delete_24_regular',label:currentLang==='he'?'מחק אירוע מההיסטוריה':'Delete history event',danger:true,action:()=>deleteSingleEvent(ev)}
   ];
   if(['book','ref'].includes(ev.type)&&bookKeyFromEvent(ev))items.splice(2,0,{icon:'history_24_regular',label:tr('open_history'),action:()=>showBookHistory(bookKeyFromEvent(ev))});
   if(ev.type==='plugin'&&d.toolId)items.splice(2,0,{icon:'history_24_regular',label:tr('open_history'),action:()=>showPluginHistory(d.toolId)});
@@ -1338,7 +1378,9 @@ function renderTrueDayRail(rail,sessionItems,dayTs){
 function render(){
   const sig=renderSignature();
   if(sig!==lastRenderSignature){lastRenderSignature=sig;resetVirtualWindow()}
-  const list=filtered(),visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*(Number(settings.timelinePageSize)||300),virtualPage*(Number(settings.timelinePageSize)||300)):list.slice(0,virtualLimit);
+  const list=filtered(),pageSize=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));
+  virtualPage=Math.min(virtualPage,Math.max(1,Math.ceil(list.length/pageSize)));
+  const visible=settings.timelinePaging==='pages'?list.slice((virtualPage-1)*pageSize,virtualPage*pageSize):list.slice(0,virtualLimit);
   // Group by the calendar day of each event, not the start date of a long-running session.
   const allSessions=sessions(list),ss=viewMode==='day'?sessions(visible.map(e=>({...e,sessionId:(e.sessionId||'unknown')+'@'+dk(e.time)}))):sessions(visible);
   renderStats(list,allSessions);renderHeatmap();renderOverviewUsageChart();renderSearches();renderSnapshots();
@@ -1900,6 +1942,7 @@ $('continueBtn').onclick=()=>restoreSnapshot(snaps[snaps.length-1]);
 $('snapshotBtn').onclick=()=>createSnapshot(true,true);
 $('exportBtn').onclick=showExportDialog;
 $('importBtn').onclick=importData;
+$('deleteRangeBtn').onclick=deleteDateRange;
 $('clearBtn').onclick=async()=>{if(await askConfirm(tr('clear_all_confirm'),{danger:true})){events=[];snaps=[];pinned.clear();collapsed.clear();favorites.clear();names={};sessionNotes={};await Promise.all([set(EVENTS,[]),set(SNAPS,[]),set(NOTES,{}),persistMeta()]);render();await publishHomepageState();await notify(tr('timeline_cleared'),'success')}};
 
 async function applyStorageLimitsNow(){
