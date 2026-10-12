@@ -1045,7 +1045,7 @@ function armVirtualSentinel(total){
   if(!total||(settings.timelinePaging==='pages'&&total<=size)||(settings.timelinePaging!=='pages'&&virtualLimit>=total))return;
   const cont=$('content');
   const footer=document.createElement('div');footer.className='timelinePaging';
-  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?(Math.min(total,(virtualPage-1)*(size+1)+'–'+Math.min(total,virtualPage*size)):Math.min(total,virtualLimit))+' / '+total;
+  const info=document.createElement('span');info.textContent=(currentLang==='he'?'מוצגים ':'Showing ')+(settings.timelinePaging==='pages'?((virtualPage-1)*size+1)+'–'+Math.min(total,virtualPage*size):Math.min(total,virtualLimit))+' / '+total;
   footer.appendChild(info);
   if(settings.timelinePaging==='pages'){
     const pages=Math.ceil(total/size),current=virtualPage;
