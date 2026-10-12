@@ -303,3 +303,6 @@ if(heat(5000,5000,5000)!=='h20')throw new Error('Uniform high-activity heatmap s
 for(let i=1;i<=20;i++)if(!html.includes('.heat.h'+i+'{background:'))throw new Error('Missing theme-aware heatmap shade '+i);
 if(!app.includes('heatClass(n,yearMin,yearMax)'))throw new Error('Year heatmap does not normalize with dynamic bounds');
 console.log('Dynamic 20-level heatmaps OK');
+
+if(!app.includes("if(e.type==='setting'){const r=await call('navigation.goTo',{target:'settings'})"))throw new Error('Setting event navigation missing');
+console.log('Setting event navigation guard OK');
