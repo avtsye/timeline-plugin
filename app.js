@@ -625,11 +625,8 @@ async function deleteDateRange(){
 }
 async function deleteSession(s){
   if(!await askConfirm(tr('delete_session_confirm'),{danger:true}))return;
-  events=events.filter(e=>e.sessionId!==s.id);
-  s.events.forEach(e=>favorites.delete(e.id));
-  pinned.delete(s.id);collapsed.delete(s.id);delete names[s.id];delete sessionNotes[s.id];
-  await Promise.all([set(EVENTS,events),set(NOTES,sessionNotes),persistMeta()]);
-  render();await notify(tr('session_deleted'),'success');
+  const removed=await removeHistoryEvents(e=>e.sessionId===s.id);
+  if(removed)await notify(tr('session_deleted'),'success');
 }
 async function saveSessionAsWorkspace(s){
   const name=await askText(tr('workspace_name'),names[s.id]||smartTitle(s));
@@ -1034,7 +1031,7 @@ async function renderDiagnosticsScreen(){
 function showDashboard(){switchScreen('analytics');renderAnalyticsScreen()}
 
 function renderSignature(){
-  return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang,settings.timelinePaging]);
+  return JSON.stringify([$('search').value,$('type').value,$('pluginFilter').value,$('range').value,$('sort').value,viewMode,datePreset,selectedDayKey,favoritesOnly,currentLang,settings.timelinePaging,settings.timelinePageSize]);
 }
 function resetVirtualWindow(){
   virtualLimit=Math.max(25,Math.min(2000,Number(settings.timelinePageSize)||300));virtualPage=1;
@@ -1550,7 +1547,7 @@ async function importData(){
     names=Object.assign({},names,data.names||{});sessionNotes=Object.assign({},sessionNotes,data.sessionNotes||{});pluginMigrations=Object.assign({},pluginMigrations,data.pluginMigrations||{});
     if(Array.isArray(data.savedFilters))savedFilters=[...savedFilters,...data.savedFilters].slice(-30);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings),set(NOTES,sessionNotes),set(MIGRATIONS,pluginMigrations),set(SAVED_FILTERS,savedFilters),persistMeta()]);
-    await resolveLanguage();await registerLocalizedShortcuts();applyTranslations();sync();render();await publishHomepageState();await notify(tr('import_done'),'success');
+    rebuildEventIndex();lastRenderSignature='';await resolveLanguage();await registerLocalizedShortcuts();applyTranslations();sync();render();await publishHomepageState();await notify(tr('import_done'),'success');
   }catch(_){await notify(tr('invalid_timeline_file'),'error')}
 }
 async function restoreInternalBackup(path){
@@ -1562,7 +1559,7 @@ async function restoreInternalBackup(path){
     if(!Array.isArray(data.events)||!Array.isArray(data.snaps))throw new Error('bad');
     events=data.events;snaps=data.snaps;if(data.settings)settings=Object.assign(settings,data.settings);
     await Promise.all([set(EVENTS,events),set(SNAPS,snaps),set(SETTINGS,settings)]);
-    await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(tr('backup_restored'),'success');
+    rebuildEventIndex();lastRenderSignature='';await resolveLanguage();applyTranslations();sync();render();await publishHomepageState();await notify(tr('backup_restored'),'success');
   }catch(_){await notify(tr('backup_invalid'),'error')}
 }
 async function showDiagnostics(){switchScreen('diagnostics');await renderDiagnosticsScreen()}
@@ -1752,7 +1749,11 @@ function sync(){
 }
 async function load(){
   events=await get(EVENTS,[]);
-  if(!events.length){const old=await get(LEGACY,[]);if(Array.isArray(old)&&old.length)events=old}
+  const migrationDone=await get('timeline.legacy_migration_completed.v1',false);
+  if(!migrationDone){
+    if(!Array.isArray(events)||!events.length){const old=await get(LEGACY,[]);if(Array.isArray(old)&&old.length){events=old;await set(EVENTS,events)}}
+    await set('timeline.legacy_migration_completed.v1',true);
+  }
   const values=await Promise.all([
     get(SNAPS,[]),get(SETTINGS,{}),get(PINS,[]),get(COLLAPSED,[]),get(FAVORITES,[]),get(NAMES,{}),
     get(SAVED_FILTERS,[]),get(MIGRATIONS,{}),get(NOTES,{}),get(HEALTH,{})
