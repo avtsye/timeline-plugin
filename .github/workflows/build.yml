@@ -124,6 +124,7 @@ jobs:
           TAG="v$VERSION"
           TITLE="Timeline $VERSION"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --target "$GITHUB_SHA" --title "$TITLE" --generate-notes
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "$TITLE" --notes-file "RELEASE_NOTES_$VERSION.md"
           fi
+          gh release edit "$TAG" --notes-file "RELEASE_NOTES_$VERSION.md"
           gh release upload "$TAG" dist/*.otzplugin --clobber
