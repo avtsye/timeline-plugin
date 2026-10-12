@@ -572,6 +572,7 @@ async function openEvent(e){
   const d=e.data||{};
   if(e.type==='plugin'&&d.toolId){await openPlugin(d.toolId);return}
   if(e.type==='search'){const query=String(d.query||'').trim();if(!query){await notify(currentLang==='he'?'לא נשמר נוסח החיפוש':'Search query is unavailable','info');return}const r=await call('reader.openSearchTab',{query,autoSearch:true});if(!r.success)await notify(currentLang==='he'?'לא ניתן לפתוח את החיפוש':'Could not reopen the search','error');return}
+  if(e.type==='setting'){const r=await call('navigation.goTo',{target:'settings'});if(!r.success)await notify(currentLang==='he'?'לא ניתן לפתוח את מסך ההגדרות':'Could not open settings','error');return}
   if(e.type==='tool'){await notify(tr('builtin_open_unavailable'),'info');return}
   if(!['book','ref'].includes(e.type))return;
   const p={};const map={bookUid:d.bookUid,id:d.id,bookId:d.currentBookId||d.bookId||d.currentBook||d.book,type:d.type,source:d.source,index:d.currentIndex??d.index};
