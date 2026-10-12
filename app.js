@@ -610,16 +610,39 @@ async function deleteSingleEvent(ev){
 }
 async function deleteDateRange(){
   const he=currentLang==='he';
-  const start=await askText(he?'מתאריך ושעה (YYYY-MM-DD HH:mm)':'From (YYYY-MM-DD HH:mm)','');
-  if(start===null)return;
-  const end=await askText(he?'עד תאריך ושעה (YYYY-MM-DD HH:mm)':'To (YYYY-MM-DD HH:mm)','');
-  if(end===null)return;
-  const parse=x=>{const t=String(x).trim().replace(' ','T');if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t))return NaN;return new Date(t).getTime()};
-  const from=parse(start),to=parse(end);
-  if(!Number.isFinite(from)||!Number.isFinite(to)||from>to){await notify(he?'טווח תאריכים לא תקין':'Invalid date range','error');return}
+  const picked=await new Promise(resolve=>{
+    let ov,settled=false;
+    const finish=value=>{if(settled)return;settled=true;if(ov?.__closeModal)ov.__closeModal();resolve(value)};
+    ov=showModal(he?'מחיקת היסטוריה לפי טווח':'Delete history by date range',body=>{
+      const form=document.createElement('form');form.className='dateRangeDeleteForm';
+      const intro=document.createElement('p');intro.className='dialogMessage';intro.textContent=he?'בחר תאריכים ושעות. המחיקה חלה על האירועים בציר הזמן בלבד.':'Choose start and end times. This removes Timeline events only.';
+      const inputs=[];
+      for(const [key,title] of [['start',he?'מתאריך ושעה':'Start date and time'],['end',he?'עד תאריך ושעה':'End date and time']]){
+        const wrap=document.createElement('label');wrap.className='dateRangeDeleteField';wrap.textContent=title;
+        const input=document.createElement('input');input.type='datetime-local';input.required=true;input.name=key;input.className='nativeDialogInput';wrap.appendChild(input);form.appendChild(wrap);inputs.push(input);
+      }
+      const count=document.createElement('p');count.className='dialogMessage';
+      const update=()=>{
+        const [from,to]=inputs.map(x=>x.value?new Date(x.value).getTime():NaN);
+        const valid=Number.isFinite(from)&&Number.isFinite(to)&&from<=to;
+        const total=valid?events.filter(e=>Number(e.time)>=from&&Number(e.time)<=to).length:0;
+        count.textContent=!valid?(he?'בחר טווח תאריכים תקין':'Choose a valid date range'):(he?'אירועים למחיקה: ':'Events to delete: ')+total;
+        submit.disabled=!valid||!total;
+      };
+      const actions=document.createElement('div');actions.className='dialogActions';
+      const cancel=document.createElement('button');cancel.type='button';cancel.className='actionGhost';cancel.textContent=tr('cancel');cancel.onclick=()=>finish(null);
+      const submit=document.createElement('button');submit.type='submit';submit.className='actionWarning';submit.textContent=he?'המשך למחיקה':'Continue to delete';submit.disabled=true;
+      inputs.forEach(x=>x.addEventListener('input',update));
+      form.onsubmit=e=>{e.preventDefault();if(!submit.disabled)finish(inputs.map(x=>new Date(x.value).getTime()))};
+      actions.append(cancel,submit);body.append(intro,form,count,actions);form.appendChild(actions);update();
+    });
+    ov.__requestClose=()=>finish(null);
+  });
+  if(!picked)return;
+  const [from,to]=picked;
   const count=events.filter(e=>Number(e.time)>=from&&Number(e.time)<=to).length;
-  if(!count){await notify(he?'אין אירועים בטווח המבוקש':'No events in this range','info');return}
-  if(!await askConfirm((he?'למחוק ':'Delete ')+count+(he?' אירועים בטווח שנבחר? שים לב: גיבויים ישנים עשויים עדיין להכיל אותם.':' events in this range? Older backups may still contain them.'),{danger:true}))return;
+  if(!count)return;
+  if(!await askConfirm((he?'למחוק ':'Delete ')+count+(he?' אירועים? גיבויים ישנים עשויים עדיין להכיל את הנתונים.':' events? Older backups may retain this data.'),{danger:true}))return;
   const removed=await removeHistoryEvents(e=>Number(e.time)>=from&&Number(e.time)<=to);
   if(removed)await notify(he?'נמחקו '+removed+' אירועים':'Deleted '+removed+' events','success');
 }
