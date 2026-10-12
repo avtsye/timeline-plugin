@@ -469,7 +469,7 @@ function estimateTimes(list){
   }
   return{books:Math.round(books/60000),tools:Math.round(tools/60000)};
 }
-function heatClass(n,max){if(!n)return '';const ratio=Math.log1p(n)/Math.log1p(Math.max(1,max));return 'h'+Math.max(1,Math.min(4,Math.ceil(ratio*4)))}
+function heatClass(n,min,max){if(!Number.isFinite(n)||n<=0)return '';if(max<=min)return 'h20';return 'h'+Math.max(1,Math.min(20,1+Math.floor((n-min)*19/(max-min))))}
 function renderOverviewUsageChart(){
   const box=$('overviewUsageChart');if(!box)return;
   box.replaceChildren();
@@ -507,10 +507,11 @@ function buildOverviewCurve(data){
 function renderHeatmap(){
   const box=$('heatmap');box.innerHTML='';
   const days=Array.from({length:35},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-(34-i));return d.getTime()});
-  const max=Math.max(1,...days.map(t=>(eventIndex.byDay.get(dk(t))||[]).length));
+  const activity=days.map(t=>(eventIndex.byDay.get(dk(t))||[]).length);
+  const positive=activity.filter(n=>n>0),min=positive.length?Math.min(...positive):0,max=positive.length?Math.max(...positive):0;
   for(const t of days){
     const k=dk(t),n=(eventIndex.byDay.get(k)||[]).length,b=document.createElement('button');
-    b.className='heat '+heatClass(n,max);
+    b.className='heat '+heatClass(n,min,max);
     b.title=formatDate(t,{day:'numeric',month:'long',year:'numeric'})+' · '+n+' '+tr('events');
     b.onclick=()=>{selectedDayKey=selectedDayKey===k?'':k;datePreset='all';updateQuickButtons();switchScreen('timeline');render()};
     box.appendChild(b);
@@ -1006,8 +1007,9 @@ function renderAnalyticsScreen(){
   const hh=document.createElement('div');hh.className='native-section-title';hh.textContent=tr('year_heatmap');
   const year=document.createElement('div');year.className='yearHeat';const counts={};events.forEach(e=>counts[dk(e.time)]=(counts[dk(e.time)]||0)+1);
   const yearDays=Array.from({length:365},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-(364-i));return d.getTime()});
-  const yearMax=Math.max(1,...yearDays.map(t=>counts[dk(t)]||0));
-  for(const tm of yearDays){const n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+heatClass(n,yearMax);cell.title=formatDate(tm,{day:'numeric',month:'long',year:'numeric'})+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
+  const yearActivity=yearDays.map(t=>counts[dk(t)]||0).filter(n=>n>0);
+  const yearMin=yearActivity.length?Math.min(...yearActivity):0,yearMax=yearActivity.length?Math.max(...yearActivity):0;
+  for(const tm of yearDays){const n=counts[dk(tm)]||0,cell=document.createElement('button');cell.className='heat '+heatClass(n,yearMin,yearMax);cell.title=formatDate(tm,{day:'numeric',month:'long',year:'numeric'})+' · '+n;cell.onclick=()=>{selectedDayKey=dk(tm);datePreset='all';switchScreen('timeline');render()};year.appendChild(cell)}
   heatSection.append(hh,year);host.appendChild(heatSection);
 
   const tops=document.createElement('div');tops.className='topLists';
