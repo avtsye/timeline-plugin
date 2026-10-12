@@ -294,3 +294,12 @@ for(const token of [
 if(!html.includes('id="deleteRangeBtn"'))throw new Error('Date range deletion control missing');
 if(!background.includes("t.toolId!=='timeline-plugin'"))throw new Error('Self-tracking exclusion missing');
 console.log('0.20.8 deletion, migration, search and pagination guards OK');
+
+const heatImpl=app.match(/function heatClass\(n,min,max\)\{[^\n]+\}/)?.[0];
+if(!heatImpl)throw new Error('20-level dynamic heatmap scaler missing');
+const heat=require('vm').runInNewContext(heatImpl+';heatClass');
+if(heat(0,1,5000)!==''||heat(1,1,5000)!=='h1'||heat(5000,1,5000)!=='h20'||heat(2500,1,5000)==='h1')throw new Error('Dynamic heatmap range incorrect');
+if(heat(5000,5000,5000)!=='h20')throw new Error('Uniform high-activity heatmap should remain visible');
+for(let i=1;i<=20;i++)if(!html.includes('.heat.h'+i+'{background:'))throw new Error('Missing theme-aware heatmap shade '+i);
+if(!app.includes('heatClass(n,yearMin,yearMax)'))throw new Error('Year heatmap does not normalize with dynamic bounds');
+console.log('Dynamic 20-level heatmaps OK');
