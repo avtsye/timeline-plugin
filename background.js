@@ -71,7 +71,7 @@ async function currentState(){const rs=await call('reader.getCurrentState');retu
 async function detectToolTabs(){
   const settings=Object.assign({trackPlugins:true,trackTools:true},await get(SETTINGS,{}));
   const state=await currentState();if(!state)return;
-  const tabs=(state.openTabs||[]).filter(t=>t&&t.toolId&&!t.isSelf);
+  const tabs=(state.openTabs||[]).filter(t=>t&&t.toolId&&!t.isSelf&&t.toolId!=='timeline-plugin');
   const current=new Set();
   for(const t of tabs){
     const key=t.toolId+'|'+(t.book||t.bookId||'');
@@ -244,6 +244,8 @@ function record(type,p){
     if(settings.paused||settings.pauseUntilRestart||Number(settings.pauseUntil||0)>now)return;
     const enabled={book:settings.trackBooks!==false,ref:settings.trackRefs!==false,plugin:settings.trackPlugins!==false,tool:settings.trackTools!==false,workspace:settings.trackWorkspaces!==false,navigation:settings.trackNavigation!==false,find:settings.trackFind!==false,search:settings.trackSearches!==false,setting:settings.trackSettingsChanges!==false};
     if(enabled[type]===false)return;
+    if((type==='plugin'||type==='tool')&&p&&p.toolId==='timeline-plugin')return;
+    if((type==='navigation'||type==='find')&&p&&Object.values(p).some(v=>typeof v==='string'&&/timeline-plugin|(?:^|\W)ציר זמן(?:$|\W)/i.test(v)))return;
     const d=clean(p),raw=await get(EVENTS,[]),list=Array.isArray(raw)?raw:[];
     const prev=list[list.length-1];
     const same=prev&&prev.type===type&&bookKey(prev.data||{})===bookKey(d)&&now-(prev.endTime||prev.time)<MERGE_GAP;
@@ -301,6 +303,7 @@ function wire(){
     const screen=values.join(' ').toLowerCase();
     const isFind=/(^|[^a-z])(find|locator|locate)([^a-z]|$)/.test(screen)||screen.includes('איתור');
     const normalized={...(p&&typeof p==='object'?p:{}),screen:values[0]||''};
+    if(values.some(v=>/timeline-plugin/i.test(v)))return;
     if(isFind)record('find',normalized);
     else record('navigation',normalized);
     detectToolTabs();
