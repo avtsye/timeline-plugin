@@ -280,3 +280,17 @@ for(const required of [
 }
 if(!html.includes('var(--radius-lg)')||!html.includes('var(--color-surface-container-low)'))throw new Error('Otzaria design tokens absent');
 console.log('Narrow settings panel containment regression OK');
+
+// v0.20.8 persistence and deletion regression guards
+for(const token of [
+  "const removed=await removeHistoryEvents(e=>e.sessionId===s.id)",
+  "rebuildEventIndex();lastRenderSignature=''",
+  "timeline.legacy_migration_completed.v1",
+  "async function deleteSingleEvent(ev)",
+  "async function deleteDateRange()",
+  "reader.openSearchTab',{query,autoSearch:true}",
+  "settings.timelinePaging==='pages'&&total<=size"
+])if(!app.includes(token))throw new Error('Timeline regression: missing '+token);
+if(!html.includes('id="deleteRangeBtn"'))throw new Error('Date range deletion control missing');
+if(!background.includes("t.toolId!=='timeline-plugin'"))throw new Error('Self-tracking exclusion missing');
+console.log('0.20.8 deletion, migration, search and pagination guards OK');
