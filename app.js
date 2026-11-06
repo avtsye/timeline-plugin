@@ -610,6 +610,40 @@ async function deleteSingleEvent(ev){
   const count=await removeHistoryEvents(e=>e.id===ev.id);
   if(count)await notify(currentLang==='he'?'האירוע נמחק':'Event deleted','success');
 }
+function parseHebrewNumeral(value){
+  const raw=String(value||'').replace(/[\\u0591-\\u05C7״׳'".,\\s]/g,'');
+  if(/^\\d+$/.test(raw))return Number(raw);
+  const values={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ך:20,ל:30,מ:40,ם:40,נ:50,ן:50,ס:60,ע:70,פ:80,ף:80,צ:90,ץ:90,ק:100,ר:200,ש:300,ת:400};
+  if(!raw||![...raw].every(ch=>values[ch]))return NaN;
+  return [...raw].reduce((sum,ch)=>sum+values[ch],0);
+}
+function parseHebrewDateTimestamp(dateText,timeText){
+  const tokens=String(dateText||'').trim().split(/\\s+/).filter(Boolean);
+  if(tokens.length<3)return NaN;
+  let day=parseHebrewNumeral(tokens[0]),year=parseHebrewNumeral(tokens[tokens.length-1]);
+  if(!Number.isFinite(day)||!Number.isFinite(year))return NaN;
+  if(year<1000)year+=5000;
+  const month=tokens.slice(1,-1).join(' ').replace(/[״׳'".]/g,'').replace(/\\s+/g,' ').trim();
+  const normalize=s=>String(s||'').replace(/[״׳'".]/g,'').replace(/\\s+/g,' ').trim();
+  const time=/^(\\d{1,2}):(\\d{2})$/.exec(timeText||'');
+  if(!time)return NaN;
+  const hours=Number(time[1]),minutes=Number(time[2]);
+  if(hours>23||minutes>59)return NaN;
+  const formatter=new Intl.DateTimeFormat('he-IL-u-ca-hebrew',{day:'numeric',month:'long',year:'numeric'});
+  const gregorianYear=year-3761;
+  const cursor=new Date(gregorianYear-1,0,1,12,0,0,0);
+  const limit=new Date(gregorianYear+2,0,1,12,0,0,0);
+  for(;cursor<limit;cursor.setDate(cursor.getDate()+1)){
+    const parts={};
+    for(const part of formatter.formatToParts(cursor))if(part.type!=='literal')parts[part.type]=part.value;
+    const actualYear=Number(String(parts.year||'').replace(/[^0-9]/g,''));
+    const actualDay=Number(String(parts.day||'').replace(/[^0-9]/g,''));
+    if(actualYear===year&&actualDay===day&&normalize(parts.month)===month){
+      return new Date(cursor.getFullYear(),cursor.getMonth(),cursor.getDate(),hours,minutes,0,0).getTime();
+    }
+  }
+  return NaN;
+}
 async function deleteDateRange(){
   const he=currentLang==='he';
   const picked=await new Promise(resolve=>{
@@ -618,25 +652,50 @@ async function deleteDateRange(){
     ov=showModal(he?'מחיקת היסטוריה לפי טווח':'Delete history by date range',body=>{
       const form=document.createElement('form');form.className='dateRangeDeleteForm';
       const intro=document.createElement('p');intro.className='dialogMessage';intro.textContent=he?'בחר תאריכים ושעות. המחיקה חלה על האירועים בציר הזמן בלבד.':'Choose start and end times. This removes Timeline events only.';
-      const inputs=[];
+      const calendar=document.createElement('select');calendar.className='nativeDialogInput';
+      calendar.setAttribute('aria-label',he?'לוח תאריכים':'Calendar');
+      calendar.innerHTML=he?'<option value="hebrew">לוח עברי</option><option value="gregory">לוח לועזי</option>':'<option value="gregory">Gregorian calendar</option><option value="hebrew">Hebrew calendar</option>';
+      calendar.value=usingHebrewCalendar()?'hebrew':'gregory';
+      const calendarWrap=document.createElement('label');calendarWrap.className='dateRangeDeleteField';calendarWrap.textContent=he?'בחירת לוח':'Calendar';calendarWrap.appendChild(calendar);
+      form.appendChild(calendarWrap);
+      const groups=[];
       for(const [key,title] of [['start',he?'מתאריך ושעה':'Start date and time'],['end',he?'עד תאריך ושעה':'End date and time']]){
-        const wrap=document.createElement('label');wrap.className='dateRangeDeleteField';wrap.textContent=title;
-        const input=document.createElement('input');input.type='datetime-local';input.required=true;input.name=key;input.className='nativeDialogInput';wrap.appendChild(input);form.appendChild(wrap);inputs.push(input);
+        const wrap=document.createElement('div');wrap.className='dateRangeDeleteField';
+        const label=document.createElement('span');label.textContent=title;wrap.appendChild(label);
+        const gregorian=document.createElement('input');gregorian.type='datetime-local';gregorian.required=true;gregorian.name=key+'Gregorian';gregorian.className='nativeDialogInput';
+        const hebrewWrap=document.createElement('div');hebrewWrap.className='hebrewDateEntry';
+        const hebrew=document.createElement('input');hebrew.type='text';hebrew.autocomplete='off';hebrew.dir='rtl';hebrew.placeholder='י״ד חשוון תשפ״ז';hebrew.setAttribute('aria-label',he?title+' — תאריך עברי':title+' — Hebrew date');
+        const time=document.createElement('input');time.type='time';time.value=key==='start'?'00:00':'23:59';time.setAttribute('aria-label',he?'שעה':'Time');
+        const hint=document.createElement('small');hint.className='dateRangeHebrewHint';hint.textContent=he?'יש להזין יום, חודש ושנה, למשל: י״ד חשוון תשפ״ז':'Enter day, Hebrew month, and year, e.g. 14 Cheshvan 5787';
+        hebrewWrap.append(hebrew,time,hint);wrap.append(gregorian,hebrewWrap);form.appendChild(wrap);
+        groups.push({gregorian,hebrew,time,hebrewWrap});
       }
+      const getTimestamp=(group)=>{
+        if(calendar.value==='hebrew')return parseHebrewDateTimestamp(group.hebrew.value,group.time.value);
+        return group.gregorian.value?new Date(group.gregorian.value).getTime():NaN;
+      };
+      const syncCalendar=()=>{
+        for(const group of groups){
+          group.gregorian.hidden=calendar.value==='hebrew';
+          group.hebrewWrap.hidden=calendar.value!=='hebrew';
+        }
+        update();
+      };
       const count=document.createElement('p');count.className='dialogMessage';
+      const actions=document.createElement('div');actions.className='dialogActions';
+      const cancel=document.createElement('button');cancel.type='button';cancel.className='actionGhost';cancel.textContent=tr('cancel');cancel.onclick=()=>finish(null);
+      const submit=document.createElement('button');submit.type='submit';submit.className='actionWarning';submit.textContent=he?'המשך למחיקה':'Continue to delete';submit.disabled=true;
       const update=()=>{
-        const [from,to]=inputs.map(x=>x.value?new Date(x.value).getTime():NaN);
+        const [from,to]=groups.map(getTimestamp);
         const valid=Number.isFinite(from)&&Number.isFinite(to)&&from<=to;
         const total=valid?events.filter(e=>Number(e.time)>=from&&Number(e.time)<=to).length:0;
         count.textContent=!valid?(he?'בחר טווח תאריכים תקין':'Choose a valid date range'):(he?'אירועים למחיקה: ':'Events to delete: ')+total;
         submit.disabled=!valid||!total;
       };
-      const actions=document.createElement('div');actions.className='dialogActions';
-      const cancel=document.createElement('button');cancel.type='button';cancel.className='actionGhost';cancel.textContent=tr('cancel');cancel.onclick=()=>finish(null);
-      const submit=document.createElement('button');submit.type='submit';submit.className='actionWarning';submit.textContent=he?'המשך למחיקה':'Continue to delete';submit.disabled=true;
-      inputs.forEach(x=>x.addEventListener('input',update));
-      form.onsubmit=e=>{e.preventDefault();if(!submit.disabled)finish(inputs.map(x=>new Date(x.value).getTime()))};
-      actions.append(cancel,submit);body.append(intro,form,count,actions);form.appendChild(actions);update();
+      groups.forEach(group=>[group.gregorian,group.hebrew,group.time].forEach(input=>input.addEventListener('input',update)));
+      calendar.addEventListener('change',syncCalendar);
+      form.onsubmit=e=>{e.preventDefault();if(!submit.disabled)finish(groups.map(getTimestamp))};
+      actions.append(cancel,submit);body.append(intro,form,count);form.appendChild(actions);syncCalendar();
     });
     ov.__requestClose=()=>finish(null);
   });
@@ -1896,7 +1955,13 @@ function switchScreen(name){
   if(name!=='settings'&&$('settingsScreen'))$('settingsScreen').classList.remove('settingsDialogOpen');
   const valid=['timeline','overview','restore','analytics','diagnostics','settings'];
   if(!valid.includes(name))name='timeline';
-  document.querySelectorAll('[data-screen-panel]').forEach(p=>{const active=p.dataset.screenPanel===name;p.classList.toggle('active',active);p.setAttribute('aria-hidden',active?'false':'true')});
+  document.querySelectorAll('[data-screen-panel]').forEach(p=>{
+    const isSettings=p.dataset.screenPanel==='settings';
+    const keepBehind=name==='settings'&&p.dataset.screenPanel===settingsScreenReturn;
+    const active=p.dataset.screenPanel===name||keepBehind;
+    p.classList.toggle('active',active);
+    p.setAttribute('aria-hidden',p.dataset.screenPanel===name?'false':'true');
+  });
   document.querySelectorAll('.nav-item[data-screen]').forEach(b=>{
     const active=b.dataset.screen===name;
     b.classList.toggle('active',active);
