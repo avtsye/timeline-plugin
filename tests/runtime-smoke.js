@@ -306,3 +306,17 @@ console.log('Dynamic 20-level heatmaps OK');
 
 if(!app.includes("if(e.type==='setting'){const r=await call('navigation.goTo',{target:'settings'})"))throw new Error('Setting event navigation missing');
 console.log('Setting event navigation guard OK');
+
+
+// Hebrew-calendar date-range parsing regression checks.
+const hebrewHelpersStart=app.indexOf('function parseHebrewNumeral');
+const hebrewHelpersEnd=app.indexOf('async function deleteDateRange',hebrewHelpersStart);
+if(hebrewHelpersStart<0||hebrewHelpersEnd<0) throw new Error('Hebrew date parsing helpers are missing');
+const hebrewHelpers=app.slice(hebrewHelpersStart,hebrewHelpersEnd);
+const hebrewDateTools=require('vm').runInNewContext(hebrewHelpers+';({parseHebrewNumeral,parseHebrewDateTimestamp})',{Intl,Date,Number,String,NaN});
+if(hebrewDateTools.parseHebrewNumeral('י״ד')!==14) throw new Error('Hebrew day numeral parsing failed');
+if(hebrewDateTools.parseHebrewNumeral('תשפ״ז')!==787) throw new Error('Hebrew year numeral parsing failed');
+const hebrewTimestamp=hebrewDateTools.parseHebrewDateTimestamp('י״ד חשוון תשפ״ז','12:30');
+if(!Number.isFinite(hebrewTimestamp)) throw new Error('Valid Hebrew date should convert to a timestamp');
+if(Number.isFinite(hebrewDateTools.parseHebrewDateTimestamp('ל״א חשוון תשפ״ז','12:30'))) throw new Error('Invalid Hebrew date must be rejected');
+console.log('Hebrew-calendar date-range parsing OK');
