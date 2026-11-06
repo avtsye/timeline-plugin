@@ -624,7 +624,7 @@ function parseHebrewDateTimestamp(dateText,timeText){
   if(!Number.isFinite(day)||!Number.isFinite(year))return NaN;
   if(year<1000)year+=5000;
   const month=tokens.slice(1,-1).join(' ').replace(/[״׳'".]/g,'').replace(/\s+/g,' ').trim();
-  const normalize=s=>String(s||'').replace(/[״׳'".]/g,'').replace(/\\s+/g,' ').trim();
+  const normalize=s=>String(s||'').replace(/[״׳'".]/g,'').replace(/\s+/g,' ').trim();
   const time=/^(\d{1,2}):(\d{2})$/.exec(timeText||'');
   if(!time)return NaN;
   const hours=Number(time[1]),minutes=Number(time[2]);
