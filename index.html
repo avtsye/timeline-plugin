@@ -1689,6 +1689,36 @@ body.settings-sheet-visible::before{
 .hebrewDateEntry{display:flex;flex-direction:column;gap:6px}
 .hebrewDateEntry input{width:100%;min-height:2.5rem;color:var(--color-on-surface);background:var(--color-surface-container-high);border:1px solid var(--color-outline-variant);border-radius:var(--radius-sm);padding:0.5rem;font:inherit}
 .dateRangeHebrewHint{color:var(--color-on-surface-variant);font-size:.78rem}
+
+
+/* 0.20.11: enforce the feedback form's semantic order in the DOM and layout. */
+#settingsScreen .feedbackCompact{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+#settingsScreen .feedbackCompact > .feedbackToolbar{
+  display:flex;
+  order:0;
+  align-items:center;
+  width:100%;
+}
+#settingsScreen .feedbackCompact > .feedbackBox{
+  display:block;
+  order:1;
+  width:100%;
+  margin-top:8px;
+}
+#settingsScreen .feedbackCompact > .feedbackSubmitRow{
+  display:flex;
+  order:2;
+  justify-content:flex-start;
+  width:100%;
+  margin-top:8px;
+}
+#settingsScreen .feedbackCompact > .feedbackSubmitRow > #sendFeedbackBtn{
+  margin:0;
+}
 </style>
 </head>
 <body>
@@ -1902,9 +1932,11 @@ body.settings-sheet-visible::before{
             <div class="feedbackToolbar">
               <label for="feedbackType" class="srOnly" data-i18n="feedback">סוג משוב</label>
               <select id="feedbackType"><option value="bug" data-i18n="feedback_bug">דיווח על תקלה</option><option value="other" data-i18n="feedback_other">משוב / הצעה</option></select>
-              <button id="sendFeedbackBtn" class="btn btn-filled" data-i18n="send_feedback">שלח משוב</button>
             </div>
             <textarea id="feedbackText" class="feedbackBox" data-i18n-placeholder="feedback_placeholder" placeholder="כתוב כאן את המשוב…"></textarea>
+            <div class="feedbackSubmitRow">
+              <button id="sendFeedbackBtn" class="btn btn-filled" data-i18n="send_feedback">שלח משוב</button>
+            </div>
           </section>
 
           <section class="settingsGroup dangerGroup">
