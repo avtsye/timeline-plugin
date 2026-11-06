@@ -611,21 +611,21 @@ async function deleteSingleEvent(ev){
   if(count)await notify(currentLang==='he'?'האירוע נמחק':'Event deleted','success');
 }
 function parseHebrewNumeral(value){
-  const raw=String(value||'').replace(/[\\u0591-\\u05C7״׳'".,\\s]/g,'');
-  if(/^\\d+$/.test(raw))return Number(raw);
+  const raw=String(value||'').replace(/[\u0591-\u05C7״׳'".,\s]/g,'');
+  if(/^\d+$/.test(raw))return Number(raw);
   const values={א:1,ב:2,ג:3,ד:4,ה:5,ו:6,ז:7,ח:8,ט:9,י:10,כ:20,ך:20,ל:30,מ:40,ם:40,נ:50,ן:50,ס:60,ע:70,פ:80,ף:80,צ:90,ץ:90,ק:100,ר:200,ש:300,ת:400};
   if(!raw||![...raw].every(ch=>values[ch]))return NaN;
   return [...raw].reduce((sum,ch)=>sum+values[ch],0);
 }
 function parseHebrewDateTimestamp(dateText,timeText){
-  const tokens=String(dateText||'').trim().split(/\\s+/).filter(Boolean);
+  const tokens=String(dateText||'').trim().split(/\s+/).filter(Boolean);
   if(tokens.length<3)return NaN;
   let day=parseHebrewNumeral(tokens[0]),year=parseHebrewNumeral(tokens[tokens.length-1]);
   if(!Number.isFinite(day)||!Number.isFinite(year))return NaN;
   if(year<1000)year+=5000;
-  const month=tokens.slice(1,-1).join(' ').replace(/[״׳'".]/g,'').replace(/\\s+/g,' ').trim();
+  const month=tokens.slice(1,-1).join(' ').replace(/[״׳'".]/g,'').replace(/\s+/g,' ').trim();
   const normalize=s=>String(s||'').replace(/[״׳'".]/g,'').replace(/\\s+/g,' ').trim();
-  const time=/^(\\d{1,2}):(\\d{2})$/.exec(timeText||'');
+  const time=/^(\d{1,2}):(\d{2})$/.exec(timeText||'');
   if(!time)return NaN;
   const hours=Number(time[1]),minutes=Number(time[2]);
   if(hours>23||minutes>59)return NaN;
