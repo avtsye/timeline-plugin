@@ -141,7 +141,20 @@ for(const legacy of ['data-settings-tab="backup"','data-settings-tab="integratio
   if(html.includes(legacy)) throw new Error('Legacy sparse settings tab returned: '+legacy);
 }
 if(html.includes('id="trackingStatus"')||html.includes('id="trackingDetail"')) throw new Error('Duplicated diagnostics tracking summary returned');
+const feedbackStart=html.indexOf('<section class="settingsGroup feedbackCompact">');
+const feedbackEnd=html.indexOf('</section>',feedbackStart);
+if(feedbackStart<0||feedbackEnd<0) throw new Error('Feedback form section missing');
+const feedbackMarkup=html.slice(feedbackStart,feedbackEnd);
+const feedbackTypePos=feedbackMarkup.indexOf('id="feedbackType"');
+const feedbackTextPos=feedbackMarkup.indexOf('id="feedbackText"');
+const feedbackButtonPos=feedbackMarkup.indexOf('id="sendFeedbackBtn"');
+if(!(feedbackTypePos>=0&&feedbackTextPos>feedbackTypePos&&feedbackButtonPos>feedbackTextPos)) {
+  throw new Error('Feedback form order must be: report type, text area, submit button');
+}
+if(!feedbackMarkup.includes('class="feedbackSubmitRow"')) throw new Error('Dedicated feedback submit row missing');
+if(!html.includes('#settingsScreen .feedbackCompact > .feedbackSubmitRow')) throw new Error('Feedback submit row layout rule missing');
 if(!html.includes('feedbackCompact')||!html.includes('height:84px')) throw new Error('Compact feedback layout missing');
+console.log('Feedback form DOM and visual order audit OK');
 console.log('Simplified settings and secondary-screen UX audit OK');
 
 
