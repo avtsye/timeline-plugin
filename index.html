@@ -1165,8 +1165,12 @@ textarea:focus-visible{
   grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   gap:8px;
-  margin-bottom:8px;
+  margin:0;
+  order:0;
 }
+#settingsScreen .feedbackCompact{display:flex;flex-direction:column}
+#settingsScreen .feedbackCompact .feedbackToolbar{order:0}
+#settingsScreen .feedbackCompact .feedbackBox{order:1;margin-top:8px}
 #settingsScreen .feedbackToolbar .appDropdown{width:100%;min-width:0;max-width:100%}
 #settingsScreen .feedbackToolbar .btn{margin:0}
 #settingsScreen .feedbackBox{
@@ -1669,6 +1673,22 @@ body.settings-sheet-visible .side-nav{
 .dateRangeDeleteField{display:flex;flex-direction:column;gap:0.4rem;color:var(--color-on-surface);font-size:0.95rem}
 .dateRangeDeleteField input{width:100%;min-height:2.5rem;color:var(--color-on-surface);background:var(--color-surface-container-high);border:1px solid var(--color-outline-variant);border-radius:var(--radius-sm);padding:0.5rem;font:inherit}
 .dateRangeDeleteField input:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}
+/* Feedback from users: keep the action row above the free-text field. */
+#settingsScreen .feedbackCompact{display:flex;flex-direction:column}
+#settingsScreen .feedbackCompact .feedbackToolbar{order:0;margin:0}
+#settingsScreen .feedbackCompact .feedbackBox{order:1;margin-top:8px}
+
+/* Settings are a sheet over the current screen, not a replacement screen. */
+body.settings-sheet-visible::before{
+  content:"";position:fixed;inset:0;z-index:440;
+  background:color-mix(in srgb,var(--color-scrim) 28%,transparent);
+  pointer-events:none;
+}
+.modalOverlay{z-index:600}
+.dateRangeDeleteField input[hidden],.hebrewDateEntry[hidden]{display:none}
+.hebrewDateEntry{display:flex;flex-direction:column;gap:6px}
+.hebrewDateEntry input{width:100%;min-height:2.5rem;color:var(--color-on-surface);background:var(--color-surface-container-high);border:1px solid var(--color-outline-variant);border-radius:var(--radius-sm);padding:0.5rem;font:inherit}
+.dateRangeHebrewHint{color:var(--color-on-surface-variant);font-size:.78rem}
 </style>
 </head>
 <body>
